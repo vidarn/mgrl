@@ -1,0 +1,22 @@
+// Tiles
+tile "Stone Floor"{
+	glyph='.'
+	transparent
+	walkable
+	flyable
+}
+
+tile "Rock Wall"{
+	glyph='#'
+}
+
+tile "Water Stream"{
+	glyph='~'
+	transparent
+	walkable
+	flyable
+}
+
+tile "Void"{
+	glyph='V'
+}

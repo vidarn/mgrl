@@ -3,11 +3,13 @@
 #include <boost/random/discrete_distribution.hpp>
 #include <cfloat>
 
-Dungeon::Dungeon(int width, int height)
+Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
 {
 	m_width  = width;
 	m_height = height;
 	m_tiles  = new Tile[m_width * m_height];
+	m_fovMap = new TCODMap(m_width, m_height);
+	m_tileFactory = tileFactory;
 }
 
 void
@@ -16,10 +18,18 @@ Dungeon::render()
     for(int y = 0; y< DUNGEON_WIN_H; y++){
 		for(int x = 0; x< DUNGEON_WIN_W; x++){
 			if(y<m_height && x<m_width){
-				TCODConsole::root->putChar(x,y,m_tiles[x+y*m_width].m_glyph);
+				Tile &tile = m_tiles[x+y*m_width];
+				if(tile.m_discovered){
+					if(tile.m_visible)
+						TCODConsole::root->setDefaultForeground(TCODColor::white);
+					else
+						TCODConsole::root->setDefaultForeground(TCODColor::grey);
+					TCODConsole::root->putChar(x,y,tile.m_glyph);
+				}
 			}
 		}
     }
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
 }
 
 void
@@ -27,9 +37,31 @@ Dungeon::generate()
 {
 	for(int i=0; i<m_width*m_height;i++){
 		int t = T_VOID;
-		m_tiles[i].setType(t);
+		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width);
+	for(int y=0;y<m_height;y++){
+		for(int x=0;x<m_width;x++){
+			m_fovMap->setProperties(x,y,m_tiles[x+y*m_width].m_transparent, m_tiles[x+y*m_width].m_walkable);
+		}
+	}
+}
+
+void
+Dungeon::computeFov(int playerX, int playerY)
+{
+	m_fovMap->computeFov(playerX,playerY,30,true,FOV_PERMISSIVE_8);
+	for(int y=0;y<m_height;y++){
+		for(int x=0;x<m_width;x++){
+			if(m_fovMap->isInFov(x,y)){
+				m_tiles[x+y*m_width].m_visible = true;
+				m_tiles[x+y*m_width].m_discovered = true;
+			}
+			else{
+				m_tiles[x+y*m_width].m_visible = false;
+			}
+		}
+	}
 }
 
 void
@@ -63,7 +95,12 @@ Dungeon::drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (
             error += deltaX;
         }
     }
+}
 
+bool
+Dungeon::isWalkable(int x, int y)
+{
+	return m_tiles[x+y*m_width].m_walkable;
 }
 
 static
@@ -128,22 +165,19 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
             char a = tiles[x+y*width];
-            char t = T_VOID;
+            const char* t = "Void";
             switch(a){
                 case 0:
-                    t = T_STONE_FLOOR;
+                    t = "Stone Floor";
                     break;
                 case 1:
-                    t = T_ROCK_WALL;
+                    t = "Rock Wall";
                     break;
                 case 2:
-                    t = T_WATER_STREAM;
-                    break;
-                case 3:
-                    t = 242;
+                    t = "Water Stream";
                     break;
             }
-            m_tiles[minx+x+(miny+y)*m_width].setType(t);
+            m_tiles[minx+x+(miny+y)*m_width] = m_tileFactory->getTile(t);
         }
     }
 }

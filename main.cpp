@@ -4,6 +4,9 @@
 #include "callback_overlay.h"
 #include "list_overlay.h"
 #include "dungeon.h"
+#include "actor.h"
+#include "player.h"
+#include "tile.h"
 #include <boost/random/mersenne_twister.hpp>
 
 int SCREEN_W = 100;
@@ -35,10 +38,6 @@ int
 main(int argc, char **argv)
 {
     TCODConsole::initRoot(SCREEN_W,SCREEN_H,"libtcod",false);
-    TCODConsole::root->clear();
-    TCODConsole::root->putChar(1,1,'@');
-    TCODConsole::root->putChar(2,2,'d');
-    TCODConsole::flush();
 
     int messagesWinHeight = 8;
     int messagesWinWidth    = SCREEN_W;
@@ -47,8 +46,16 @@ main(int argc, char **argv)
     DUNGEON_WIN_H = statusWinHeight;
     DUNGEON_WIN_W = SCREEN_W - statusWinWidth;
 
-    Dungeon dungeon(DUNGEON_WIN_W,DUNGEON_WIN_H);
+    TileFactory tileFactory;
+
+    Dungeon dungeon(DUNGEON_WIN_W,DUNGEON_WIN_H,&tileFactory);
     dungeon.generate();
+
+    Player player(&dungeon);
+    player.m_glyph = '@';
+    player.m_x = DUNGEON_WIN_W-1;
+    player.m_y = (DUNGEON_WIN_H)/2;
+
     std::vector<Overlay*> overlays;
     Overlay *statusWin = new CallbackOverlay(5,5,"Status",NULL, &drawInventory, &handleInventoryInput);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
@@ -57,7 +64,10 @@ main(int argc, char **argv)
     messagesWin->setPos(0,DUNGEON_WIN_H+1);
 
     while ( !TCODConsole::isWindowClosed() ) {
+        dungeon.computeFov(player.m_x, player.m_y);
+        TCODConsole::root->clear();
         dungeon.render();
+        player.render();
         statusWin->render();
         messagesWin->render();
         for(int i=0;i<overlays.size();i++){
@@ -76,6 +86,30 @@ main(int argc, char **argv)
                 switch(key.c) {
                     case 'q' :
                         return 0;
+                    case 'h' :
+                        player.move(-1,0);
+                        break;
+                    case 'j' :
+                        player.move(0,1);
+                        break;
+                    case 'k' :
+                        player.move(0,-1);
+                        break;
+                    case 'l' :
+                        player.move(1,0);
+                        break;
+                    case 'y' :
+                        player.move(-1,-1);
+                        break;
+                    case 'u' :
+                        player.move(1,-1);
+                        break;
+                    case 'b' :
+                        player.move(-1,1);
+                        break;
+                    case 'n' :
+                        player.move(1,1);
+                        break;
                     case 'i':
                         if(overlays.size() < 1){
                             ListDefinition inventoryList[] = {

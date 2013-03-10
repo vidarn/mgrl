@@ -1,6 +1,9 @@
 #ifndef TILE_IWRFWCCC
 #define TILE_IWRFWCCC
-#include <ncurses.h>
+#include <vector>
+#include <map>
+#include <string>
+#include <libtcod/libtcod.hpp>
 
 enum TILE_TYPES
 {
@@ -14,7 +17,6 @@ class Tile{
 	public:
 		Tile();
 		void setType(int type);
-		int m_type;
 		char m_glyph;
 		char m_color;
 		bool m_walkable;
@@ -23,5 +25,32 @@ class Tile{
 		bool m_discovered;
 		bool m_visible;
 };
+
+class TileFactory
+{
+	public:
+		TileFactory();
+		~TileFactory();
+		void addTileType(std::string name, Tile tile);
+		Tile getTile(std::string name);
+	private:
+		std::map<std::string, Tile> m_tiles;
+		std::vector<Tile> m_tileTypes;
+};
+
+class TileConfigListener : public ITCODParserListener {
+	public:
+		TileConfigListener(TileFactory *factory);
+		virtual bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
+		virtual bool parserFlag(TCODParser *parser,const char *name);
+		virtual bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value);
+		virtual bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name);
+		virtual void error(const char *msg);
+	private:
+		TileFactory *m_factory;
+		Tile *m_tile;
+		const char *m_tileName;
+};
+
 
 #endif /* end of include guard: TILE_IWRFWCCC */
