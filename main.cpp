@@ -74,82 +74,95 @@ main(int argc, char **argv)
             overlays[i]->render();
         }
         TCODConsole::flush();
-        TCOD_key_t key = TCODConsole::waitForKeypress(true);
-        if(key.pressed){
-            if(overlays.size() > 0){
-                if(!overlays.back()->handleInput(key.c)){
-                    delete overlays.back();
-                    overlays.pop_back();
+        if(player.m_running){
+            player.run();
+        }
+        else{
+            TCOD_key_t key = TCODConsole::waitForKeypress(true);
+            if(key.pressed){
+                if(overlays.size() > 0){
+                    if(!overlays.back()->handleInput(key.c)){
+                        delete overlays.back();
+                        overlays.pop_back();
+                    }
                 }
-            }
-            else{
-                switch(key.c) {
-                    case 'q' :
-                        return 0;
-                    case 'h' :
-                        player.move(-1,0);
-                        break;
-                    case 'j' :
-                        player.move(0,1);
-                        break;
-                    case 'k' :
-                        player.move(0,-1);
-                        break;
-                    case 'l' :
-                        player.move(1,0);
-                        break;
-                    case 'y' :
-                        player.move(-1,-1);
-                        break;
-                    case 'u' :
-                        player.move(1,-1);
-                        break;
-                    case 'b' :
-                        player.move(-1,1);
-                        break;
-                    case 'n' :
-                        player.move(1,1);
-                        break;
-                    case 'i':
-                        if(overlays.size() < 1){
-                            ListDefinition inventoryList[] = {
-                                { LIST_CATEGORY,  { "/","Weapons"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_CATEGORY,  { "[","Armour"}},
-                                { LIST_ENTRY,     { "c","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "d","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "e","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "f","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "g","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "h","Iron Chestplate"}},
-                                { LIST_ENTRY,     { "i","Iron Chestplate"}},
-                                { LIST_CATEGORY,  { "~","Misc"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "a","Short Sword"}},
-                                { LIST_ENTRY,     { "b","War Axe"}},
-                                { LIST_ENTRY,     { "f","Short Sword"}},
-                                { LIST_ENTRY,     { "k","War Axe"}},
-                                { LIST_ENTRY,     { "h","Iron Chestplate"}},
-                                { LIST_DONE,NULL}
-                            };
-                            overlays.push_back(new ListOverlay(30, 30, "Inventory", inventoryList));
-                            overlays.push_back(new CallbackOverlay(2, 60, "What is your name?", NULL, &drawInventory, &handleInventoryInput));
-                        }
-                        break;
-                    case 'r':
-                        dungeon.generate();
-                        break;
-                    default:break;
+                else{
+                    switch(key.c) {
+                        case 'q' :
+                            return 0;
+                        case 'h' :
+                            player.move(-1,0); break;
+                        case 'j' :
+                            player.move(0,1); break;
+                        case 'k' :
+                            player.move(0,-1); break;
+                        case 'l' :
+                            player.move(1,0); break;
+                        case 'y' :
+                            player.move(-1,-1); break;
+                        case 'u' :
+                            player.move(1,-1); break;
+                        case 'b' :
+                            player.move(-1,1); break;
+                        case 'n' :
+                            player.move(1,1); break;
+                        case 'H' :
+                            player.startRun(-1,0); break;
+                        case 'J' :
+                            player.startRun(0,1); break;
+                        case 'K' :
+                            player.startRun(0,-1); break;
+                        case 'L' :
+                            player.startRun(1,0); break;
+                        case 'Y' :
+                            player.startRun(-1,-1); break;
+                        case 'U' :
+                            player.startRun(1,-1); break;
+                        case 'B' :
+                            player.startRun(-1,1); break;
+                        case 'N' :
+                            player.startRun(1,1); break;
+                        case 'i':
+                            if(overlays.size() < 1){
+                                ListDefinition inventoryList[] = {
+                                    { LIST_CATEGORY,  { "/","Weapons"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_CATEGORY,  { "[","Armour"}},
+                                    { LIST_ENTRY,     { "c","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "d","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "e","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "f","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "g","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "h","Iron Chestplate"}},
+                                    { LIST_ENTRY,     { "i","Iron Chestplate"}},
+                                    { LIST_CATEGORY,  { "~","Misc"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "a","Short Sword"}},
+                                    { LIST_ENTRY,     { "b","War Axe"}},
+                                    { LIST_ENTRY,     { "f","Short Sword"}},
+                                    { LIST_ENTRY,     { "k","War Axe"}},
+                                    { LIST_ENTRY,     { "h","Iron Chestplate"}},
+                                    { LIST_DONE,NULL}
+                                };
+                                overlays.push_back(new ListOverlay(30, 30, "Inventory", inventoryList));
+                                overlays.push_back(new CallbackOverlay(2, 60, "What is your name?", NULL, &drawInventory, &handleInventoryInput));
+                            }
+                            break;
+                        case 'r':
+                            dungeon.generate();
+                            break;
+                        default:break;
+                    }
                 }
             }
         }

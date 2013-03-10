@@ -12,6 +12,7 @@ class Dungeon{
 		void computeFov(int playerX, int playerY);
         void drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *));
 		bool isWalkable(int x, int y);
+		char getGlyph(int x, int y);
 	private:
         void generateCavern(int miny, int maxy, int minx, int maxx);
         void connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles);

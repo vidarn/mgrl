@@ -103,6 +103,12 @@ Dungeon::isWalkable(int x, int y)
 	return m_tiles[x+y*m_width].m_walkable;
 }
 
+char
+Dungeon::getGlyph(int x, int y)
+{
+	return m_tiles[x+y*m_width].m_glyph;
+}
+
 static
 char
 cavernFirstPass(int numWalls)
