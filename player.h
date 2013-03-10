@@ -1,18 +1,16 @@
 #ifndef PLAYER_R44I7II0
 #define PLAYER_R44I7II0
-#include "actor.h"
-#include "dungeon.h"
+#include "creature.h"
 
-class Player: public Actor
+class Player: public Creature
 {
 	public:
-		Player(Dungeon *dungeon);
+		Player(Level *level);
 		bool move(int dx, int dy);
 		void startRun(int dx, int dy);
 		void run();
 		bool m_running;
 	private:
-		Dungeon *m_dungeon;
 		int m_runX, m_runY;
 		char m_glyphLeft, m_glyphRight;
 };

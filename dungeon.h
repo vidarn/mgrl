@@ -3,16 +3,21 @@
 #include <libtcod/libtcod.hpp>
 #include "common.h"
 #include "tile.h"
+#include "creature.h"
+class Level;
 
 class Dungeon{
 	public:
-		Dungeon(int width, int height, TileFactory *tileFactory);
+		Dungeon(int width, int height, TileFactory *tileFactory, std::vector<Actor*> *actors);
 		void render();
-		void generate();
-		void computeFov(int playerX, int playerY);
+		void generate(Level *level);
         void drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *));
 		bool isWalkable(int x, int y);
+		bool isTransparent(int x, int y);
 		char getGlyph(int x, int y);
+		void setVisible(int x, int y, bool state);
+		void setDiscovered(int x, int y, bool state);
+		int m_width, m_height;
 	private:
         void generateCavern(int miny, int maxy, int minx, int maxx);
         void connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles);
@@ -20,8 +25,7 @@ class Dungeon{
                 char **tmpTiles, char (*ruleCallback)(int));
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
-		int m_width, m_height;
-		TCODMap *m_fovMap;
+		std::vector<Actor*> *m_actors;
 };
 
 struct

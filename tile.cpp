@@ -21,7 +21,6 @@ TileFactory::~TileFactory()
 void
 TileFactory::addTileType(std::string name, Tile tile)
 {
-	std::cout << name << std::endl;
 	m_tiles.insert(std::pair<std::string ,Tile>(name,tile));
 }
 
@@ -69,7 +68,6 @@ TileConfigListener::parserProperty(TCODParser *parser,const char *name, TCOD_val
 	if(strcmp(name,"glyph")==0){
 		if(type == TCOD_TYPE_CHAR){
 			m_tile->m_glyph = value.c;
-			std::cout << "glyph " << value.c << std::endl;
 			ok = true;
 		}
 	}

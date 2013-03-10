@@ -1,13 +1,14 @@
 #include <iostream>
 #include <libtcod/libtcod.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include <vector>
+#include <ctime>
 #include "callback_overlay.h"
 #include "list_overlay.h"
-#include "dungeon.h"
+#include "level.h"
 #include "actor.h"
 #include "player.h"
 #include "tile.h"
-#include <boost/random/mersenne_twister.hpp>
 
 int SCREEN_W = 100;
 int SCREEN_H = 40;
@@ -25,6 +26,39 @@ drawInventory(TCODConsole *console, void *data, int width, int height)
     }
 }
 
+void
+drawStatus(TCODConsole *console, void *data, int width, int height)
+{
+    Actor *player = static_cast<Actor *>(data);
+    console->print(0 ,0,"HP: %d/%d",player->m_hp,player->m_maxHp);
+    console->print(0 ,1," [                ]");
+	console->setDefaultForeground(TCODColor::white);
+    int health = 16.0f * float(player->m_hp)/float(player->m_maxHp);
+    if(health < 16)
+        console->setDefaultForeground(TCODColor::darkGreen);
+    if(health < 13)
+        console->setDefaultForeground(TCODColor::yellow);
+    if(health < 7)
+        console->setDefaultForeground(TCODColor::orange);
+    if(health < 3)
+        console->setDefaultForeground(TCODColor::red);
+    for(int i=0;i<16;i++){
+        if(i<health){
+            console->putChar(2+i,1,'+');
+        }
+        else{
+            console->putChar(2+i,1,'.');
+        }
+    }
+	console->setDefaultForeground(TCODColor::white);
+    console->print(0 ,3,"STR:%2d",4);
+    console->print(7 ,3,"CON:%2d",14);
+    console->print(14,3,"DEX:%2d",14);
+    console->print(0 ,4,"INT:%2d",4);
+    console->print(7 ,4,"WIS:%2d",14);
+    console->print(14,4,"CHA:%2d",14);
+}
+
 bool
 handleInventoryInput(char key, void *data)
 {
@@ -37,45 +71,42 @@ handleInventoryInput(char key, void *data)
 int
 main(int argc, char **argv)
 {
+    time_t tim;
+    time(&tim);
+    RAND.seed(tim);
     TCODConsole::initRoot(SCREEN_W,SCREEN_H,"libtcod",false);
 
     int messagesWinHeight = 8;
     int messagesWinWidth    = SCREEN_W;
     int statusWinHeight   = SCREEN_H - messagesWinHeight;
-    int statusWinWidth    = 20;
+    int statusWinWidth    = 21;
     DUNGEON_WIN_H = statusWinHeight;
     DUNGEON_WIN_W = SCREEN_W - statusWinWidth;
 
-    TileFactory tileFactory;
+    Level level(DUNGEON_WIN_W,DUNGEON_WIN_H);
+    level.generate();
 
-    Dungeon dungeon(DUNGEON_WIN_W,DUNGEON_WIN_H,&tileFactory);
-    dungeon.generate();
-
-    Player player(&dungeon);
-    player.m_glyph = '@';
-    player.m_x = DUNGEON_WIN_W-1;
-    player.m_y = (DUNGEON_WIN_H)/2;
 
     std::vector<Overlay*> overlays;
-    Overlay *statusWin = new CallbackOverlay(5,5,"Status",NULL, &drawInventory, &handleInventoryInput);
+    Overlay *statusWin = new CallbackOverlay(5,5,"Status",&(level.m_player), &drawStatus, &handleInventoryInput);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
     statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
     Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",NULL, &drawInventory, &handleInventoryInput);
     messagesWin->setPos(0,DUNGEON_WIN_H+1);
+    level.update();
 
     while ( !TCODConsole::isWindowClosed() ) {
-        dungeon.computeFov(player.m_x, player.m_y);
         TCODConsole::root->clear();
-        dungeon.render();
-        player.render();
+        level.render();
         statusWin->render();
         messagesWin->render();
         for(int i=0;i<overlays.size();i++){
             overlays[i]->render();
         }
         TCODConsole::flush();
-        if(player.m_running){
-            player.run();
+        if(level.m_player->m_running){
+            level.m_player->run();
+            level.update();
         }
         else{
             TCOD_key_t key = TCODConsole::waitForKeypress(true);
@@ -87,41 +118,44 @@ main(int argc, char **argv)
                     }
                 }
                 else{
+                    bool update = true;
                     switch(key.c) {
                         case 'q' :
                             return 0;
                         case 'h' :
-                            player.move(-1,0); break;
+                            level.m_player->move(-1,0); break;
                         case 'j' :
-                            player.move(0,1); break;
+                            level.m_player->move(0,1); break;
                         case 'k' :
-                            player.move(0,-1); break;
+                            level.m_player->move(0,-1); break;
                         case 'l' :
-                            player.move(1,0); break;
+                            level.m_player->move(1,0); break;
                         case 'y' :
-                            player.move(-1,-1); break;
+                            level.m_player->move(-1,-1); break;
                         case 'u' :
-                            player.move(1,-1); break;
+                            level.m_player->move(1,-1); break;
                         case 'b' :
-                            player.move(-1,1); break;
+                            level.m_player->move(-1,1); break;
                         case 'n' :
-                            player.move(1,1); break;
+                            level.m_player->move(1,1); break;
                         case 'H' :
-                            player.startRun(-1,0); break;
+                            level.m_player->startRun(-1,0); break;
                         case 'J' :
-                            player.startRun(0,1); break;
+                            level.m_player->startRun(0,1); break;
                         case 'K' :
-                            player.startRun(0,-1); break;
+                            level.m_player->startRun(0,-1); break;
                         case 'L' :
-                            player.startRun(1,0); break;
+                            level.m_player->startRun(1,0); break;
                         case 'Y' :
-                            player.startRun(-1,-1); break;
+                            level.m_player->startRun(-1,-1); break;
                         case 'U' :
-                            player.startRun(1,-1); break;
+                            level.m_player->startRun(1,-1); break;
                         case 'B' :
-                            player.startRun(-1,1); break;
+                            level.m_player->startRun(-1,1); break;
                         case 'N' :
-                            player.startRun(1,1); break;
+                            level.m_player->startRun(1,1); break;
+                        case 'e' :
+                            level.m_player->m_hp--; break;
                         case 'i':
                             if(overlays.size() < 1){
                                 ListDefinition inventoryList[] = {
@@ -159,10 +193,15 @@ main(int argc, char **argv)
                             }
                             break;
                         case 'r':
-                            dungeon.generate();
+                            level.generate();
                             break;
-                        default:break;
+                        default:
+                            std::cout << "FALSE!\n";
+                            update=false;
+                            break;
                     }
+                    if(update)
+                        level.update();
                 }
             }
         }

@@ -1,13 +1,15 @@
 #include "actor.h"
+#include "level.h"
 
-Actor::Actor():
-	m_x(0),m_y(0),m_glyph('A')
+Actor::Actor(Level *level):
+	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(level)
 {
 }
 
-Actor::Actor(int x, int y):
-	m_x(x),m_y(x),m_glyph('A')
+void
+Actor::walkTowardsPlayer()
 {
+	m_level->walkTowardsPlayer(&m_x,&m_y);
 }
 
 void

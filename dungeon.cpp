@@ -1,15 +1,16 @@
-#include "dungeon.h"
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include <cfloat>
+#include "dungeon.h"
+#include "level.h"
 
-Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
+Dungeon::Dungeon(int width, int height, TileFactory *tileFactory, std::vector<Actor *> *actors)
 {
 	m_width  = width;
 	m_height = height;
 	m_tiles  = new Tile[m_width * m_height];
-	m_fovMap = new TCODMap(m_width, m_height);
 	m_tileFactory = tileFactory;
+	m_actors = actors;
 }
 
 void
@@ -26,6 +27,11 @@ Dungeon::render()
 						TCODConsole::root->setDefaultForeground(TCODColor::grey);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
+				else{
+					//DEBUG
+					TCODConsole::root->setDefaultForeground(TCODColor::darkestGrey);
+					TCODConsole::root->putChar(x,y,tile.m_glyph);
+				}
 			}
 		}
     }
@@ -33,35 +39,26 @@ Dungeon::render()
 }
 
 void
-Dungeon::generate()
+Dungeon::generate(Level *level)
 {
 	for(int i=0; i<m_width*m_height;i++){
 		int t = T_VOID;
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width);
-	for(int y=0;y<m_height;y++){
-		for(int x=0;x<m_width;x++){
-			m_fovMap->setProperties(x,y,m_tiles[x+y*m_width].m_transparent, m_tiles[x+y*m_width].m_walkable);
-		}
-	}
-}
-
-void
-Dungeon::computeFov(int playerX, int playerY)
-{
-	m_fovMap->computeFov(playerX,playerY,30,true,FOV_PERMISSIVE_8);
-	for(int y=0;y<m_height;y++){
-		for(int x=0;x<m_width;x++){
-			if(m_fovMap->isInFov(x,y)){
-				m_tiles[x+y*m_width].m_visible = true;
-				m_tiles[x+y*m_width].m_discovered = true;
-			}
-			else{
-				m_tiles[x+y*m_width].m_visible = false;
-			}
-		}
-	}
+    for(int i=0;i<30;i++){
+        boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
+        boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
+        int x = xDist(RAND);
+        int y = yDist(RAND);
+        if(isWalkable(x,y)){
+            Actor *actor = new Actor(level);
+            actor->m_x = x;
+            actor->m_y = y;
+            actor->m_glyph = 'g';
+            m_actors->push_back(actor);
+        }
+    }
 }
 
 void
@@ -103,10 +100,29 @@ Dungeon::isWalkable(int x, int y)
 	return m_tiles[x+y*m_width].m_walkable;
 }
 
+bool
+Dungeon::isTransparent(int x, int y)
+{
+	return m_tiles[x+y*m_width].m_transparent;
+}
+
+
 char
 Dungeon::getGlyph(int x, int y)
 {
 	return m_tiles[x+y*m_width].m_glyph;
+}
+
+void
+Dungeon::setVisible(int x, int y, bool state)
+{
+	m_tiles[x+y*m_width].m_visible = state;
+}
+
+void
+Dungeon::setDiscovered(int x, int y, bool state)
+{
+	m_tiles[x+y*m_width].m_discovered = state;
 }
 
 static
