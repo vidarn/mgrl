@@ -6,12 +6,12 @@ class CallbackOverlay: public Overlay
 {
 	public:
 		CallbackOverlay(int height, int width, const char *title,
-				void *data, void (*drawCallback)(WINDOW *, void *, int, int),
+				void *data, void (*drawCallback)(TCODConsole *, void *, int, int),
 				bool (*inputCallback)(char , void*));
 		virtual void render();
 		virtual bool handleInput(char key);
 	private:
-		void (*m_drawCallback)(WINDOW *, void *, int, int);
+		void (*m_drawCallback)(TCODConsole *, void *, int, int);
 		bool (*m_inputCallback)(char , void*);
 		void *m_data;
 };

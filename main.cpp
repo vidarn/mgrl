@@ -1,6 +1,5 @@
 #include <iostream>
 #include <libtcod/libtcod.hpp>
-#include <ncurses.h>
 #include <vector>
 #include "callback_overlay.h"
 #include "list_overlay.h"
@@ -14,28 +13,12 @@ int DUNGEON_WIN_H;
 boost::random::mt19937 RAND;
 
 void
-drawStatusWin(WINDOW* statusWin, int statusWinHeight, int statusWinWidth)
+drawInventory(TCODConsole *console, void *data, int width, int height)
 {
-    for(int i = 0; i< statusWinHeight; i++){
-        mvwaddch(statusWin,i,0,'|');
-    }
-    wrefresh(statusWin);
-}
-
-void
-drawMessagesWin(WINDOW* messagesWin, int messagesWinHeight, int messagesWinWidth)
-{
-    for(int i = 0; i< messagesWinWidth; i++){
-        mvwaddch(messagesWin,0,i,'-');
-    }
-    wrefresh(messagesWin);
-}
-
-void
-drawInventory(WINDOW *window, void *data, int width, int height)
-{
-    for(int i = 0; i< width*height; i++){
-        waddch(window,'+');
+    for(int y = 0; y< height; y++){
+        for(int x = 0; x< width; x++){
+            console->putChar(x,y,' ');
+        }
     }
 }
 
@@ -51,7 +34,6 @@ handleInventoryInput(char key, void *data)
 int
 main(int argc, char **argv)
 {
-    //TCODConsole::setCustomFont("font.png",TCOD_FONT_LAYOUT_ASCII_INROW);
     TCODConsole::initRoot(SCREEN_W,SCREEN_H,"libtcod",false);
     TCODConsole::root->clear();
     TCODConsole::root->putChar(1,1,'@');
@@ -68,11 +50,16 @@ main(int argc, char **argv)
     Dungeon dungeon(DUNGEON_WIN_W,DUNGEON_WIN_H);
     dungeon.generate();
     std::vector<Overlay*> overlays;
+    Overlay *statusWin = new CallbackOverlay(5,5,"Status",NULL, &drawInventory, &handleInventoryInput);
+    statusWin->setPos(DUNGEON_WIN_W+1,1);
+    statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
+    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",NULL, &drawInventory, &handleInventoryInput);
+    messagesWin->setPos(0,DUNGEON_WIN_H+1);
 
     while ( !TCODConsole::isWindowClosed() ) {
         dungeon.render();
-        //drawStatusWin(  statusWin   , statusWinHeight   , statusWinWidth);
-        //drawMessagesWin(messagesWin , messagesWinHeight , messagesWinWidth);
+        statusWin->render();
+        messagesWin->render();
         for(int i=0;i<overlays.size();i++){
             overlays[i]->render();
         }
@@ -133,84 +120,4 @@ main(int argc, char **argv)
             }
         }
     }
-    /*initscr();
-    start_color();
-    noecho();
-    refresh();
-    getmaxyx(stdscr,SCREEN_H,SCREEN_W);
-    WINDOW *dungeonWin, *messagesWin, *statusWin;
-    int messagesWinHeight = 8;
-    int messagesWinWidth    = SCREEN_W;
-    int statusWinHeight   = SCREEN_H - messagesWinHeight;
-    int statusWinWidth    = 40;
-    DUNGEON_WIN_H = statusWinHeight;
-    DUNGEON_WIN_W = SCREEN_W - statusWinWidth;
-    statusWin = newwin(statusWinHeight, statusWinWidth, 0, DUNGEON_WIN_W);
-    messagesWin = newwin(messagesWinHeight, messagesWinWidth, DUNGEON_WIN_H, 0);
-    std::vector<Overlay*> overlays;
-    Dungeon dungeon(40,200);
-    dungeon.generate();
-    char key = ' ';
-    while(1){
-        if(overlays.size() > 0){
-            if(!overlays.back()->handleInput(key)){
-                delete overlays.back();
-                overlays.pop_back();
-            }
-        }
-        else{
-            switch(key){
-                case 'i':
-                    if(overlays.size() < 1){
-                        ListDefinition inventoryList[] = {
-                            { LIST_CATEGORY,  { "/","Weapons"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_CATEGORY,  { "[","Armour"}},
-                            { LIST_ENTRY,     { "c","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "d","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "e","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "f","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "g","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "h","Iron Chestplate"}},
-                            { LIST_ENTRY,     { "i","Iron Chestplate"}},
-                            { LIST_CATEGORY,  { "~","Misc"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "a","Short Sword"}},
-                            { LIST_ENTRY,     { "b","War Axe"}},
-                            { LIST_ENTRY,     { "f","Short Sword"}},
-                            { LIST_ENTRY,     { "k","War Axe"}},
-                            { LIST_ENTRY,     { "h","Iron Chestplate"}},
-                            { LIST_DONE,NULL}
-                        };
-                        overlays.push_back(new ListOverlay(30, 30, "Inventory", inventoryList));
-                        overlays.push_back(new CallbackOverlay(2, 60, "What is your name?", NULL, &drawInventory, &handleInventoryInput));
-                    }
-                    break;
-                case 'r':
-                    dungeon.generate();
-                    break;
-                case 'q':
-                    endwin();
-                    return 0;
-            }
-        }
-        dungeon.render();
-        drawStatusWin(  statusWin   , statusWinHeight   , statusWinWidth);
-        drawMessagesWin(messagesWin , messagesWinHeight , messagesWinWidth);
-        for(int i=0;i<overlays.size();i++){
-            overlays[i]->render();
-        }
-        move(SCREEN_H-1,SCREEN_W-1);
-        key = getch();
-    }*/
 }

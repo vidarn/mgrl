@@ -11,7 +11,25 @@ Overlay::Overlay(int height, int width, const char *title)
 	m_height=height;
 	m_width=width;
 	m_title = title;
-	m_window = newwin(m_height,m_width,m_y,m_x);
+	m_console = new TCODConsole(m_width,m_height);
+}
+
+Overlay::~Overlay()
+{
+	delete m_console;
+}
+
+void
+Overlay::setPos(int x, int y)
+{
+	m_x = x; m_y = y;
+}
+
+void
+Overlay::setSize(int w, int h)
+{
+	m_width = w; m_height = h;
+	delete m_console;
 	m_console = new TCODConsole(m_width,m_height);
 }
 
@@ -34,6 +52,4 @@ Overlay::drawBorder()
 	int titleLen = strlen(m_title);
 	int titleX = m_x-1 + (m_width)/2 - (titleLen+0.5f)/2.0f;
 	TCODConsole::root->print(titleX,m_y-1,"|%s|",m_title);
-	mvprintw(m_y-1,titleX,"|%s|",m_title);
-	refresh();
 }

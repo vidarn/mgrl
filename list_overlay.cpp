@@ -1,4 +1,5 @@
 #include "list_overlay.h"
+#include <cstdio>
 
 ListOverlay::ListOverlay(int height, int width, const char *title, ListDefinition *definition):
 	Overlay(height,width, title)
@@ -39,7 +40,6 @@ ListOverlay::render()
 					sprintf(buffer,"%s (%s):", d->m_data.m_name, d->m_data.m_key);
 				}
 				int i=0;
-				wmove(m_window,y,0);
 				while(buffer[i] != 0){
 					m_console->putChar(i,y,buffer[i]);
 					i++;
@@ -60,49 +60,6 @@ ListOverlay::render()
 		m_console->print(0,m_height-1,"<,> to scroll");
 	}
 	TCODConsole::blit(m_console,0,0,0,0,TCODConsole::root,m_x,m_y);
-
-	/*drawBorder();
-	wmove(m_window,0,0);
-    for(int i = 0; i< m_width*m_height; i++){
-        waddch(m_window,' ');
-    }
-	wmove(m_window,0,0);
-	int numEntries = 0;
-	ListDefinition *d = m_definition;
-	char buffer[256];
-	int y=0;
-	while(d->m_type != LIST_DONE){
-		numEntries++;
-		if(numEntries>=m_scroll){
-			if(y < m_numLines){
-				if(d->m_type == LIST_ENTRY){
-					sprintf(buffer," [%s] - %s\n", d->m_data.m_key, d->m_data.m_name);
-				}
-				if(d->m_type == LIST_CATEGORY){
-					sprintf(buffer,"%s (%s):\n", d->m_data.m_name, d->m_data.m_key);
-				}
-				int i=0;
-				wmove(m_window,y,0);
-				while(buffer[i] != 0){
-					waddch(m_window,buffer[i]);
-					i++;
-					if(i >= m_width){
-						for(int ii=i-1;ii>0 && i-ii <= 3;ii--){
-							mvwaddch(m_window,y,ii,'.');
-						}
-						break;
-					}
-				}
-			}
-			y++;
-		}
-		d++;
-	}
-	if(m_scroll != -1){
-		mvwprintw(m_window,m_height-2,0,"--");
-		mvwprintw(m_window,m_height-1,0,"<,> to scroll");
-	}
-    wrefresh(m_window);*/
 }
 
 bool
