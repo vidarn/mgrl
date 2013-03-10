@@ -17,6 +17,7 @@ class Actor
 		char m_glyph;
 		int m_hp, m_maxHp;
 		int m_dx, m_dy;
+		const char *m_name;
 	protected:
 		Level *m_level;
 };

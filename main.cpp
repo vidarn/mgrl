@@ -18,12 +18,11 @@ bool DEBUG = true;
 boost::random::mt19937 RAND;
 
 void
-drawInventory(TCODConsole *console, void *data, int width, int height)
+drawMessages(TCODConsole *console, void *data, int width, int height)
 {
-    for(int y = 0; y< height; y++){
-        for(int x = 0; x< width; x++){
-            console->putChar(x,y,' ');
-        }
+    MessageHandler *messages = static_cast<MessageHandler *>(data);
+    for(int y = 0; y<7; y++){
+        console->print(0, 7-y, " %s", messages->getNthLatestMessage(y).m_message.c_str());
     }
 }
 
@@ -92,7 +91,7 @@ main(int argc, char **argv)
     Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, &handleInventoryInput);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
     statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
-    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",NULL, &drawInventory, &handleInventoryInput);
+    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",level.m_messages, &drawMessages, &handleInventoryInput);
     messagesWin->setPos(0,DUNGEON_WIN_H+1);
     level.update();
 
@@ -179,6 +178,10 @@ main(int argc, char **argv)
                             break;
                         case 'd':
                             DEBUG = !DEBUG;
+                            if(DEBUG)
+                                level.m_messages->showMessage("DEBUG MODE ON",MESSAGE_WARNING);
+                            else
+                                level.m_messages->showMessage("DEBUG MODE OFF",MESSAGE_WARNING);
                             update=false;
                             break;
                         default:

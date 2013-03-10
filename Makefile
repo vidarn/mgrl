@@ -3,6 +3,7 @@ OBJ = main.o
 OBJ += overlay.o callback_overlay.o list_overlay.o
 OBJ += dungeon.o tile.o level.o
 OBJ += actor.o creature.o player.o
+OBJ += messages.o
 FLG = -g
 LIB = -ltcod -ltcodxx
 

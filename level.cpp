@@ -6,6 +6,7 @@ Level::Level(int dungeonWidth, int dungeonHeight)
 	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory, &m_actors);
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
+	m_messages = new MessageHandler();
 	m_player = new Player(this);
     m_player->m_glyph = '@';
     m_player->m_x = DUNGEON_WIN_W-1;

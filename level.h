@@ -2,6 +2,7 @@
 #define LEVEL_WF504OFN
 #include "dungeon.h"
 #include "player.h"
+#include "messages.h"
 
 class Level
 {
@@ -16,6 +17,7 @@ class Level
 		Dungeon *m_dungeon;
 		TileFactory m_tileFactory;
 		Player *m_player;
+		MessageHandler *m_messages;
 		std::vector<Actor*> m_actors;
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;

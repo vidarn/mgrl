@@ -57,6 +57,7 @@ Dungeon::generate(Level *level)
             actor->m_x = x;
             actor->m_y = y;
             actor->m_glyph = 'g';
+            actor->m_name = "Goblin";
             m_actors->push_back(actor);
         }
     }
