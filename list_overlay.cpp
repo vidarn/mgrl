@@ -34,7 +34,7 @@ ListOverlay::render()
 		if(numEntries>=m_scroll){
 			if(y < m_numLines){
 				if(d->m_type == LIST_ENTRY){
-					sprintf(buffer," [%s] - %s", d->m_data.m_key, d->m_data.m_name);
+					sprintf(buffer," [%s] %s", d->m_data.m_key, d->m_data.m_name);
 				}
 				if(d->m_type == LIST_CATEGORY){
 					sprintf(buffer,"%s (%s):", d->m_data.m_name, d->m_data.m_key);

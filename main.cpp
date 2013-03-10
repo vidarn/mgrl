@@ -14,6 +14,7 @@ int SCREEN_W = 100;
 int SCREEN_H = 40;
 int DUNGEON_WIN_W;
 int DUNGEON_WIN_H;
+bool DEBUG = true;
 boost::random::mt19937 RAND;
 
 void
@@ -88,7 +89,7 @@ main(int argc, char **argv)
 
 
     std::vector<Overlay*> overlays;
-    Overlay *statusWin = new CallbackOverlay(5,5,"Status",&(level.m_player), &drawStatus, &handleInventoryInput);
+    Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, &handleInventoryInput);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
     statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
     Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",NULL, &drawInventory, &handleInventoryInput);
@@ -164,39 +165,23 @@ main(int argc, char **argv)
                                     { LIST_ENTRY,     { "b","War Axe"}},
                                     { LIST_CATEGORY,  { "[","Armour"}},
                                     { LIST_ENTRY,     { "c","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "d","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "e","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "f","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "g","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "h","Iron Chestplate"}},
-                                    { LIST_ENTRY,     { "i","Iron Chestplate"}},
                                     { LIST_CATEGORY,  { "~","Misc"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_ENTRY,     { "f","Short Sword"}},
-                                    { LIST_ENTRY,     { "k","War Axe"}},
-                                    { LIST_ENTRY,     { "h","Iron Chestplate"}},
                                     { LIST_DONE,NULL}
                                 };
                                 overlays.push_back(new ListOverlay(30, 30, "Inventory", inventoryList));
-                                overlays.push_back(new CallbackOverlay(2, 60, "What is your name?", NULL, &drawInventory, &handleInventoryInput));
                             }
+                            update=false;
                             break;
                         case 'r':
                             level.generate();
                             break;
+                        case '.':
+                            break;
+                        case 'd':
+                            DEBUG = !DEBUG;
+                            update=false;
+                            break;
                         default:
-                            std::cout << "FALSE!\n";
                             update=false;
                             break;
                     }

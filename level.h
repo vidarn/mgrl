@@ -18,7 +18,7 @@ class Level
 		Player *m_player;
 		std::vector<Actor*> m_actors;
 	private:
-		TCODMap *m_fovMap;
+		TCODMap *m_fovMap, *m_dungeonFovMap;
 		TCODDijkstra *m_pathFinder;
 };
 

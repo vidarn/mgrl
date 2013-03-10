@@ -28,9 +28,10 @@ Dungeon::render()
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
 				else{
-					//DEBUG
-					TCODConsole::root->setDefaultForeground(TCODColor::darkestGrey);
-					TCODConsole::root->putChar(x,y,tile.m_glyph);
+					if(DEBUG){
+						TCODConsole::root->setDefaultForeground(TCODColor::darkestGrey);
+						TCODConsole::root->putChar(x,y,tile.m_glyph);
+					}
 				}
 			}
 		}
@@ -52,7 +53,7 @@ Dungeon::generate(Level *level)
         int x = xDist(RAND);
         int y = yDist(RAND);
         if(isWalkable(x,y)){
-            Actor *actor = new Actor(level);
+            Actor *actor = new Creature(level);
             actor->m_x = x;
             actor->m_y = y;
             actor->m_glyph = 'g';
