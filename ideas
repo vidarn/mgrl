@@ -1,0 +1,15 @@
+
+* MTG-like
+* You have a set of ability slots at the bottom/top of the screen
+* You have a deck of abilities. You can add/remove known abilites from the deck, but you must have at least a minimum amount of the in the deck at all times
+* Abilities can be instantaneous or continous. Contious abilities (such as summons or enchantments) lock the ability slot while they're active
+* You have a mana pool for each color. The mana pools regenerate when you have a mana generating ability active
+* There's either a slow passive mana regerneration or specific "mana leaks" on the level that help you regenerate mana even without mana abilities
+* There's different colors of magic:
+    + Red has a lot of destructive abilities and can summon fast and hard-hitting but short lived creatures
+    + Blue has translocations, traps and abilities that affect other abilites or the abilites you're about to draw
+    + White has healing, damage preventing and incapatitating abilites and can summon defensive creatures
+* Each level contains a shard of knowledge that grants you a random set of new abilities
+* Scrolls are one-shot instantaneous abilites without mana cost
+* There's a food clock
+* Upon leveling up you can raise combat related stats and mana affinity (affecting your maximum mana pool of the different colors)
