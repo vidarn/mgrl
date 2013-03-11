@@ -1,6 +1,7 @@
 #ifndef MESSAGES_FA2ZE2MV
 #define MESSAGES_FA2ZE2MV
 #include <string.h>
+#include "player.h"
 
 enum {
 	MESSAGE_FLAVOUR,
@@ -19,13 +20,14 @@ struct Message
 class MessageHandler
 {
 	public:
-		MessageHandler();
+		MessageHandler(Player *player);
 		void showMessage(std::string message, int importance);
 		Message getNthLatestMessage(int n);
 	private:
 		static const int m_numMaxMessages=200;
 		Message m_messages[m_numMaxMessages];
 		int m_currMessage;
+		Player *m_player;
 };
 
 

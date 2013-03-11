@@ -6,11 +6,12 @@ Level::Level(int dungeonWidth, int dungeonHeight)
 	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory, &m_actors);
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
-	m_messages = new MessageHandler();
 	m_player = new Player(this);
     m_player->m_glyph = '@';
     m_player->m_x = DUNGEON_WIN_W-1;
     m_player->m_y = (DUNGEON_WIN_H)/2;
+	m_playerAlive = true;
+	m_messages = new MessageHandler(m_player);
 	m_pathFinder = 0;
 }
 
@@ -114,3 +115,40 @@ Level::walkTowardsPlayer(int *creatureX, int *creatureY)
 	delete path;
 }
 
+void
+Level::killActor(Actor *victim, Actor *killer)
+{
+	for(int i=0;i<m_actors.size();i++){
+		Actor *actor = m_actors[i];
+		if(actor == victim){
+			m_actors.erase(m_actors.begin()+i);
+		}
+	}
+	victim->die(killer);
+	delete victim;
+}
+
+std::vector<Actor *>
+Level::getVisibleActors()
+{
+	std::vector<Actor *> actors;
+	for(int i=0;i<m_actors.size();i++){
+		Actor *actor = m_actors[i];
+		if(m_fovMap->isInFov(actor->m_x, actor->m_y)){
+			actors.push_back(actor);
+		}
+	}
+	return actors;
+}
+
+Creature *
+Level::getCreature(int x, int y)
+{
+	for(int i=0;i<m_actors.size();i++){
+		Actor *actor = m_actors[i];
+		if(actor->hasTag(TAG_CREATURE) && actor->m_x==x && actor->m_y==y){
+			return static_cast<Creature *>(actor);
+		}
+	}
+	return 0;
+}

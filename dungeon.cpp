@@ -27,12 +27,20 @@ Dungeon::render()
 						TCODConsole::root->setDefaultForeground(TCODColor::grey);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
-				else{
-					if(DEBUG){
-						TCODConsole::root->setDefaultForeground(TCODColor::darkestGrey);
-						TCODConsole::root->putChar(x,y,tile.m_glyph);
-					}
-				}
+                if(DEBUG){
+                    TCODConsole::root->setDefaultForeground(TCODColor::grey);
+                    TCODConsole::root->putChar(x,y,tile.m_glyph);
+                }
+                if(DEBUG){
+                    if(y ==0){
+						TCODConsole::root->setDefaultForeground(TCODColor::grey);
+						TCODConsole::root->putChar(x,y,'0'+x%10);
+                    }
+                    if(x ==0){
+						TCODConsole::root->setDefaultForeground(TCODColor::grey);
+						TCODConsole::root->putChar(x,y,'0'+y%10);
+                    }
+                }
 			}
 		}
     }
@@ -47,21 +55,48 @@ Dungeon::generate(Level *level)
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width);
-    for(int i=0;i<30;i++){
+    for(int i=0;i<10;i++){
         boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
         boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
         int x = xDist(RAND);
         int y = yDist(RAND);
         if(isWalkable(x,y)){
-            Actor *actor = new Creature(level);
+            level->m_player->m_x = x;
+            level->m_player->m_y = y;
+            /*Actor *actor = new Creature(level);
             actor->m_x = x;
             actor->m_y = y;
             actor->m_glyph = 'g';
             actor->m_name = "Goblin";
-            m_actors->push_back(actor);
+            m_actors->push_back(actor);*/
         }
     }
 }
+
+void
+Dungeon::drawPath(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *))
+{
+	TCODMap *map = new TCODMap(m_width, m_height);
+    for(int y=0;y<m_height;y++){
+        for(int x=0;x<m_width;x++){
+            map->setProperties(x,y,true,tiles[x+y*width] != 127);
+        }
+    }
+	TCODPath *path = new TCODPath(map,0.0f);
+	bool success = path->compute(x0,y0,x1,y1);
+    if(success){
+        int x;
+        int y;
+        while(!path->isEmpty()){
+            path->walk(&x,&y,false);
+            tileCallback(&(tiles[x+y*width]));
+        }
+    }
+    else{
+        drawLine(y0,y1,x0,x1,width,tiles,tileCallback);
+    }
+}
+
 
 void
 Dungeon::drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *))
@@ -155,7 +190,7 @@ cavernEntrance(char *tiles, char axis, char sign, int posY, int posX, int width)
             for(int tmp2=-tmp1;tmp2<=tmp1;tmp2++){
                 int y = axis ? posY + sign*tmp1 : posY + tmp2;
                 int x = axis ? posX + tmp2      : posX + sign*tmp1;
-                tiles[x + y*width] = 0;
+                tiles[x + y*width] = 126;
             }
         }
 }
@@ -174,18 +209,50 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
             tiles[x+y*width] = dist(RAND);
         }
     }
+    for(int i=0;i<m_rooms.size();i++){
+        delete m_rooms[i];
+    }
+    m_rooms.clear();
+    std::vector<CavernConnectivityPoint> points;
+    boost::random::uniform_int_distribution<> roomNumDist(3,30);
+    int numRooms = roomNumDist(RAND);
+    int roomID = 0;
+    for(int i=0;i<numRooms;i++){
+        Room *room = Room::getRoom(0,tiles,width,height);
+        if(room->validate(tiles,points,roomID)){
+            room->reserve(tiles);
+            m_rooms.push_back(room);
+            roomID++;
+        }
+        else{
+            delete room;
+        }
+    }
     int numRepetitions = 4;
-    cavernEntrance(tiles,0,-1,height/2,width-1,width);
+    //cavernEntrance(tiles,0,-1,height/2,width-1,width);
     for(int r=0;r<numRepetitions;r++){
         cellularAutomata(height,width,&tiles,&tmpTiles,cavernFirstPass);
-        cavernEntrance(tiles,0,-1,height/2,width-1,width);
     }
     numRepetitions = 3;
     for(int r=0;r<numRepetitions;r++){
         cellularAutomata(height,width,&tiles,&tmpTiles,cavernSecondPass);
-        cavernEntrance(tiles,0,-1,height/2,width-1,width);
     }
-    connectCaverns(miny,maxy,minx,maxx,tiles);
+    connectCaverns(miny,maxy,minx,maxx,tiles,points);
+    for(int y=0;y<height;y++){
+        for(int x=0;x<width;x++){
+            char c = tiles[x+y*width];
+            switch(c){
+                case 126:
+                    c = 0;
+                    break;
+                case 127:
+                    c = 1;
+                    break;
+            }
+            tiles[x+y*width] = c;
+        }
+    }
+    roomsRender(tiles);
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
             char a = tiles[x+y*width];
@@ -200,6 +267,12 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
                 case 2:
                     t = "Water Stream";
                     break;
+                case 127:
+                    t = "Void";
+                    break;
+                case 126:
+                    t = "Water Stream";
+                    break;
             }
             m_tiles[minx+x+(miny+y)*m_width] = m_tileFactory->getTile(t);
         }
@@ -211,7 +284,7 @@ void
 recursiveConnectCaverns(int width, int height, int y, int x, char *tiles, std::vector<CavernConnectivityPoint> *points)
 {
     int val = tiles[x+y*width];
-    if(val==0 || val==4){
+    if(val==0 || val==4 || val == 126){
         if(val==4){
             for(int i=0;i<points->size();i++){
                 if((*points)[i].x == x && (*points)[i].y == y){
@@ -231,12 +304,11 @@ recursiveConnectCaverns(int width, int height, int y, int x, char *tiles, std::v
 }
 
 void
-Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
+Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles, std::vector<CavernConnectivityPoint> &points)
 {
     int width = maxx-minx;
     int height = maxy-miny;
     int numSteps = 500;
-    std::vector<CavernConnectivityPoint> points;
     //TODO handle doors
     boost::random::uniform_int_distribution<> yDist(miny,maxy-1);
     boost::random::uniform_int_distribution<> xDist(minx,maxx-1);
@@ -245,6 +317,7 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
         point.y = yDist(RAND);
         point.x = xDist(RAND);
         point.tag = -1;
+        point.type = CON_CAV;
         if(tiles[point.x+point.y*width] == 0){
             tiles[point.x+point.y*width] = 4;
             points.push_back(point);
@@ -252,6 +325,7 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
     }
     //TODO handle case where all points hit walls
     CavernConnectivityPoint *point = &(points[0]);
+    point->tag = 1;
     bool done = false;
     while(!done){
         recursiveConnectCaverns(width,height,point->y,point->x,tiles,&points);
@@ -261,9 +335,10 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
         for(int i=0;i<points.size();i++){
             if(points[i].tag == 1){
                 for(int ii=0;ii<points.size();ii++){
-                    if(points[ii].tag == -1){
-                        float y = points[ii].y - points[i].y;
-                        float x = points[ii].x - points[i].x;
+                    CavernConnectivityPoint &tmpPoint = points[ii];
+                    if(tmpPoint.tag == -1 && (tmpPoint.roomID != points[i].roomID || tmpPoint.type != CON_DUN)){
+                        float y = tmpPoint.y - points[i].y;
+                        float x = tmpPoint.x - points[i].x;
                         float dist = y*y + x*x;
                         if(dist < closestDist){
                             closestDist  = dist;
@@ -277,7 +352,7 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
         if(closestPoint != -1){
             CavernConnectivityPoint &cp = points[closestPoint];
             CavernConnectivityPoint &op = points[originPoint];
-            drawLine(op.y,cp.y,op.x,cp.x,width,tiles,setFloor);
+            drawPath(op.y,cp.y,op.x,cp.x,width,tiles,setFloor);
             cp.tag = 1;
             point = &cp;
         }
@@ -286,12 +361,14 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles)
         }
     }
     for(int i=0;i<width*height;i++){
-        if(tiles[i]>1){
-            tiles[i] = 0;
+        if(tiles[i] < 126){
+            if(tiles[i]>1){
+                tiles[i] = 0;
+            }
+            else{
+                tiles[i] = 1;
+            }
         }
-		else{
-			tiles[i] = 1;
-		}
     }
 }
 
@@ -302,18 +379,24 @@ Dungeon::cellularAutomata(int height, int width, char **tiles,
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
             int numWalls = 0;
-            if(x>0 && x<width-1 && y>0 && y<height-1){
-                for(int yy=-1;yy<=1;yy++){
-                    for(int xx=-1;xx<=1;xx++){
-                        if((*tiles)[xx+x+(yy+y)*width] == 1){
-                            numWalls++;
+            if((*tiles)[x+y*width] < 126){
+                if(x>0 && x<width-1 && y>0 && y<height-1){
+                    for(int yy=-1;yy<=1;yy++){
+                        for(int xx=-1;xx<=1;xx++){
+                            char c = (*tiles)[xx+x+(yy+y)*width];
+                            if(c != 0 && c != 126){
+                                numWalls++;
+                            }
                         }
                     }
+                    (*tmpTiles)[x+y*width] = ruleCallback(numWalls);
                 }
-                (*tmpTiles)[x+y*width] = ruleCallback(numWalls);
+                else{
+                    (*tmpTiles)[x+y*width] = 1;
+                }
             }
             else{
-                (*tmpTiles)[x+y*width] = 1;
+                (*tmpTiles)[x+y*width] = (*tiles)[x+y*width];
             }
         }
     }
@@ -321,3 +404,20 @@ Dungeon::cellularAutomata(int height, int width, char **tiles,
     *tmpTiles = *tiles;
     *tiles = tmp;
 }
+
+void
+Dungeon::roomsReserve(char *tiles)
+{
+    for(int i=0;i<m_rooms.size();i++){
+        m_rooms[i]->reserve(tiles);
+    }
+}
+
+void
+Dungeon::roomsRender(char *tiles)
+{
+    for(int i=0;i<m_rooms.size();i++){
+        m_rooms[i]->render(tiles);
+    }
+}
+

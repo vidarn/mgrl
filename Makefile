@@ -1,9 +1,11 @@
 OUT = roguelike
 OBJ = main.o
 OBJ += overlay.o callback_overlay.o list_overlay.o
-OBJ += dungeon.o tile.o level.o
+OBJ += dungeon.o tile.o room.o
+OBJ += level.o 
 OBJ += actor.o creature.o player.o
 OBJ += messages.o
+OBJ += ability.o
 FLG = -g
 LIB = -ltcod -ltcodxx
 

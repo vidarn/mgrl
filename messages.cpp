@@ -1,11 +1,12 @@
 #include <iostream>
 #include "messages.h"
 
-MessageHandler::MessageHandler()
+MessageHandler::MessageHandler(Player *player)
 {
 	for(int i=0;i<m_numMaxMessages;i++){
 		m_messages[i].m_message = "";
 	}
+	m_player = player;
 }
 
 void
@@ -16,6 +17,9 @@ MessageHandler::showMessage(std::string message, int importance)
 	m_messages[m_currMessage].m_importance = importance;
 	m_currMessage = (m_currMessage+1)%m_numMaxMessages;
 	std::cout << message << std::endl;
+	if(importance != MESSAGE_FLAVOUR){
+		m_player->m_running = false;
+	}
 }
 
 Message

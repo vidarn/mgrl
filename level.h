@@ -14,11 +14,15 @@ class Level
 		void walkTowardsPlayer(int *creatureX, int *creatureY);
 		void updatePathFinder(int playerX, int playerY);
 		void computeFov(int playerX, int playerY);
+		void killActor(Actor *victim, Actor *killer);
+		std::vector<Actor *> getVisibleActors();
+		Creature *getCreature(int x, int y);
 		Dungeon *m_dungeon;
 		TileFactory m_tileFactory;
 		Player *m_player;
 		MessageHandler *m_messages;
 		std::vector<Actor*> m_actors;
+		bool m_playerAlive;
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;
 		TCODDijkstra *m_pathFinder;

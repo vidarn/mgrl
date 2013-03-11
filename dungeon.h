@@ -4,6 +4,8 @@
 #include "common.h"
 #include "tile.h"
 #include "creature.h"
+#include "room.h"
+
 class Level;
 
 class Dungeon{
@@ -12,6 +14,7 @@ class Dungeon{
 		void render();
 		void generate(Level *level);
         void drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *));
+        void drawPath(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *));
 		bool isWalkable(int x, int y);
 		bool isTransparent(int x, int y);
 		char getGlyph(int x, int y);
@@ -20,19 +23,15 @@ class Dungeon{
 		int m_width, m_height;
 	private:
         void generateCavern(int miny, int maxy, int minx, int maxx);
-        void connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles);
+        void connectCaverns(int miny, int maxy, int minx, int maxx,
+                char *tiles, std::vector<CavernConnectivityPoint> &points);
         void cellularAutomata(int height, int width, char **tiles,
                 char **tmpTiles, char (*ruleCallback)(int));
+        void roomsReserve(char *tiles);
+        void roomsRender(char *tiles);
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
 		std::vector<Actor*> *m_actors;
+        std::vector<Room *> m_rooms;
 };
-
-struct
-CavernConnectivityPoint
-{
-    int x, y;
-    int tag;
-};
-
 #endif /* end of include guard: DUNGEON_CM9N55L0 */
