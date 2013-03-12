@@ -1,12 +1,15 @@
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/discrete_distribution.hpp>
 #include "room.h"
 #include "rooms/square.h"
 #include "rooms/round.h"
 #include "rooms/pool.h"
+#include "decorations/pillar.h"
+#include "decorations/dinner.h"
+#include "decorations/spider.h"
+#include "decorations/sarcophagus.h"
+#include "decorations/flood.h"
 
 Room::Room(char *tiles, int w, int h):
-    m_stride(w)
+    m_stride(w), m_height(h)
 {
 }
 
@@ -14,6 +17,37 @@ void
 Room::render(Tile *tiles, TileFactory *tileFactory)
 {
     renderRoom(tiles, tileFactory);
+}
+
+void
+Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
+{
+    std::vector<DecorationPlacement> decorationPlacements;
+    std::vector<Decoration *> decorations;
+    decorateRoom(tiles, tileFactory, decorationPlacements);
+    int patternId = -1;
+    int randomId = -1;
+    for(int i=0;i<decorationPlacements.size();i++){
+        DecorationPlacement &place = decorationPlacements[i];
+        Decoration *dec;
+        if(place.m_type == DEC_PATTERN)
+            dec = getPatternDecoration(patternId,place);
+        else
+            dec = getRandomDecoration(randomId, place);
+        if(dec != 0){
+            if(dec->validate(charTiles)){
+                dec->reserve(charTiles);
+                decorations.push_back(dec);
+            }
+            else{
+                delete dec;
+            }
+        }
+    }
+    for(int i=0;i<decorations.size();i++){
+        decorations[i]->render(tiles, tileFactory);
+        delete decorations[i];
+    }
 }
 
 void
@@ -46,6 +80,92 @@ Room::validateTile(char tile)
     return tile < 126;
 }
 
+void
+Room::reserveWall(int x, int y, char *tiles)
+{
+    x+=m_x;y+=m_y;
+    if(x>0 && x<m_stride-1 && y>0 && y<m_height-1)
+        tiles[x+y*m_stride] = 127;
+}
+
+void
+Room::reserveFloor(int x, int y, char *tiles)
+{
+    x+=m_x;y+=m_y;
+    if(x>0 && x<m_stride-1 && y>0 && y<m_height-1)
+        tiles[x+y*m_stride] = 126;
+}
+
+void
+Room::addDecoration(int x, int y, int type, std::vector<DecorationPlacement> &places)
+{
+    x+=m_x;y+=m_y;
+    if(x>0 && x<m_stride-1 && y>0 && y<m_height-1){
+        DecorationPlacement place(x,y,type);
+        places.push_back(place);
+    }
+}
+
+void
+Room::setTile(int x, int y, std::string tile, Tile *tiles, TileFactory *tileFactory)
+{
+    x+=m_x;y+=m_y;
+    if(x>0 && x<m_stride-1 && y>0 && y<m_height-1)
+        tiles[x+y*m_stride] = tileFactory->getTile(tile);
+}
+
+Tile *
+Room::getTile(int x, int y,  Tile *tiles)
+{
+    x+=m_x;y+=m_y;
+    if(x>0 && x<m_stride-1 && y>0 && y<m_height-1)
+        return &tiles[x+y*m_stride];
+    return 0;
+}
+
+Decoration *
+Room::getPatternDecoration(int &id, DecorationPlacement &place)
+{
+    double weights[] = {
+        1.00f,
+        0.20f,
+    };
+    boost::random::discrete_distribution<> dist(weights);
+    if(id == -1)
+        id = dist(RAND);
+    switch(id){
+        case 0:
+            return new PillarDecoration(place.m_x, place.m_y, m_stride, m_height);
+        case 1:
+            return new SarcophagusDecoration(place.m_x, place.m_y, m_stride, m_height);
+    }
+    return 0;
+}
+
+Decoration *
+Room::getRandomDecoration(int &id, DecorationPlacement &place)
+{
+    double weights[] = {
+        1.00f,
+        0.20f,
+        0.10f,
+    };
+    boost::random::discrete_distribution<> dist(weights);
+    int a = dist(RAND);
+    if(id != -1)
+        a = id;
+    switch(a){
+        case 0:
+            return new DinnerDecoration(place.m_x, place.m_y, m_stride, m_height);
+        case 1:
+            id = a;
+            return new SpiderDecoration(place.m_x, place.m_y, m_stride, m_height);
+        case 2:
+            return new FloodDecoration(place.m_x, place.m_y, m_stride, m_height);
+    }
+    return 0;
+}
+
 Room *
 Room::getRoom(int dungeonLevel, char *tiles, int w, int h)
 {
@@ -55,16 +175,8 @@ Room::getRoom(int dungeonLevel, char *tiles, int w, int h)
         0.40f,
         0.10f,
         0.45f,
-        0.30f,
+        0.20f,
     };
-    /*int weightsSize = sizeof(weights)/sizeof(*weights);
-    double totalW = 0;
-    for(int i=0;i<weightsSize;i++){
-        totalW += weights[i];
-    }
-    for(int i=0;i<weightsSize;i++){
-        weights[i] /= totalW;
-    }*/
     boost::random::discrete_distribution<> dist(weights);
     int a = dist(RAND);
     switch(a){

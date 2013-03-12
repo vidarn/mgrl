@@ -25,10 +25,20 @@ RoundRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
 	for(int y=-m_radius;y<=m_radius;y++){
 		for(int x=-m_radius;x<=m_radius;x++){
 			if(sqrtf(float(x*x)+float(y*y)) < float(m_radius)-0.6f){
-				tiles[m_x+x+(m_y+y)*m_stride] = tileFactory->getTile("Stone Floor");
+                setTile(x,y,"Stone Floor", tiles, tileFactory);
 			}
 		}
 	}
+}
+
+void
+RoundRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<DecorationPlacement> &places)
+{
+    boost::random::uniform_int_distribution<> patternDist(-1,0);
+    int pattern = patternDist(RAND);
+    if(pattern >=0){
+        addDecoration(0,0,DEC_PATTERN,places);
+    }
 }
 
 void

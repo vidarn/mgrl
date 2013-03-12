@@ -5,11 +5,9 @@ tile "Stone Floor"{
 	walkable
 	flyable
 }
-
 tile "Rock Wall"{
 	glyph='#'
 }
-
 tile "Water Stream"{
 	glyph='~'
     col="blue"
@@ -17,7 +15,46 @@ tile "Water Stream"{
 	walkable
 	flyable
 }
-
+tile "Pillar"{
+	glyph='I'
+}
+tile "Web"{
+	glyph=';'
+	walkable
+	flyable
+}
+tile "Web Covered Body"{
+	glyph='%'
+}
+tile "Right Facing Chair"{
+	glyph='h'
+	transparent
+}
+tile "Left Facing Chair"{
+	glyph='h'
+	transparent
+}
+tile "Table"{
+	glyph='T'
+	transparent
+}
+tile "Cupboard"{
+	glyph='('
+	transparent
+}
+tile "Stove"{
+	glyph='('
+	transparent
+}
+tile "Campfire"{
+	glyph='w'
+	transparent
+}
+tile "Sarcophagus"{
+	glyph='('
+	transparent
+}
 tile "Void"{
 	glyph='V'
+	transparent
 }

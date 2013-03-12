@@ -29,6 +29,7 @@ class Dungeon{
                 char **tmpTiles, char (*ruleCallback)(int));
         void roomsReserve(char *tiles);
         void roomsRender(Tile *tiles, TileFactory *tileFactory);
+        void roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory);
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
 		std::vector<Actor*> *m_actors;

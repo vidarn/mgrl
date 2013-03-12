@@ -2,6 +2,7 @@
 #define COMMON_Y7J3P1ZQ
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/discrete_distribution.hpp>
 
 extern int SCREEN_W;
 extern int SCREEN_H;

@@ -80,12 +80,12 @@ Dungeon::generate(Level *level)
         int x = xDist(RAND);
         int y = yDist(RAND);
         if(isWalkable(x,y)){
-            Actor *actor = new Creature(level);
+            /*Actor *actor = new Creature(level);
             actor->m_x = x;
             actor->m_y = y;
             actor->m_glyph = 'g';
             actor->m_name = "Goblin";
-            m_actors->push_back(actor);
+            m_actors->push_back(actor);*/
         }
     }
 }
@@ -294,6 +294,12 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
         }
     }
     roomsRender(m_tiles,m_tileFactory);
+    for(int y=0;y<height;y++){
+        for(int x=0;x<width;x++){
+            tiles[x+y*width] = m_tiles[minx+x+(miny+y)*m_width].m_walkable? 0 : 1;
+        }
+    }
+    roomsDecorate(tiles, m_tiles,m_tileFactory);
 }
 
 static
@@ -435,6 +441,14 @@ Dungeon::roomsRender(Tile *tiles, TileFactory *tileFactory)
 {
     for(int i=0;i<m_rooms.size();i++){
         m_rooms[i]->render(tiles, tileFactory);
+    }
+}
+
+void
+Dungeon::roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
+{
+    for(int i=0;i<m_rooms.size();i++){
+        m_rooms[i]->decorate(charTiles, tiles, tileFactory);
     }
 }
 

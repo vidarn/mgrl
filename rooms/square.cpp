@@ -63,6 +63,65 @@ SquareRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
 }
 
 void
+SquareRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<DecorationPlacement> &places)
+{
+    boost::random::uniform_int_distribution<> xDist(1,m_w-2);
+    boost::random::uniform_int_distribution<> yDist(1,m_h-2);
+    double weights[] = {
+		0.20f,
+        1.00f,
+        1.00f,
+        1.00f,
+        1.50f,
+        0.30f,
+    };
+    boost::random::discrete_distribution<> patternDist(weights);
+    int pattern = patternDist(RAND) -1;
+    if(pattern >=0){
+        if(m_w < 4 || m_h < 4){
+            addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
+        }
+        else{
+            switch(pattern){
+                case 0: // corners
+                    addDecoration(  1  ,  1  ,DEC_PATTERN,places);
+                    addDecoration(  1  ,m_h-2,DEC_PATTERN,places);
+                    addDecoration(m_w-2,  1  ,DEC_PATTERN,places);
+                    addDecoration(m_w-2,m_h-2,DEC_PATTERN,places);
+                    break;
+                case 1: // corners, one in from walls
+                    addDecoration(  2  ,  2  ,DEC_PATTERN,places);
+                    addDecoration(  2  ,m_h-3,DEC_PATTERN,places);
+                    addDecoration(m_w-3,  2  ,DEC_PATTERN,places);
+                    addDecoration(m_w-3,m_h-3,DEC_PATTERN,places);
+                    break;
+                case 2: // one random
+                    addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
+                    break;
+                case 3: // few random
+                    {
+                        boost::random::uniform_int_distribution<> numDist(1,3);
+                        int numRand = numDist(RAND);
+                        for(int i=0;i<m_w;i++){
+                            addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
+                        }
+                    }
+                    break;
+                case 4: // many random
+                    {
+                        boost::random::uniform_int_distribution<> numDist(4,7);
+                        int numRand = numDist(RAND);
+                        for(int i=0;i<m_w;i++){
+                            addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+}
+
+void
 SquareRoom::reserveRoom(char *tiles)
 {
     for(int y=m_y;y<m_y+m_h;y++){
