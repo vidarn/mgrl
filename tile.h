@@ -18,7 +18,7 @@ class Tile{
 		Tile();
 		void setType(int type);
 		char m_glyph;
-		char m_color;
+		TCODColor m_color;
 		bool m_walkable;
 		bool m_transparent;
 		bool m_flyable;
@@ -33,6 +33,7 @@ class TileFactory
 		~TileFactory();
 		void addTileType(std::string name, Tile tile);
 		Tile getTile(std::string name);
+        TCODColor getColor(std::string name);
 	private:
 		std::map<std::string, Tile> m_tiles;
 		std::vector<Tile> m_tileTypes;
