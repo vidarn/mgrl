@@ -10,7 +10,9 @@ TileFactory::TileFactory()
 		->addFlag("walkable")
 		->addFlag("flyable")
 		;
-	tileStruct->addProperty("glyph",TCOD_TYPE_CHAR,true);
+	tileStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
+        ->addProperty("col",TCOD_TYPE_STRING,false)
+        ;
 	parser.run("data/tiles",new TileConfigListener(this));
 }
 
@@ -28,6 +30,14 @@ Tile
 TileFactory::getTile(std::string name)
 {
 	return m_tiles[name];
+}
+
+TCODColor
+TileFactory::getColor(std::string name){
+	if(strcmp(name.c_str(),"blue")==0)
+        return TCODColor::blue;
+	if(strcmp(name.c_str(),"white")==0)
+        return TCODColor::white;
 }
 
 TileConfigListener::TileConfigListener(TileFactory *factory):
@@ -71,6 +81,12 @@ TileConfigListener::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			ok = true;
 		}
 	}
+	if(strcmp(name,"col")==0){
+		if(type == TCOD_TYPE_STRING){
+			m_tile->m_color = m_factory->getColor(value.s);
+			ok = true;
+		}
+	}
 	if(!ok){
 		char buffer[512];
 		sprintf(buffer,"Error reading property \"%s\"",name);
@@ -101,6 +117,7 @@ Tile::Tile()
 	m_flyable     = false;
 	m_discovered  = false;
 	m_visible     = false;
+    m_color       = TCODColor::white;
 }
 
 void

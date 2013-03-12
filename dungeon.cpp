@@ -21,17 +21,18 @@ Dungeon::render()
 			if(y<m_height && x<m_width){
 				Tile &tile = m_tiles[x+y*m_width];
 				if(tile.m_discovered){
-					if(tile.m_visible)
-						TCODConsole::root->setDefaultForeground(TCODColor::white);
-					else
-						TCODConsole::root->setDefaultForeground(TCODColor::grey);
+                    TCODColor col = tile.m_color;
+					if(!tile.m_visible)
+						col = col * TCODColor::grey;
+                    TCODConsole::root->setDefaultForeground(col);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
                 if(DEBUG){
-                    TCODConsole::root->setDefaultForeground(TCODColor::grey);
+                    TCODColor col = tile.m_color;
+					if(!tile.m_visible)
+						col = col * TCODColor::grey;
+                    TCODConsole::root->setDefaultForeground(col);
                     TCODConsole::root->putChar(x,y,tile.m_glyph);
-                }
-                if(DEBUG){
                     if(y ==0){
 						TCODConsole::root->setDefaultForeground(TCODColor::grey);
 						TCODConsole::root->putChar(x,y,'0'+x%10);

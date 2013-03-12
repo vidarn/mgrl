@@ -12,6 +12,7 @@ tile "Rock Wall"{
 
 tile "Water Stream"{
 	glyph='~'
+    col="blue"
 	transparent
 	walkable
 	flyable
