@@ -1,6 +1,9 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/random/discrete_distribution.hpp>
 #include "room.h"
+#include "rooms/square.h"
+#include "rooms/round.h"
+#include "rooms/pool.h"
 
 Room::Room(char *tiles, int w, int h):
     m_stride(w)
@@ -8,9 +11,9 @@ Room::Room(char *tiles, int w, int h):
 }
 
 void
-Room::render(char *tiles)
+Room::render(Tile *tiles, TileFactory *tileFactory)
 {
-    renderRoom(tiles);
+    renderRoom(tiles, tileFactory);
 }
 
 void
@@ -46,72 +49,37 @@ Room::validateTile(char tile)
 Room *
 Room::getRoom(int dungeonLevel, char *tiles, int w, int h)
 {
-    return new SquareRoom(tiles, w, h, 0);
-}
-
-ROOM_CONS(SquareRoom, int size)
-{
-    boost::random::uniform_int_distribution<> sizeDist(4,7);
-    m_w = sizeDist(RAND);
-    m_h = sizeDist(RAND);
-    boost::random::uniform_int_distribution<> xDist(2,w-2-m_w);
-    boost::random::uniform_int_distribution<> yDist(2,h-2-m_h);
-    m_x = xDist(RAND);
-    m_y = yDist(RAND);
-
-    boost::random::uniform_int_distribution<> doorWallDist(0,3);
-    boost::random::uniform_int_distribution<> numDoorsDist(1,3);
-    boost::random::uniform_int_distribution<> doorXDist(1,m_w-1);
-    boost::random::uniform_int_distribution<> doorYDist(1,m_h-1);
-    int numDoors = numDoorsDist(RAND);
-    for(int i=0;i<numDoors;i++){
-        CavernConnectivityPoint point;
-        int doorWall = doorWallDist(RAND);
-        point.x = doorXDist(RAND) + m_x;
-        point.y = doorYDist(RAND) + m_y;
-        point.x = m_x + m_w/2;
-        point.y = m_y + m_h/2;
-        switch(doorWall){
-            case 0: point.x = m_x;break;
-            case 1: point.x = m_x + m_w-1;break;
-            case 2: point.y = m_y;break;
-            case 3: point.y = m_y + m_h-1;break;
-        }
-        point.tag = -1;
-        point.type = CON_DUN;
-        m_doors.push_back(point);
+    double weights[] = {
+        0.80f,
+        2.20f,
+        0.40f,
+        0.10f,
+        0.45f,
+        0.30f,
+    };
+    /*int weightsSize = sizeof(weights)/sizeof(*weights);
+    double totalW = 0;
+    for(int i=0;i<weightsSize;i++){
+        totalW += weights[i];
+    }
+    for(int i=0;i<weightsSize;i++){
+        weights[i] /= totalW;
+    }*/
+    boost::random::discrete_distribution<> dist(weights);
+    int a = dist(RAND);
+    switch(a){
+        case 0:
+            return new SquareRoom(tiles, w, h, ROOM_SQUARE_SMALL);
+        case 1:
+            return new SquareRoom(tiles, w, h, ROOM_SQUARE_MEDIUM);
+        case 2:
+            return new SquareRoom(tiles, w, h, ROOM_SQUARE_LARGE);
+        case 3:
+            return new SquareRoom(tiles, w, h, ROOM_SQUARE_HUGE);
+        case 4:
+            return new RoundRoom(tiles, w, h);
+        case 5:
+            return new PoolRoom(tiles, w, h);
     }
 }
 
-void
-SquareRoom::renderRoom(char *tiles)
-{
-    for(int y=m_y+1;y<m_y+m_h-1;y++){
-        for(int x=m_x+1;x<m_x+m_w-1;x++){
-            tiles[x+y*m_stride] = 0;
-        }
-    }
-}
-
-void
-SquareRoom::reserveRoom(char *tiles)
-{
-    for(int y=m_y;y<m_y+m_h;y++){
-        for(int x=m_x;x<m_x+m_w;x++){
-            tiles[x+y*m_stride] = 127;
-        }
-    }
-}
-
-bool
-SquareRoom::validateRoom(char *tiles)
-{
-    for(int y=m_y;y<m_y+m_h;y++){
-        for(int x=m_x;x<m_x+m_w;x++){
-            if(!validateTile(tiles[x+y*m_stride])){
-                return false;
-            }
-        }
-    }
-    return true;
-}

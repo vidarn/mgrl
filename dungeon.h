@@ -28,7 +28,7 @@ class Dungeon{
         void cellularAutomata(int height, int width, char **tiles,
                 char **tmpTiles, char (*ruleCallback)(int));
         void roomsReserve(char *tiles);
-        void roomsRender(char *tiles);
+        void roomsRender(Tile *tiles, TileFactory *tileFactory);
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
 		std::vector<Actor*> *m_actors;

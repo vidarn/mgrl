@@ -2,8 +2,9 @@
 #define ROOMS_SCM06W3Y
 #include <vector>
 #include "common.h"
+#include "tile.h"
 
-#define ROOM_DEF(NAME,...) class NAME: public Room{public: NAME(char *tiles, int w, int h, ##__VA_ARGS__); virtual void renderRoom(char *tiles); virtual void reserveRoom(char *tiles); virtual bool validateRoom(char *tiles);
+#define ROOM_DEF(NAME,...) class NAME: public Room{public: NAME(char *tiles, int w, int h, ##__VA_ARGS__); virtual void renderRoom(Tile *tiles, TileFactory *tileFactory); virtual void reserveRoom(char *tiles); virtual bool validateRoom(char *tiles);
 #define ROOM_CONS(NAME,...) NAME::NAME(char *tiles, int w, int h, ##__VA_ARGS__):Room(tiles,w,h)
 
 enum{
@@ -24,7 +25,7 @@ class Room
 {
     public:
         Room(char *tiles, int w, int h);
-        void render(char *tiles);
+        void render(Tile *tiles, TileFactory *tileFactory);
         void reserve(char *tiles);
         bool validate(char *tiles, std::vector<CavernConnectivityPoint> &points, int id);
         bool validateTile(char tile);
@@ -34,14 +35,9 @@ class Room
         int m_id;
         std::vector<CavernConnectivityPoint> m_doors;
     protected:
-        virtual void renderRoom(char *tiles)   = 0;
+        virtual void renderRoom(Tile *tiles, TileFactory *tileFactory)   = 0;
         virtual void reserveRoom(char *tiles)  = 0;
         virtual bool validateRoom(char *tiles) = 0;
-};
-
-
-ROOM_DEF(SquareRoom, int size)
-    int m_w, m_h;
 };
 
 #endif /* end of include guard: ROOMS_SCM06W3Y */

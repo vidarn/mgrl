@@ -6,6 +6,7 @@ OBJ += level.o
 OBJ += actor.o creature.o player.o
 OBJ += messages.o
 OBJ += ability.o
+OBJ += $(patsubst %.cpp,  %.o, $(wildcard rooms/*.cpp))
 FLG = -g
 LIB = -ltcod -ltcodxx
 

@@ -71,6 +71,22 @@ Dungeon::generate(Level *level)
             m_actors->push_back(actor);*/
         }
     }
+    //TODO free actors
+    m_actors->clear();
+    for(int i=0;i<10;i++){
+        boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
+        boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
+        int x = xDist(RAND);
+        int y = yDist(RAND);
+        if(isWalkable(x,y)){
+            Actor *actor = new Creature(level);
+            actor->m_x = x;
+            actor->m_y = y;
+            actor->m_glyph = 'g';
+            actor->m_name = "Goblin";
+            m_actors->push_back(actor);
+        }
+    }
 }
 
 void
@@ -203,6 +219,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
     char *tiles = new char[width*height];
     char *tmpTiles = new char[width*height];
     double probabilities[] = {0.55, 0.45};
+    //probabilities[1] = 0.0;
     boost::random::discrete_distribution<> dist(probabilities);
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
@@ -229,7 +246,6 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
         }
     }
     int numRepetitions = 4;
-    //cavernEntrance(tiles,0,-1,height/2,width-1,width);
     for(int r=0;r<numRepetitions;r++){
         cellularAutomata(height,width,&tiles,&tmpTiles,cavernFirstPass);
     }
@@ -252,7 +268,6 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
             tiles[x+y*width] = c;
         }
     }
-    roomsRender(tiles);
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
             char a = tiles[x+y*width];
@@ -277,6 +292,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
             m_tiles[minx+x+(miny+y)*m_width] = m_tileFactory->getTile(t);
         }
     }
+    roomsRender(m_tiles,m_tileFactory);
 }
 
 static
@@ -309,7 +325,6 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles, std
     int width = maxx-minx;
     int height = maxy-miny;
     int numSteps = 500;
-    //TODO handle doors
     boost::random::uniform_int_distribution<> yDist(miny,maxy-1);
     boost::random::uniform_int_distribution<> xDist(minx,maxx-1);
     for(int i=0;i<numSteps;i++){
@@ -323,50 +338,51 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles, std
             points.push_back(point);
         }
     }
-    //TODO handle case where all points hit walls
-    CavernConnectivityPoint *point = &(points[0]);
-    point->tag = 1;
-    bool done = false;
-    while(!done){
-        recursiveConnectCaverns(width,height,point->y,point->x,tiles,&points);
-        float closestDist = FLT_MAX;
-        int   closestPoint = -1;
-        int   originPoint;
-        for(int i=0;i<points.size();i++){
-            if(points[i].tag == 1){
-                for(int ii=0;ii<points.size();ii++){
-                    CavernConnectivityPoint &tmpPoint = points[ii];
-                    if(tmpPoint.tag == -1 && (tmpPoint.roomID != points[i].roomID || tmpPoint.type != CON_DUN)){
-                        float y = tmpPoint.y - points[i].y;
-                        float x = tmpPoint.x - points[i].x;
-                        float dist = y*y + x*x;
-                        if(dist < closestDist){
-                            closestDist  = dist;
-                            closestPoint = ii;
-                            originPoint  = i;
+    if(points.size() > 0){
+        CavernConnectivityPoint *point = &(points[0]);
+        point->tag = 1;
+        bool done = false;
+        while(!done){
+            recursiveConnectCaverns(width,height,point->y,point->x,tiles,&points);
+            float closestDist = FLT_MAX;
+            int   closestPoint = -1;
+            int   originPoint;
+            for(int i=0;i<points.size();i++){
+                if(points[i].tag == 1){
+                    for(int ii=0;ii<points.size();ii++){
+                        CavernConnectivityPoint &tmpPoint = points[ii];
+                        if(tmpPoint.tag == -1 && (tmpPoint.roomID != points[i].roomID || tmpPoint.type != CON_DUN)){
+                            float y = tmpPoint.y - points[i].y;
+                            float x = tmpPoint.x - points[i].x;
+                            float dist = y*y + x*x;
+                            if(dist < closestDist){
+                                closestDist  = dist;
+                                closestPoint = ii;
+                                originPoint  = i;
+                            }
                         }
                     }
                 }
             }
-        }
-        if(closestPoint != -1){
-            CavernConnectivityPoint &cp = points[closestPoint];
-            CavernConnectivityPoint &op = points[originPoint];
-            drawPath(op.y,cp.y,op.x,cp.x,width,tiles,setFloor);
-            cp.tag = 1;
-            point = &cp;
-        }
-        else{
-            done = true;
-        }
-    }
-    for(int i=0;i<width*height;i++){
-        if(tiles[i] < 126){
-            if(tiles[i]>1){
-                tiles[i] = 0;
+            if(closestPoint != -1){
+                CavernConnectivityPoint &cp = points[closestPoint];
+                CavernConnectivityPoint &op = points[originPoint];
+                drawPath(op.y,cp.y,op.x,cp.x,width,tiles,setFloor);
+                cp.tag = 1;
+                point = &cp;
             }
             else{
-                tiles[i] = 1;
+                done = true;
+            }
+        }
+        for(int i=0;i<width*height;i++){
+            if(tiles[i] < 126){
+                if(tiles[i]>1){
+                    tiles[i] = 0;
+                }
+                else{
+                    tiles[i] = 1;
+                }
             }
         }
     }
@@ -414,10 +430,10 @@ Dungeon::roomsReserve(char *tiles)
 }
 
 void
-Dungeon::roomsRender(char *tiles)
+Dungeon::roomsRender(Tile *tiles, TileFactory *tileFactory)
 {
     for(int i=0;i<m_rooms.size();i++){
-        m_rooms[i]->render(tiles);
+        m_rooms[i]->render(tiles, tileFactory);
     }
 }
 
