@@ -7,7 +7,6 @@ Level::Level(int dungeonWidth, int dungeonHeight)
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_player = new Player(this);
-    m_player->m_glyph = '@';
     m_player->m_x = DUNGEON_WIN_W-1;
     m_player->m_y = (DUNGEON_WIN_H)/2;
 	m_playerAlive = true;

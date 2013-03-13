@@ -4,7 +4,7 @@
 
 Actor::Actor(Level *level):
 	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(level), m_dx(0),
-	m_dy(0), m_name("something"), m_ac(0)
+	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white)
 {
 }
 
@@ -47,6 +47,7 @@ Actor::walk(int dx,int dy)
 void
 Actor::render()
 {
+	TCODConsole::root->setDefaultForeground(m_color);
 	TCODConsole::root->putChar(m_x,m_y,m_glyph);
 }
 

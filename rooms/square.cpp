@@ -55,9 +55,22 @@ ROOM_CONS(SquareRoom, int size)
 void
 SquareRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
 {
-    for(int y=m_y+1;y<m_y+m_h-1;y++){
-        for(int x=m_x+1;x<m_x+m_w-1;x++){
-            tiles[x+y*m_stride] = tileFactory->getTile("Stone Floor");
+    for(int y=0;y<m_h;y++){
+        for(int x=0;x<m_w;x++){
+            if(x==0 || y==0 || x==m_w-1 || y==m_h-1){
+                Tile *tile = getTile(x,y,tiles);
+                if(tile!=0){
+                    if(tile->m_walkable!=1){
+                        setTile(x,y,"Dungeon Wall",tiles,tileFactory);
+                    }
+                    else{
+                        setTile(x,y,"Dungeon Floor",tiles,tileFactory);
+                    }
+                }
+            }
+            else{
+                setTile(x,y,"Dungeon Floor",tiles,tileFactory);
+            }
         }
     }
 }

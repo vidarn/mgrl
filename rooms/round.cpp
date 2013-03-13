@@ -12,8 +12,8 @@ ROOM_CONS(RoundRoom)
     boost::random::uniform_real_distribution<> angleDist(0.f,3.14f*2.f);
 	CavernConnectivityPoint point;
 	float doorAngle = angleDist(RAND);
-	point.x = m_x+cos(doorAngle)*float(m_radius);
-	point.y = m_y+sin(doorAngle)*float(m_radius);
+	point.x = m_x+cos(doorAngle)*float(m_radius-1.0f);
+	point.y = m_y+sin(doorAngle)*float(m_radius-1.0f);
 	point.tag = -1;
 	point.type = CON_DUN;
 	m_doors.push_back(point);

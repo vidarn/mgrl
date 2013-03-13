@@ -80,12 +80,13 @@ Dungeon::generate(Level *level)
         int x = xDist(RAND);
         int y = yDist(RAND);
         if(isWalkable(x,y)){
-            /*Actor *actor = new Creature(level);
+            Actor *actor = new Creature(level);
             actor->m_x = x;
             actor->m_y = y;
-            actor->m_glyph = 'g';
+            actor->m_glyph = 8;
             actor->m_name = "Goblin";
-            m_actors->push_back(actor);*/
+            actor->m_color = TCODColor::darkGreen;
+            m_actors->push_back(actor);
         }
     }
 }

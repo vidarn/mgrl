@@ -176,6 +176,8 @@ main(int argc, char **argv)
                             level.m_player->startRun(1,1);update=false; break;
                         case 'e' :
                             level.m_player->m_hp--;update=false; break;
+                        case 'w' :
+                            level.m_player->m_hp++;update=false; break;
                         case 'i':
                             if(overlays.size() < 1){
                                 ListDefinition inventoryList[] = {

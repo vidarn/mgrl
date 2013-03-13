@@ -4,7 +4,7 @@
 Player::Player(Level *level):
 	Creature(level)
 {
-	m_glyph = '@';
+	m_glyph = 3;
 	m_running = false;
 	m_hitDie = 8;
 	m_hp = m_maxHp = m_hitDie;

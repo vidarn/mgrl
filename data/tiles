@@ -1,49 +1,58 @@
 // Tiles
 tile "Stone Floor"{
-	glyph='.'
+	glyph=12
+	transparent
+	walkable
+	flyable
+}
+tile "Dungeon Floor"{
+	glyph=10
 	transparent
 	walkable
 	flyable
 }
 tile "Rock Wall"{
-	glyph='#'
+	glyph=9
+}
+tile "Dungeon Wall"{
+	glyph=4
 }
 tile "Water Stream"{
-	glyph='~'
+	glyph=7
     col="blue"
 	transparent
 	walkable
 	flyable
 }
 tile "Pillar"{
-	glyph='I'
+	glyph=13
 }
 tile "Web"{
-	glyph=';'
+	glyph=11
 	walkable
 	flyable
 }
 tile "Web Covered Body"{
-	glyph='%'
+	glyph=16
 }
 tile "Right Facing Chair"{
-	glyph='h'
+	glyph=2
 	transparent
 }
 tile "Left Facing Chair"{
-	glyph='h'
+	glyph=1
 	transparent
 }
 tile "Table"{
-	glyph='T'
+	glyph=5
 	transparent
 }
 tile "Cupboard"{
-	glyph='('
+	glyph=14
 	transparent
 }
 tile "Stove"{
-	glyph='('
+	glyph=6
 	transparent
 }
 tile "Campfire"{
@@ -51,7 +60,7 @@ tile "Campfire"{
 	transparent
 }
 tile "Sarcophagus"{
-	glyph='('
+	glyph=15
 	transparent
 }
 tile "Void"{

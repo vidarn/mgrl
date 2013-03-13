@@ -34,6 +34,7 @@ class Actor
 		virtual bool reflSave(int dc);
 		int m_x, m_y;
 		char m_glyph;
+		TCODColor m_color;
 		int m_hp, m_maxHp;
 		int m_dx, m_dy;
 		int m_ac;
