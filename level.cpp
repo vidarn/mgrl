@@ -3,12 +3,14 @@
 
 Level::Level(int dungeonWidth, int dungeonHeight)
 {
-	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory, &m_actors);
+	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory);
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
-	m_player = new Player(this);
+	m_player = new Player();
+    m_player->finish(this);
     m_player->m_x = DUNGEON_WIN_W-1;
     m_player->m_y = (DUNGEON_WIN_H)/2;
+    m_player->finish(this);
 	m_playerAlive = true;
 	m_messages = new MessageHandler(m_player);
 	m_pathFinder = 0;
@@ -19,13 +21,13 @@ Level::render()
 {
 	m_dungeon->render();
 	for(int i=0;i<m_actors.size();i++){
-		Actor *actor = m_actors[i];
-		if(m_fovMap->isInFov(actor->m_x, actor->m_y)){
-			actor->render();
+		Actor &actor = *(m_actors[i]);
+		if(m_fovMap->isInFov(actor.m_x, actor.m_y)){
+			actor.render();
 		}
 		else{
 			if(DEBUG){
-				actor->render();
+				actor.render();
 			}
 		}
 	}
@@ -35,6 +37,8 @@ Level::render()
 void
 Level::generate()
 {
+    //TODO free actors
+    m_actors.clear();
 	m_dungeon->generate(this);
 	int w = m_dungeon->m_width;
 	int h = m_dungeon->m_height;
@@ -63,9 +67,9 @@ Level::computeFov(int playerX, int playerY)
 		}
 	}
 	for(int i=0;i<m_actors.size();i++){
-		Actor *actor = m_actors[i];
-		if(m_fovMap->isInFov(actor->m_x, actor->m_y)){
-			actor->playerSpotted();
+		Actor &actor = *(m_actors[i]);
+		if(m_fovMap->isInFov(actor.m_x, actor.m_y)){
+			actor.playerSpotted();
 		}
 	}
 }
@@ -124,7 +128,7 @@ Level::killActor(Actor *victim, Actor *killer)
 		}
 	}
 	victim->die(killer);
-	delete victim;
+    delete victim;
 }
 
 std::vector<Actor *>

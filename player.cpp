@@ -1,16 +1,17 @@
 #include "player.h"
 #include "level.h"
 
-Player::Player(Level *level):
-	Creature(level)
+Player::Player():
+	Creature()
 {
 	m_glyph = 3;
 	m_running = false;
 	m_hitDie = 8;
 	m_hp = m_maxHp = m_hitDie;
-	m_name = "Player";
+	m_name = "You";
 	m_abilities.push_back(new AbSacredNectar(AB_SACRED_NECTAR));
 	m_abilities.push_back(new AbLightningBolt(AB_LIGHTNING_BOLT));
+    addTag(TAG_PLAYER);
 }
 
 bool
@@ -66,4 +67,11 @@ void Player::die(Actor *source)
 	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 	m_level->m_messages->showMessage("You are dead...",MESSAGE_NOTIFICATION);
 	m_level->m_playerAlive = false;
+}
+
+void
+Player::finish(Level *level)
+{
+    m_level = level;
+	calculateBonuses();
 }

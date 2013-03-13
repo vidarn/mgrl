@@ -5,11 +5,13 @@
 class Creature: public Actor
 {
 	public:
-		Creature(Level *level);
+		Creature();
 		virtual void act();
 		virtual void playerSpotted();
 		void attack(Actor *target);
 		void calculateBonuses();
+        virtual void handleProperty(std::string &name, TCOD_value_t &val);
+        virtual void finish(Level *level);
 		int m_hd;
 		int m_str;int m_dex;int m_con;
 		int m_int;int m_wis;int m_cha;

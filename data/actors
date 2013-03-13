@@ -1,0 +1,14 @@
+// Creatures
+creature "Goblin"{
+	glyph=8
+    col="dark green"
+    name="Small Goblin"
+    int bab=0
+    int str=7
+    int dex=12
+    int con=13
+    int in=6
+    int wis=8
+    int cha=4
+    dice hp="2d8"
+}

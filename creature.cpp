@@ -4,14 +4,13 @@
 #include "level.h"
 
 
-Creature::Creature(Level *level)
-	:Actor(level),m_hd(1),m_playerSpottedCooldown(0),m_playerSpottedMemory(4),
+Creature::Creature()
+	:Actor(),m_hd(1),m_playerSpottedCooldown(0),m_playerSpottedMemory(4),
 	m_str(8),m_dex(8),m_con(8),
 	m_int(8),m_wis(8),m_cha(8),
 	m_bab(0),m_hitDie(6)
 {
 	addTag(TAG_CREATURE);
-	calculateBonuses();
 }
 
 void
@@ -46,17 +45,26 @@ void
 Creature::attack(Actor *target)
 {
 	bool showMessage = true;
-	std::string msg = m_name;
+	std::string msg;
+    if(!hasTag(TAG_PLAYER))
+        msg = "The ";
+	msg += m_name;
 	int die = d10(RAND);
 	if(die + m_bab + m_strBonus > target->m_ac){
-		msg += " hits ";
-		if(!target->takeDamage(d6(RAND) + m_strBonus, DAMAGE_PHYSICAL, this)){
+        if(hasTag(TAG_PLAYER))
+            msg += " hit the ";
+        else
+            msg += " hits ";
+		if(!target->takeDamage(std::max(0,d3(RAND) + m_strBonus), DAMAGE_PHYSICAL, this)){
 			m_level->killActor(target,this);
 			showMessage = false;
 		}
 	}
 	else{
-		msg += " misses ";
+        if(hasTag(TAG_PLAYER))
+            msg += " miss the ";
+        else
+            msg += " misses ";
 	}
 	msg += target->m_name;
 	if(showMessage){
@@ -73,4 +81,29 @@ Creature::calculateBonuses()
 	m_intBonus = m_int/2 - 5;
 	m_wisBonus = m_wis/2 - 5;
 	m_chaBonus = m_cha/2 - 5;
+
+    m_hp = m_maxHp = m_hitDie;
+}
+
+void
+Creature::handleProperty(std::string &name, TCOD_value_t &val)
+{
+    if(name == "str") m_str = val.i;
+    if(name == "dex") m_dex = val.i;
+    if(name == "con") m_con = val.i;
+    if(name == "in" ) m_int = val.i;
+    if(name == "wis") m_wis = val.i;
+    if(name == "cha") m_cha = val.i;
+    if(name == "bab") m_bab = val.i;
+    if(name == "hp"){
+        m_hd = val.dice.nb_rolls;
+        m_hitDie = val.dice.nb_faces;
+    }
+}
+
+void
+Creature::finish(Level *level)
+{
+    m_level = level;
+	calculateBonuses();
 }

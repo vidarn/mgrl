@@ -10,7 +10,7 @@ class Level;
 
 class Dungeon{
 	public:
-		Dungeon(int width, int height, TileFactory *tileFactory, std::vector<Actor*> *actors);
+		Dungeon(int width, int height, TileFactory *tileFactory);
 		void render();
 		void generate(Level *level);
         void drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (*tileCallback)(char *));
@@ -32,7 +32,6 @@ class Dungeon{
         void roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory);
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
-		std::vector<Actor*> *m_actors;
         std::vector<Room *> m_rooms;
 };
 #endif /* end of include guard: DUNGEON_CM9N55L0 */

@@ -19,9 +19,10 @@ class Level
 		Creature *getCreature(int x, int y);
 		Dungeon *m_dungeon;
 		TileFactory m_tileFactory;
+		ActorFactory m_actorFactory;
 		Player *m_player;
 		MessageHandler *m_messages;
-		std::vector<Actor*> m_actors;
+		std::vector<Actor *> m_actors;
 		bool m_playerAlive;
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;

@@ -2,6 +2,8 @@
 #define ACTOR_U9AMWJYS
 #include <libtcod/libtcod.hpp>
 #include <vector>
+#include <map>
+#include <string>
 class Level;
 
 enum{
@@ -15,10 +17,16 @@ enum{
 	TAG_ITEM,
 };
 
+enum{
+	ACTOR_CREATURE,
+	ACTOR_ITEM,
+};
+
 class Actor
 {
 	public:
-		Actor(Level *level);
+		Actor();
+		virtual void finish(Level *level);
 		void walkTowardsPlayer();
 		void walkRandomly();
 		void render();
@@ -32,6 +40,7 @@ class Actor
 		virtual bool fortSave(int dc);
 		virtual bool willSave(int dc);
 		virtual bool reflSave(int dc);
+        virtual void handleProperty(std::string &name, TCOD_value_t &val);
 		int m_x, m_y;
 		char m_glyph;
 		TCODColor m_color;
@@ -43,5 +52,45 @@ class Actor
 	protected:
 		Level *m_level;
 };
+
+struct ActorDefinition
+{
+    ActorDefinition()
+    {}
+    ActorDefinition(int type):
+        m_type(type)
+    {}
+    int m_type;
+    std::vector<std::string> m_flags;
+    std::vector<std::string> m_propertyNames;
+    std::vector<TCOD_value_t> m_propertyData;
+};
+
+class ActorFactory
+{
+	public:
+		ActorFactory();
+		~ActorFactory();
+		void addActorType(std::string name, ActorDefinition actorDef);
+		Actor *getActor(std::string name, Level *level);
+        TCODColor getColor(std::string name);
+	private:
+		std::map<std::string, ActorDefinition> m_actorDefinitions;
+};
+
+class ActorConfigListener : public ITCODParserListener {
+	public:
+		ActorConfigListener(ActorFactory *factory);
+		virtual bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
+		virtual bool parserFlag(TCODParser *parser,const char *name);
+		virtual bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value);
+		virtual bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name);
+		virtual void error(const char *msg);
+	private:
+		ActorFactory *m_factory;
+		ActorDefinition m_actorDef;
+		const char *m_defName;
+};
+
 
 #endif /* end of include guard: ACTOR_U9AMWJYS */

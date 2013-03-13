@@ -4,13 +4,12 @@
 #include "dungeon.h"
 #include "level.h"
 
-Dungeon::Dungeon(int width, int height, TileFactory *tileFactory, std::vector<Actor *> *actors)
+Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
 {
 	m_width  = width;
 	m_height = height;
 	m_tiles  = new Tile[m_width * m_height];
 	m_tileFactory = tileFactory;
-	m_actors = actors;
 }
 
 void
@@ -64,29 +63,18 @@ Dungeon::generate(Level *level)
         if(isWalkable(x,y)){
             level->m_player->m_x = x;
             level->m_player->m_y = y;
-            /*Actor *actor = new Creature(level);
-            actor->m_x = x;
-            actor->m_y = y;
-            actor->m_glyph = 'g';
-            actor->m_name = "Goblin";
-            m_actors->push_back(actor);*/
         }
     }
-    //TODO free actors
-    m_actors->clear();
     for(int i=0;i<10;i++){
         boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
         boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
         int x = xDist(RAND);
         int y = yDist(RAND);
         if(isWalkable(x,y)){
-            Actor *actor = new Creature(level);
+            Actor *actor = level->m_actorFactory.getActor("Goblin",level);
             actor->m_x = x;
             actor->m_y = y;
-            actor->m_glyph = 8;
-            actor->m_name = "Goblin";
-            actor->m_color = TCODColor::darkGreen;
-            m_actors->push_back(actor);
+            level->m_actors.push_back(actor);
         }
     }
 }

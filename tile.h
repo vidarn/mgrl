@@ -1,9 +1,9 @@
 #ifndef TILE_IWRFWCCC
 #define TILE_IWRFWCCC
+#include <libtcod/libtcod.hpp>
 #include <vector>
 #include <map>
 #include <string>
-#include <libtcod/libtcod.hpp>
 
 enum TILE_TYPES
 {
@@ -36,7 +36,6 @@ class TileFactory
         TCODColor getColor(std::string name);
 	private:
 		std::map<std::string, Tile> m_tiles;
-		std::vector<Tile> m_tileTypes;
 };
 
 class TileConfigListener : public ITCODParserListener {

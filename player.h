@@ -6,11 +6,12 @@
 class Player: public Creature
 {
 	public:
-		Player(Level *level);
+		Player();
 		bool walk(int dx, int dy);
 		void startRun(int dx, int dy);
 		void run();
 		virtual void die(Actor *source);
+		virtual void finish(Level *level);
 		bool m_running;
 		std::vector<Ability *> m_abilities;
 	private:

@@ -24,6 +24,7 @@ tile "Water Stream"{
 	walkable
 	flyable
 }
+// Decorations
 tile "Pillar"{
 	glyph=13
 }
