@@ -135,12 +135,17 @@ Actor::handleProperty(std::string &name, TCOD_value_t &val)
 {
 }
 
+void
+Actor::handleTag(std::string &tag)
+{
+}
+
 ActorFactory::ActorFactory()
 {
 	TCODParser parser;
 	TCODParserStruct *actorStruct = parser.newStructure("creature");
-	/*actorStruct->addFlag("creature")
-		;*/
+	actorStruct->addFlag("spider")
+		;
 	actorStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
         ->addProperty("col",TCOD_TYPE_STRING,false)
         ->addProperty("name",TCOD_TYPE_STRING,false)
@@ -185,8 +190,60 @@ ActorFactory::getActor(std::string name, Level *level)
             actor->handleProperty(name,val);
         }
     }
+    for(int i=0;i<def.m_flags.size();i++){
+        actor->handleTag(def.m_flags[i]);
+    }
     actor->finish(level);
     return actor;
+}
+
+Actor *
+ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
+{
+    std::vector<std::string> matchingDefinitions;
+    std::map<std::string, ActorDefinition>::iterator iter;
+    for(iter=m_actorDefinitions.begin();iter!=m_actorDefinitions.end();++iter){
+        std::string defName = iter->first;
+        ActorDefinition &def = iter->second;
+        if(def.m_type == ACTOR_CREATURE){
+            int creatureHd = 1;
+            for(int i=0;i<def.m_propertyNames.size();i++){
+                std::string  &name = def.m_propertyNames[i];
+                TCOD_value_t &val  = def.m_propertyData[i];
+                if(name == "hp"){
+                    creatureHd = val.dice.nb_rolls;
+                }
+            }
+            std::vector<bool> tagMatches;
+            for(int i=0;i<tags.size();i++){
+                tagMatches.push_back(false);
+            }
+            for(int i=0;i<def.m_flags.size();i++){
+                std::string &flag = def.m_flags[i];
+                for(int ii=0;ii<tags.size();ii++){
+                    if(tags[ii] == flag){
+                        tagMatches[ii] = true;
+                    }
+                }
+            }
+            bool allTagsMatch = true;
+            for(int i=0;i<tags.size();i++){
+                allTagsMatch = allTagsMatch && tagMatches[i];
+            }
+            if(creatureHd == hd && allTagsMatch){
+                matchingDefinitions.push_back(defName);
+            }
+        }
+    }
+    if(matchingDefinitions.size() > 0){
+        boost::random::uniform_int_distribution<> creatureDist(0,matchingDefinitions.size()-1);
+        int a = creatureDist(RAND);
+        std::string name = matchingDefinitions[a];
+        return getActor(name,level);
+    }
+    else{
+        return 0;
+    }
 }
 
 TCODColor

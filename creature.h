@@ -11,6 +11,7 @@ class Creature: public Actor
 		void attack(Actor *target);
 		void calculateBonuses();
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
+        virtual void handleTag(std::string &tag);
         virtual void finish(Level *level);
 		int m_hd;
 		int m_str;int m_dex;int m_con;

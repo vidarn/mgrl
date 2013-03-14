@@ -83,6 +83,12 @@ Creature::calculateBonuses()
 	m_chaBonus = m_cha/2 - 5;
 
     m_hp = m_maxHp = m_hitDie;
+    boost::random::uniform_int_distribution<> hpDist(0,m_hitDie);
+    for(int i=1;i<m_hd;i++){
+        m_hp += hpDist(RAND);
+    }
+    m_hp += m_conBonus*m_hd;
+    m_hp = std::max(1,m_hp);
 }
 
 void
@@ -99,6 +105,11 @@ Creature::handleProperty(std::string &name, TCOD_value_t &val)
         m_hd = val.dice.nb_rolls;
         m_hitDie = val.dice.nb_faces;
     }
+}
+
+void
+Creature::handleTag(std::string &tag)
+{
 }
 
 void

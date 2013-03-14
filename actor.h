@@ -41,6 +41,7 @@ class Actor
 		virtual bool willSave(int dc);
 		virtual bool reflSave(int dc);
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
+        virtual void handleTag(std::string &tag);
 		int m_x, m_y;
 		char m_glyph;
 		TCODColor m_color;
@@ -73,6 +74,7 @@ class ActorFactory
 		~ActorFactory();
 		void addActorType(std::string name, ActorDefinition actorDef);
 		Actor *getActor(std::string name, Level *level);
+		Actor *getCreature(int hd, Level *level, std::vector<std::string> tags);
         TCODColor getColor(std::string name);
 	private:
 		std::map<std::string, ActorDefinition> m_actorDefinitions;
