@@ -13,7 +13,7 @@ creature "Goblin"{
     dice hp="1d6"
 }
 creature "Bat"{
-	glyph='b'
+	glyph=17
     name="Giant Bat"
     int bab=0
     int str=6
@@ -25,8 +25,9 @@ creature "Bat"{
     dice hp="1d4"
 }
 creature "Spider"{
-	glyph='s'
+	glyph=18
     name="Spider"
+    genWeight=0.1
     int bab=0
     int str=6
     int dex=12

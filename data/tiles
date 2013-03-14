@@ -33,7 +33,7 @@ tile "Web"{
 	walkable
 	flyable
 }
-tile "Web Covered Body"{
+tile "Spider Egg"{
 	glyph=16
 }
 tile "Right Facing Chair"{

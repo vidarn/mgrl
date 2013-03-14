@@ -7,9 +7,10 @@
 #include "decorations/spider.h"
 #include "decorations/sarcophagus.h"
 #include "decorations/flood.h"
+#include "level.h"
 
 Room::Room(char *tiles, int w, int h):
-    m_stride(w), m_height(h)
+    m_stride(w), m_height(h), m_roomWidth(0), m_roomHeight(0)
 {
 }
 
@@ -20,8 +21,9 @@ Room::render(Tile *tiles, TileFactory *tileFactory)
 }
 
 void
-Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
+Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level)
 {
+    std::vector<std::string> creatureTags;
     std::vector<DecorationPlacement> decorationPlacements;
     std::vector<Decoration *> decorations;
     decorateRoom(tiles, tileFactory, decorationPlacements);
@@ -31,9 +33,9 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
         DecorationPlacement &place = decorationPlacements[i];
         Decoration *dec;
         if(place.m_type == DEC_PATTERN)
-            dec = getPatternDecoration(patternId,place);
+            dec = getPatternDecoration(patternId,place, creatureTags);
         else
-            dec = getRandomDecoration(randomId, place);
+            dec = getRandomDecoration(randomId, place, creatureTags);
         if(dec != 0){
             if(dec->validate(charTiles)){
                 dec->reserve(charTiles);
@@ -47,6 +49,25 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
     for(int i=0;i<decorations.size();i++){
         decorations[i]->render(tiles, tileFactory);
         delete decorations[i];
+    }
+    if(m_roomWidth > 0 && m_roomHeight > 0){
+        boost::random::uniform_int_distribution<> creatureNumDist(3,5);
+        boost::random::uniform_int_distribution<> xDist(0,m_roomWidth);
+        boost::random::uniform_int_distribution<> yDist(0,m_roomHeight);
+        int numCreatures = creatureNumDist(RAND);
+        for(int i=0;i<numCreatures;i++){
+            int x = xDist(RAND);
+            int y = yDist(RAND);
+            Tile *tile = getTile(x,y,tiles);
+            if(tile != 0 && tile->m_walkable){
+                Actor *actor = level->m_actorFactory.getCreature(1,level,creatureTags);
+                if(actor != 0){
+                    actor->m_x = m_x+x;
+                    actor->m_y = m_y+y;
+                    level->m_actors.push_back(actor);
+                }
+            }
+        }
     }
 }
 
@@ -124,7 +145,7 @@ Room::getTile(int x, int y,  Tile *tiles)
 }
 
 Decoration *
-Room::getPatternDecoration(int &id, DecorationPlacement &place)
+Room::getPatternDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags)
 {
     double weights[] = {
         1.00f,
@@ -143,12 +164,12 @@ Room::getPatternDecoration(int &id, DecorationPlacement &place)
 }
 
 Decoration *
-Room::getRandomDecoration(int &id, DecorationPlacement &place)
+Room::getRandomDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags)
 {
     double weights[] = {
         1.00f,
         0.20f,
-        0.10f,
+        0.00f,
     };
     boost::random::discrete_distribution<> dist(weights);
     int a = dist(RAND);
@@ -159,9 +180,8 @@ Room::getRandomDecoration(int &id, DecorationPlacement &place)
             return new DinnerDecoration(place.m_x, place.m_y, m_stride, m_height);
         case 1:
             id = a;
+            creatureTags.push_back(std::string("spider"));
             return new SpiderDecoration(place.m_x, place.m_y, m_stride, m_height);
-        case 2:
-            return new FloodDecoration(place.m_x, place.m_y, m_stride, m_height);
     }
     return 0;
 }

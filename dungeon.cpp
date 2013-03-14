@@ -3,6 +3,7 @@
 #include <cfloat>
 #include "dungeon.h"
 #include "level.h"
+#include "decorations/flood.h"
 
 Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
 {
@@ -54,7 +55,7 @@ Dungeon::generate(Level *level)
 		int t = T_VOID;
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
-    generateCavern(0, m_height, 0, m_width);
+    generateCavern(0, m_height, 0, m_width,level);
     for(int i=0;i<10;i++){
         boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
         boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
@@ -204,7 +205,7 @@ cavernEntrance(char *tiles, char axis, char sign, int posY, int posX, int width)
 }
 
 void
-Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
+Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
 {
     int height = maxy - miny;
     int width = maxx - minx;
@@ -290,7 +291,13 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx)
             tiles[x+y*width] = m_tiles[minx+x+(miny+y)*m_width].m_walkable? 0 : 1;
         }
     }
-    roomsDecorate(tiles, m_tiles,m_tileFactory);
+    for(int i=0;i<points.size();i++){
+        if(points[i].type == CON_DUN){
+            FloodDecoration fd(points[i].x, points[i].y, m_width, m_height);
+            fd.render(m_tiles,m_tileFactory);
+        }
+    }
+    roomsDecorate(tiles, m_tiles,m_tileFactory,level);
 }
 
 static
@@ -436,10 +443,10 @@ Dungeon::roomsRender(Tile *tiles, TileFactory *tileFactory)
 }
 
 void
-Dungeon::roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory)
+Dungeon::roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level)
 {
     for(int i=0;i<m_rooms.size();i++){
-        m_rooms[i]->decorate(charTiles, tiles, tileFactory);
+        m_rooms[i]->decorate(charTiles, tiles, tileFactory, level);
     }
 }
 

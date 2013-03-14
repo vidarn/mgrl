@@ -37,12 +37,14 @@ DecorationPlacement
     int m_type;
 };
 
+class Level;
+
 class Room
 {
     public:
         Room(char *tiles, int w, int h);
         void render(Tile *tiles, TileFactory *tileFactory);
-        void decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory);
+        void decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level);
         void reserve (char *tiles);
         bool validate(char *tiles, std::vector<CavernConnectivityPoint> &points, int id);
         bool validateTile(char tile);
@@ -51,11 +53,12 @@ class Room
         void addDecoration(int x, int y, int type, std::vector<DecorationPlacement> &places);
         void setTile(int x, int y, std::string tile, Tile *tiles, TileFactory *tileFactory);
         Tile * getTile(int x, int y,  Tile *tiles);
-        Decoration * getPatternDecoration(int &id, DecorationPlacement &place);
-        Decoration * getRandomDecoration(int &id, DecorationPlacement &place);
+        Decoration * getPatternDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
+        Decoration * getRandomDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
         static Room *getRoom(int dungeonLevel, char *tiles, int w, int h);
         int m_x, m_y;
         int m_stride, m_height;
+        int m_roomWidth, m_roomHeight;
         int m_id;
         std::vector<CavernConnectivityPoint> m_doors;
     protected:

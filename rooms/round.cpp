@@ -24,8 +24,19 @@ RoundRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
 {
 	for(int y=-m_radius;y<=m_radius;y++){
 		for(int x=-m_radius;x<=m_radius;x++){
+			if(sqrtf(float(x*x)+float(y*y)) < float(m_radius)+0.6f){
+                Tile *tile = getTile(x,y,tiles);
+                if(tile!=0){
+                    if(tile->m_walkable!=1){
+                        setTile(x,y,"Dungeon Wall",tiles,tileFactory);
+                    }
+                    else{
+                        setTile(x,y,"Dungeon Floor", tiles, tileFactory);
+                    }
+                }
+			}
 			if(sqrtf(float(x*x)+float(y*y)) < float(m_radius)-0.6f){
-                setTile(x,y,"Stone Floor", tiles, tileFactory);
+                setTile(x,y,"Dungeon Floor", tiles, tileFactory);
 			}
 		}
 	}

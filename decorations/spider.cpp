@@ -3,7 +3,7 @@
 DEC_CONS(SpiderDecoration)
 {
     double weights[] = {
-		0.80f,
+		1.00f,
         0.20f,
     };
     boost::random::discrete_distribution<> dist(weights);
@@ -27,7 +27,7 @@ DEC_REN(SpiderDecoration)
 			setTile(0,0,"Web", tiles, tileFactory);
 			break;
         case 1:
-			setTile(0,0,"Web Covered Body", tiles, tileFactory);
+			setTile(0,0,"Spider Egg", tiles, tileFactory);
 			break;
     }
 }

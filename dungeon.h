@@ -22,14 +22,14 @@ class Dungeon{
 		void setDiscovered(int x, int y, bool state);
 		int m_width, m_height;
 	private:
-        void generateCavern(int miny, int maxy, int minx, int maxx);
+        void generateCavern(int miny, int maxy, int minx, int maxx, Level *level);
         void connectCaverns(int miny, int maxy, int minx, int maxx,
                 char *tiles, std::vector<CavernConnectivityPoint> &points);
         void cellularAutomata(int height, int width, char **tiles,
                 char **tmpTiles, char (*ruleCallback)(int));
         void roomsReserve(char *tiles);
         void roomsRender(Tile *tiles, TileFactory *tileFactory);
-        void roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory);
+        void roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level);
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
         std::vector<Room *> m_rooms;

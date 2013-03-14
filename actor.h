@@ -56,12 +56,14 @@ class Actor
 
 struct ActorDefinition
 {
-    ActorDefinition()
+    ActorDefinition():
+        m_genWeight(1.0f)
     {}
     ActorDefinition(int type):
-        m_type(type)
+        m_type(type),m_genWeight(1.0f)
     {}
-    int m_type;
+    int   m_type;
+    float m_genWeight;
     std::vector<std::string> m_flags;
     std::vector<std::string> m_propertyNames;
     std::vector<TCOD_value_t> m_propertyData;

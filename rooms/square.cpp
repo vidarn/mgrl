@@ -15,6 +15,8 @@ ROOM_CONS(SquareRoom, int size)
     }
     m_w = sizeDist(RAND);
     m_h = sizeDist(RAND);
+    m_roomWidth  = m_w;
+    m_roomHeight = m_h;
     boost::random::uniform_int_distribution<> xDist(2,w-2-m_w);
     boost::random::uniform_int_distribution<> yDist(2,h-2-m_h);
     m_x = xDist(RAND);

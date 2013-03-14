@@ -96,7 +96,7 @@ Actor::takeDamage(int amount, int type, Actor *source)
 {
 	m_hp -= amount;
     std::stringstream ss;
-    //ss << m_name << " takes " << amount << " damage and has " << m_hp << " hp left";
+    ss << m_name << " takes " << amount << " damage and has " << m_hp << " hp left";
     m_level->m_messages->showMessage(ss.str(), MESSAGE_ACTION);
 	return m_hp > 0;
 }
@@ -149,6 +149,7 @@ ActorFactory::ActorFactory()
 	actorStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
         ->addProperty("col",TCOD_TYPE_STRING,false)
         ->addProperty("name",TCOD_TYPE_STRING,false)
+        ->addProperty("genWeight",TCOD_TYPE_FLOAT,false)
         ;
 	parser.run("data/actors",new ActorConfigListener(this));
 }
@@ -201,6 +202,7 @@ Actor *
 ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
 {
     std::vector<std::string> matchingDefinitions;
+    std::vector<float> definitionWeights;
     std::map<std::string, ActorDefinition>::iterator iter;
     for(iter=m_actorDefinitions.begin();iter!=m_actorDefinitions.end();++iter){
         std::string defName = iter->first;
@@ -231,12 +233,13 @@ ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
                 allTagsMatch = allTagsMatch && tagMatches[i];
             }
             if(creatureHd == hd && allTagsMatch){
+                definitionWeights.push_back(def.m_genWeight);
                 matchingDefinitions.push_back(defName);
             }
         }
     }
     if(matchingDefinitions.size() > 0){
-        boost::random::uniform_int_distribution<> creatureDist(0,matchingDefinitions.size()-1);
+        boost::random::discrete_distribution<> creatureDist(definitionWeights);
         int a = creatureDist(RAND);
         std::string name = matchingDefinitions[a];
         return getActor(name,level);
@@ -284,8 +287,14 @@ ActorConfigListener::parserFlag(TCODParser *parser,const char *name)
 bool
 ActorConfigListener::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value)
 {
-    m_actorDef.m_propertyNames.push_back(name);
-    m_actorDef.m_propertyData.push_back(value);
+	if(strcmp(name,"genWeight")==0){
+        std::cout << "weight\n";
+        m_actorDef.m_genWeight = value.f;
+    }
+    else{
+        m_actorDef.m_propertyNames.push_back(name);
+        m_actorDef.m_propertyData.push_back(value);
+    }
 }
 
 bool
