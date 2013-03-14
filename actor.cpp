@@ -143,10 +143,16 @@ Actor::handleTag(std::string &tag)
 ActorFactory::ActorFactory()
 {
 	TCODParser parser;
-	TCODParserStruct *actorStruct = parser.newStructure("creature");
-	actorStruct->addFlag("spider")
+	TCODParserStruct *creatureStruct = parser.newStructure("creature");
+	creatureStruct->addFlag("spider")
 		;
-	actorStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
+	creatureStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
+        ->addProperty("col",TCOD_TYPE_STRING,false)
+        ->addProperty("name",TCOD_TYPE_STRING,false)
+        ->addProperty("genWeight",TCOD_TYPE_FLOAT,false)
+        ;
+	TCODParserStruct *itemStruct = parser.newStructure("item");
+	itemStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
         ->addProperty("col",TCOD_TYPE_STRING,false)
         ->addProperty("name",TCOD_TYPE_STRING,false)
         ->addProperty("genWeight",TCOD_TYPE_FLOAT,false)
@@ -171,6 +177,8 @@ ActorFactory::getActor(std::string name, Level *level)
     Actor *actor;
     if(def.m_type == ACTOR_CREATURE)
         actor = new Creature();
+    else if(def.m_type == ACTOR_ITEM)
+        actor = new Item();
     else
         actor = new Actor();
     actor->m_name = name.c_str();
@@ -273,6 +281,9 @@ ActorConfigListener::parserNewStruct(TCODParser *parser,const TCODParserStruct *
 	if(strcmp(str->getName(),"creature")==0){ok=true;
         m_actorDef  = ActorDefinition(ACTOR_CREATURE);
     }
+	if(strcmp(str->getName(),"item")==0){ok=true;
+        m_actorDef  = ActorDefinition(ACTOR_ITEM);
+    }
     m_defName = name;
 	return ok;
 }
@@ -288,7 +299,6 @@ bool
 ActorConfigListener::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value)
 {
 	if(strcmp(name,"genWeight")==0){
-        std::cout << "weight\n";
         m_actorDef.m_genWeight = value.f;
     }
     else{

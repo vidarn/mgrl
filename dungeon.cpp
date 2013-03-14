@@ -74,7 +74,7 @@ Dungeon::generate(Level *level)
         if(isWalkable(x,y)){
             std::vector<std::string> tags;
             //tags.push_back("spider");
-            Actor *actor = level->m_actorFactory.getCreature(1,level,tags);
+            Actor *actor = level->m_actorFactory.getActor("Short Sword",level);
             actor->m_x = x;
             actor->m_y = y;
             level->m_actors.push_back(actor);

@@ -2,6 +2,7 @@
 #define LEVEL_WF504OFN
 #include "dungeon.h"
 #include "player.h"
+#include "item.h"
 #include "messages.h"
 
 class Level

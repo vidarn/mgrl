@@ -51,3 +51,10 @@ creature "Orc"{
     int cha=4
     dice hp="2d10"
 }
+
+// Items
+
+item "Short Sword"{
+	glyph=')'
+    name="Short Sword"
+}
