@@ -12,6 +12,7 @@ class Player: public Creature
 		void run();
 		virtual void die(Actor *source);
 		virtual void finish(Level *level);
+        virtual void act();
 		virtual void doOpen();
 		virtual void doQuaff();
         virtual void pickUp(Actor *item);

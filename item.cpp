@@ -12,6 +12,7 @@ Item::Item()
     m_damageNumDice(1)
 {
 	addTag(TAG_ITEM);
+	addTag(TAG_REMEMBER);
 }
 
 Item::~Item()
@@ -29,6 +30,7 @@ Item::act()
 void
 Item::playerSpotted()
 {
+    m_discovered = true;
 }
 
 void

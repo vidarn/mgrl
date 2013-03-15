@@ -4,7 +4,6 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <vector>
 #include <ctime>
-#include "callback_overlay.h"
 #include "level.h"
 #include "actor.h"
 #include "player.h"
@@ -25,57 +24,6 @@ boost::random::uniform_int_distribution<> d6(0,6);
 boost::random::uniform_int_distribution<> d4(0,4);
 boost::random::uniform_int_distribution<> d3(0,3);
 
-void
-drawMessages(TCODConsole *console, void *data, int width, int height)
-{
-    MessageHandler *messages = static_cast<MessageHandler *>(data);
-    for(int y = 0; y<7; y++){
-        console->print(0, 7-y, " %s", messages->getNthLatestMessage(y).m_message.c_str());
-    }
-}
-
-void
-drawStatus(TCODConsole *console, void *data, int width, int height)
-{
-    Player *player = static_cast<Player *>(data);
-	console->setDefaultForeground(TCODColor::white);
-    int health = 16.0f * float(player->m_hp)/float(player->m_maxHp);
-    if(health < 16)
-        console->setDefaultForeground(TCODColor::darkGreen);
-    if(health < 13)
-        console->setDefaultForeground(TCODColor::yellow);
-    if(health < 7)
-        console->setDefaultForeground(TCODColor::orange);
-    if(health < 3)
-        console->setDefaultForeground(TCODColor::red);
-    console->print(0 ,0,"HP: %d/%d",player->m_hp,player->m_maxHp);
-    console->print(0 ,1," [                ]");
-    for(int i=0;i<16;i++){
-        if(i<health){
-            console->putChar(2+i,1,'+');
-        }
-        else{
-            console->putChar(2+i,1,'.');
-        }
-    }
-	console->setDefaultForeground(TCODColor::white);
-    console->print(0 ,3,"STR:%2d",player->m_str);
-    console->print(7 ,3,"DEX:%2d",player->m_dex);
-    console->print(14,3,"CON:%2d",player->m_con);
-    console->print(0 ,4,"INT:%2d",player->m_int);
-    console->print(7 ,4,"WIS:%2d",player->m_wis);
-    console->print(14,4,"CHA:%2d",player->m_cha);
-    for(int i=0;i<player->m_abilities.size();i++){
-        Ability *ability = player->m_abilities[i];
-        console->setDefaultForeground(TCODColor::white);
-        console->print(0,7+3*i,"%s",ability->m_name.c_str());
-        for(int ii=0;ii<ability->m_cost.size();ii++){
-            ManaCost &cost = ability->m_cost[ii];
-            console->setDefaultForeground(cost.m_col);
-            console->print(ii*4,8+3*i,"%2d%c",cost.m_amount,cost.m_char);
-        }
-    }
-}
 
 int
 main(int argc, char **argv)
@@ -92,22 +40,15 @@ main(int argc, char **argv)
     DUNGEON_WIN_H = statusWinHeight;
     DUNGEON_WIN_W = SCREEN_W - statusWinWidth;
 
-    Level level(DUNGEON_WIN_W,DUNGEON_WIN_H);
+    Level level(DUNGEON_WIN_W,DUNGEON_WIN_H,statusWinWidth,statusWinHeight
+            ,messagesWinWidth,messagesWinHeight);
     level.generate();
 
 
-    Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, 0);
-    statusWin->setPos(DUNGEON_WIN_W+1,1);
-    statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
-    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",level.m_messages, &drawMessages, 0);
-    messagesWin->setPos(0,DUNGEON_WIN_H+1);
     level.update();
 
     while ( !TCODConsole::isWindowClosed() ) {
         TCODConsole::root->clear();
-        TCODConsole::root->setDefaultForeground(TCODColor::white);
-        statusWin->render();
-        messagesWin->render();
         level.render();
         TCODConsole::flush();
         if(level.m_player->m_running){
@@ -180,6 +121,9 @@ main(int argc, char **argv)
                             break;
                         case '2':
                             level.m_player->invokeAbility(1);
+                            break;
+                        case '3':
+                            level.m_player->invokeAbility(2);
                             break;
                         case 'd':
                             DEBUG = !DEBUG;

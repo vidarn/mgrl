@@ -11,13 +11,13 @@ enum{
 	AB_NONE,
 	AB_SACRED_NECTAR,
 	AB_LIGHTNING_BOLT,
+	AB_SMALL_RED_MANA_STREAM,
 };
 
 enum{
 	COLOR_RED,
 	COLOR_BLUE,
 	COLOR_WHITE,
-	COLOR_LESS,
 };
 
 struct ManaCost
@@ -39,10 +39,6 @@ struct ManaCost
 				m_char = 21; 
                 m_col = TCODColor::white;
                 break;
-			case COLOR_LESS:
-				m_char = 22; 
-                m_col = TCODColor::lightGrey;
-                break;
 		}
 	}
 	int m_amount;
@@ -57,6 +53,7 @@ class Ability
 		Ability(int id);
         virtual bool invoke(Actor *invoker, Level *level)=0;
         virtual void deactivate(Actor *invoker, Level *level);
+        virtual bool act(Actor *invoker, Level *level);
 		std::string m_name;
 		std::string m_description;
 		std::string m_flavour;
@@ -69,9 +66,9 @@ class AbSacredNectar: public Ability
 {
 	public:
 		AbSacredNectar(int id);
-        Actor *m_nectar;
         virtual bool invoke(Actor *invoker, Level *level);
         virtual void deactivate(Actor *invoker, Level *level);
+        Actor *m_nectar;
 };
 
 class AbLightningBolt: public Ability
@@ -79,6 +76,15 @@ class AbLightningBolt: public Ability
 	public:
 		AbLightningBolt(int id);
         virtual bool invoke(Actor *invoker, Level *level);
+};
+
+class AbSmallRedManaStream: public Ability
+{
+	public:
+		AbSmallRedManaStream(int id);
+        virtual bool invoke(Actor *invoker, Level *level);
+        virtual bool act(Actor *invoker, Level *level);
+        int m_cooldown;
 };
 
 #endif /* end of include guard: ABILITY_EK9W4SK */

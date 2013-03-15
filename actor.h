@@ -16,6 +16,7 @@ enum{
 	TAG_PLAYER,
 	TAG_ITEM,
 	TAG_ATTACKABLE,
+	TAG_REMEMBER,
     ITEM_OPEN,
     ITEM_PICK_UP,
     ITEM_APPLY,
@@ -58,7 +59,7 @@ class Actor
 		virtual void finish(Level *level);
 		void walkTowardsPlayer();
 		void walkRandomly();
-		void render(bool hilight);
+		void render(bool hilight, bool visible);
 		void addTag(int tag);
 		bool hasTag(int tag);
 		virtual bool walk(int dx, int dy);
@@ -84,6 +85,7 @@ class Actor
 		int m_hp, m_maxHp;
 		int m_dx, m_dy;
 		int m_ac;
+        bool m_discovered;
 		const char *m_name;
 		std::vector<int> m_tags;
         std::vector<Actor *> m_inventory;

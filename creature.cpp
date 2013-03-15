@@ -16,6 +16,9 @@ Creature::Creature()
 {
 	addTag(TAG_CREATURE);
 	addTag(TAG_ATTACKABLE);
+    for(int i=0;i<3;i++){
+        m_mana[i] = m_maxMana[i] = 1;
+    }
 }
 
 void
@@ -215,4 +218,25 @@ Creature::finish(Level *level)
     }
     calculateHp();
     calculateAc();
+}
+
+void
+Creature::regainMana(int amount, int color)
+{
+    switch(color){
+			case COLOR_RED:
+                m_mana[0] += amount;
+                break;
+			case COLOR_BLUE:
+                m_mana[1] += amount;
+                break;
+			case COLOR_WHITE:
+                m_mana[2] += amount;
+                break;
+    }
+    for(int i=0;i<3;i++){
+        std::cout << m_mana[i] << amount << "Mana\n";
+        m_mana[i] = std::min(m_maxMana[i], std::max(0, m_mana[i]));
+    }
+    std::cout << "Regain\n";
 }

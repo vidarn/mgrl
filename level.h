@@ -1,5 +1,6 @@
 #ifndef LEVEL_WF504OFN
 #define LEVEL_WF504OFN
+#include "callback_overlay.h"
 #include "dungeon.h"
 #include "player.h"
 #include "item.h"
@@ -8,7 +9,8 @@
 class Level
 {
 	public:
-		Level(int dungeonWidth, int dungeonHeight);
+		Level(int dungeonWidth, int dungeonHeight, int statusWinWidth, int statusWinHeight,
+                int messagesWinWidth, int messagesWinHeight);
 		void render();
 		void generate();
 		void update();
@@ -28,6 +30,8 @@ class Level
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;
 		TCODDijkstra *m_pathFinder;
+        Overlay *m_statusWin;
+        Overlay *m_messagesWin;
 };
 
 #endif /* end of include guard: LEVEL_WF504OFN */

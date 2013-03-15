@@ -88,10 +88,10 @@ Dungeon::generate(Level *level)
         if(isWalkable(x,y)){
             std::vector<std::string> tags;
             //tags.push_back("spider");
-            Actor *actor = level->m_actorFactory.getActor("Sarcophagus",level);
+            /*Actor *actor = level->m_actorFactory.getActor("Sarcophagus",level);
             actor->m_x = x;
             actor->m_y = y;
-            level->m_actors.push_back(actor);
+            level->m_actors.push_back(actor);*/
         }
     }
 }
@@ -264,8 +264,9 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     }
     m_rooms.clear();
     std::vector<CavernConnectivityPoint> points;
-    boost::random::uniform_int_distribution<> roomNumDist(3,30);
-    int numRooms = roomNumDist(RAND);
+    //boost::random::uniform_int_distribution<> roomNumDist(3,30);
+    //int numRooms = roomNumDist(RAND);
+    int numRooms = 20;
     int roomID = 0;
     for(int i=0;i<numRooms;i++){
         Room *room = Room::getRoom(0,tiles,width,height);
@@ -334,7 +335,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     for(int i=0;i<points.size();i++){
         if(points[i].type == CON_DUN){
             FloodDecoration fd(points[i].x, points[i].y, m_width, m_height);
-            fd.render(m_tiles,m_tileFactory);
+            fd.render(m_tiles,m_tileFactory,level);
         }
     }
     roomsDecorate(tiles, m_tiles,m_tileFactory,level);

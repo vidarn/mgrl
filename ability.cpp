@@ -13,6 +13,12 @@ Ability::deactivate(Actor *invoker, Level *level)
 {
 }
 
+bool
+Ability::act(Actor *invoker, Level *level)
+{
+    return false;
+}
+
 //Sacred Nectar
 
 AbSacredNectar::AbSacredNectar(int id):
@@ -20,8 +26,7 @@ AbSacredNectar::AbSacredNectar(int id):
 {
 	m_name        = "Sacred Nectar";
 	m_description = "You gain 5 hp";
-	m_cost.push_back(ManaCost(1,COLOR_WHITE));
-	m_cost.push_back(ManaCost(1,COLOR_LESS));
+	m_cost.push_back(ManaCost(2,COLOR_WHITE));
     m_nectar = 0;
 }
 
@@ -60,8 +65,9 @@ AbLightningBolt::invoke(Actor *invoker, Level *level)
     while(!done){
         target = invoker->getTarget(TARGET_HOSTILE);
         if(target ==0){
-            level->m_messages->showMessage("Are you sure you do not want to target anyone? (y/n)", MESSAGE_WARNING);
+            level->m_messages->showMessage("Are you sure that you do not want to target anyone? (y/n)", MESSAGE_WARNING);
             level->render();
+            TCODConsole::flush();
             bool selected = false;
             while(!selected){
                 TCOD_key_t key = TCODConsole::waitForKeypress(true);
@@ -90,4 +96,34 @@ AbLightningBolt::invoke(Actor *invoker, Level *level)
         delete bolt;
     }
     return true;
+}
+
+// Small Red Mana Stream
+
+AbSmallRedManaStream::AbSmallRedManaStream(int id):
+	Ability(id)
+{
+	m_name        = "Krark's Mana Stream";
+	m_description = "";
+    m_cooldown = 0;
+}
+
+bool
+AbSmallRedManaStream::invoke(Actor *invoker, Level *level)
+{
+    return false;
+}
+
+bool
+AbSmallRedManaStream::act(Actor *invoker, Level *level)
+{
+    std::cout << m_cooldown << std::endl;
+    if(m_cooldown == 0){
+        if(invoker->hasTag(ACTOR_CREATURE) || invoker->hasTag(TAG_PLAYER)){
+            static_cast<Creature *>(invoker)->regainMana(1,COLOR_RED);
+            level->m_messages->showMessage("You feel a surge of red mana",MESSAGE_NOTIFICATION);
+        }
+        m_cooldown = 20;
+    }
+    m_cooldown--;
 }

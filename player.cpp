@@ -1,4 +1,5 @@
 #include <libtcod/libtcod.hpp>
+#include <cfloat>
 #include "player.h"
 #include "level.h"
 #include "list_overlay.h"
@@ -13,12 +14,14 @@ Player::Player():
 	m_name = "You";
 	m_abilities.push_back(new AbSacredNectar(AB_SACRED_NECTAR));
 	m_abilities.push_back(new AbLightningBolt(AB_LIGHTNING_BOLT));
+	m_abilities.push_back(new AbSmallRedManaStream(AB_SMALL_RED_MANA_STREAM));
     addTag(TAG_PLAYER);
 }
 
 bool
 Player::walk(int dx, int dy)
 {
+    act();
 	int tmpX = m_x + dx;
 	int tmpY = m_y + dy;
 	if(m_level->m_dungeon->isWalkable(tmpX,tmpY)){
@@ -70,7 +73,7 @@ Player::run()
 void
 Player::die(Actor *source)
 {
-	std::string msg = "You were killed by ";
+	std::string msg = "You were killed by a ";
 	msg += source->m_name;
 	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 	m_level->m_messages->showMessage("You are dead...",MESSAGE_NOTIFICATION);
@@ -88,6 +91,17 @@ Player::finish(Level *level)
     m_helmet = 1;
 }
 
+void
+Player::act()
+{
+    std::cout << "ACT\n";
+    for(int i=0; i<m_abilities.size();i++){
+        Ability *ability = m_abilities[i];
+        if(ability->m_active)
+            ability->act(this, m_level);
+    }
+}
+
 Actor *
 Player::getTarget(int type)
 {
@@ -101,8 +115,20 @@ Player::getTarget(int type)
         tags.push_back(ACTOR_CREATURE);
         std::vector<Actor *> visibleActors = m_level->getVisibleActors(tags);
         if(visibleActors.size()>0){
-            targetX = visibleActors[0]->m_x;
-            targetY = visibleActors[0]->m_y;
+            int closestActor=0;
+            float closestDist = FLT_MAX;
+            for(int i=0;i<visibleActors.size();i++){
+                Actor *actor = visibleActors[i];
+                float x = m_x - actor->m_x;
+                float y = m_y - actor->m_y;
+                float dist = x*x + y*y;
+                if(dist < closestDist){
+                    closestDist = dist;
+                    closestActor = i;
+                }
+            }
+            targetX = visibleActors[closestActor]->m_x;
+            targetY = visibleActors[closestActor]->m_y;
         }
     }
     while(!done){
@@ -162,6 +188,7 @@ Player::getTarget(int type)
 void
 Player::doOpen()
 {
+    act();
     std::vector<int> tags;
     tags.push_back(ITEM_OPEN);
     std::vector<Actor *> actors = m_level->getActors(m_x, m_y,tags);
@@ -176,6 +203,7 @@ Player::doOpen()
 void
 Player::doQuaff()
 {
+    act();
     std::vector<ListDefinition>itemList;
     bool empty = true;
     for(int i=0;i<m_inventory.size();i++){
@@ -273,20 +301,46 @@ Player::showInventory()
 void
 Player::invokeAbility(int id)
 {
+    act();
     Ability *ab = m_abilities[id];
-    if(!ab->m_active){
-        std::string msg = "You invoke ";
-        msg += ab->m_name;
-        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
-        if(ab->invoke(this,m_level)){
-        }
-        else{
-            ab->m_active = true;
+    int cost[3] = {0,0,0};
+    for(int i=0;i<ab->m_cost.size();i++){
+        ManaCost &abCost = ab->m_cost[i];
+        switch(abCost.m_color){
+            case COLOR_RED:
+                cost[0] += abCost.m_amount;
+                break;
+            case COLOR_BLUE:
+                cost[1] += abCost.m_amount;
+                break;
+            case COLOR_WHITE:
+                cost[2] += abCost.m_amount;
+                break;
         }
     }
-    else{
-        ab->deactivate(this,m_level);
-        ab->m_active = false;
+    bool canAfford = true;
+    for(int i=0;i<3;i++){
+        if(m_mana[i] < cost[i])
+            canAfford = false;
+    }
+    if(canAfford){
+        for(int i=0;i<3;i++){
+            m_mana[i] -= cost[i];
+        }
+        if(!ab->m_active){
+            std::string msg = "You invoke ";
+            msg += ab->m_name;
+            m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+            if(ab->invoke(this,m_level)){
+            }
+            else{
+                ab->m_active = true;
+            }
+        }
+        else{
+            ab->deactivate(this,m_level);
+            ab->m_active = false;
+        }
     }
 }
 

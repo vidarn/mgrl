@@ -47,7 +47,7 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
         }
     }
     for(int i=0;i<decorations.size();i++){
-        decorations[i]->render(tiles, tileFactory);
+        decorations[i]->render(tiles, tileFactory, level);
         delete decorations[i];
     }
     if(m_roomWidth > 0 && m_roomHeight > 0){

@@ -1,4 +1,5 @@
 #include "decoration.h"
+#include "level.h"
 
 
 Decoration::Decoration(int x, int y, int w, int h):
@@ -40,9 +41,9 @@ Decoration::reserveTile(int x, int y, char *tiles)
 }
 
 void
-Decoration::render(Tile *tiles, TileFactory *tileFactory)
+Decoration::render(Tile *tiles, TileFactory *tileFactory, Level *level)
 {
-    renderDecoration(tiles, tileFactory);
+    renderDecoration(tiles, tileFactory, level);
 }
 
 void
