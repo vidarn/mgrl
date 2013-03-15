@@ -36,6 +36,9 @@ enum{
     ITEM_POTION,
     ITEM_FOOD,
     ITEM_CONTAINER,
+    POTION_MINOR_HEAL,
+    POTION_HEAL,
+    POTION_MAJOR_HEAL
 };
 
 enum{
@@ -57,6 +60,7 @@ class Actor
 		virtual void playerSpotted();
 		virtual void act();
 		virtual bool takeDamage(int amount, int type, Actor *source);
+		virtual void healDamage(int amount, Actor *source);
 		virtual void die(Actor *source);
 		virtual bool fortSave(int dc);
 		virtual bool willSave(int dc);
@@ -64,8 +68,13 @@ class Actor
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
         virtual void handleTag(std::string &tag);
         virtual void open(Actor *opener);
+        virtual void pickUp(Actor *item);
+        virtual void removeFromInventory(Actor *item);
+        virtual void quaff(Actor *drinker);
+        virtual Actor *getTarget(int type);
 		int m_x, m_y;
 		char m_glyph;
+		char m_letter;
 		TCODColor m_color;
 		int m_hp, m_maxHp;
 		int m_dx, m_dy;
@@ -73,6 +82,7 @@ class Actor
 		const char *m_name;
 		std::vector<int> m_tags;
         std::vector<Actor *> m_inventory;
+        std::vector<std::string> m_inventoryStrings;
 	protected:
 		Level *m_level;
 };

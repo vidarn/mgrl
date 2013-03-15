@@ -11,6 +11,7 @@ creature "Goblin"{
     int wis=8
     int cha=4
     dice hp="1d6"
+    string weapon="Short Sword"
 }
 creature "Bat"{
 	glyph=17
@@ -58,9 +59,22 @@ item "Short Sword"{
 	glyph=')'
     name="Short Sword"
     bool melee=true
+    dice damage="1d6"
+}
+item "Leather Cap"{
+	glyph=')'
+    name="Leather Cap"
+    bool helmet=true
+    int ac=2
 }
 item "Sarcophagus"{
 	glyph=15
     name="Sarcophagus"
-    string[] container=["Short Sword","Bat"]
+    string[] container=["Short Sword"]
+}
+item "Sacred Nectar"{
+    glyph='!'
+    name="Sacred Nectar"
+    bool potion=true
+    bool minor_heal_potion=true
 }

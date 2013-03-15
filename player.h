@@ -13,7 +13,11 @@ class Player: public Creature
 		virtual void die(Actor *source);
 		virtual void finish(Level *level);
 		virtual void doOpen();
+		virtual void doQuaff();
+        virtual void pickUp(Actor *item);
 		virtual void showInventory();
+		virtual void invokeAbility(int id);
+        Actor *getFromInventory(char key);
 		bool m_running;
 		std::vector<Ability *> m_abilities;
 	private:

@@ -13,7 +13,12 @@ class Item: public Actor
         virtual void handleTag(std::string &tag);
         virtual void finish(Level *level);
         virtual void open(Actor *opener);
-        std::vector<std::string> m_inventoryStrings;
+        virtual void quaff(Actor *drinker);
+        int m_acBonus;
+        int m_armorCheckPenalty;
+        int m_enchantment;
+        int m_damageDie;
+        int m_damageNumDice;
 };
 
 

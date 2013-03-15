@@ -6,7 +6,7 @@
 
 Actor::Actor():
 	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(0), m_dx(0),
-	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white)
+	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white), m_letter(0)
 {
 }
 void
@@ -102,6 +102,12 @@ Actor::takeDamage(int amount, int type, Actor *source)
 }
 
 void
+Actor::healDamage(int amount, Actor *source){
+    m_hp+=amount;
+    m_hp=std::min(m_maxHp,m_hp);
+}
+
+void
 Actor::die(Actor *source)
 {
 	std::string msg;
@@ -143,6 +149,34 @@ Actor::handleTag(std::string &tag)
 void
 Actor::open(Actor *opener)
 {
+}
+
+void
+Actor::pickUp(Actor *item)
+{
+    m_inventory.push_back(item);
+}
+
+void
+Actor::quaff(Actor *drinker)
+{
+}
+
+Actor *
+getTarget(int type)
+{
+}
+
+void
+Actor::removeFromInventory(Actor *item)
+{
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *invItem = m_inventory[i];
+        if(invItem == item){
+            m_inventory.erase(m_inventory.begin()+i);
+            i--;
+        }
+    }
 }
 
 ActorFactory::ActorFactory()

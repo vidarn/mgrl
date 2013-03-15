@@ -6,13 +6,12 @@ Level::Level(int dungeonWidth, int dungeonHeight)
 	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory);
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
+	m_messages = new MessageHandler(m_player);
 	m_player = new Player();
-    m_player->finish(this);
     m_player->m_x = DUNGEON_WIN_W-1;
     m_player->m_y = (DUNGEON_WIN_H)/2;
     m_player->finish(this);
 	m_playerAlive = true;
-	m_messages = new MessageHandler(m_player);
 	m_pathFinder = 0;
 }
 

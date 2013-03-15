@@ -52,8 +52,8 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
     }
     if(m_roomWidth > 0 && m_roomHeight > 0){
         boost::random::uniform_int_distribution<> creatureNumDist(3,5);
-        boost::random::uniform_int_distribution<> xDist(0,m_roomWidth);
-        boost::random::uniform_int_distribution<> yDist(0,m_roomHeight);
+        boost::random::uniform_int_distribution<> xDist(0,m_roomWidth-1);
+        boost::random::uniform_int_distribution<> yDist(0,m_roomHeight-1);
         int numCreatures = creatureNumDist(RAND);
         for(int i=0;i<numCreatures;i++){
             int x = xDist(RAND);

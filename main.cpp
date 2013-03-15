@@ -38,8 +38,6 @@ void
 drawStatus(TCODConsole *console, void *data, int width, int height)
 {
     Player *player = static_cast<Player *>(data);
-    console->print(0 ,0,"HP: %d/%d",player->m_hp,player->m_maxHp);
-    console->print(0 ,1," [                ]");
 	console->setDefaultForeground(TCODColor::white);
     int health = 16.0f * float(player->m_hp)/float(player->m_maxHp);
     if(health < 16)
@@ -50,6 +48,8 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
         console->setDefaultForeground(TCODColor::orange);
     if(health < 3)
         console->setDefaultForeground(TCODColor::red);
+    console->print(0 ,0,"HP: %d/%d",player->m_hp,player->m_maxHp);
+    console->print(0 ,1," [                ]");
     for(int i=0;i<16;i++){
         if(i<health){
             console->putChar(2+i,1,'+');
@@ -67,21 +67,14 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
     console->print(14,4,"CHA:%2d",player->m_cha);
     for(int i=0;i<player->m_abilities.size();i++){
         Ability *ability = player->m_abilities[i];
+        console->setDefaultForeground(TCODColor::white);
         console->print(0,7+3*i,"%s",ability->m_name.c_str());
         for(int ii=0;ii<ability->m_cost.size();ii++){
             ManaCost &cost = ability->m_cost[ii];
+            console->setDefaultForeground(cost.m_col);
             console->print(ii*4,8+3*i,"%2d%c",cost.m_amount,cost.m_char);
         }
     }
-}
-
-bool
-handleInventoryInput(char key, void *data)
-{
-    if(key == 'q'){
-        return false;
-    }
-    return true;
 }
 
 int
@@ -103,10 +96,10 @@ main(int argc, char **argv)
     level.generate();
 
 
-    Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, &handleInventoryInput);
+    Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, 0);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
     statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
-    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",level.m_messages, &drawMessages, &handleInventoryInput);
+    Overlay *messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",level.m_messages, &drawMessages, 0);
     messagesWin->setPos(0,DUNGEON_WIN_H+1);
     level.update();
 
@@ -129,8 +122,10 @@ main(int argc, char **argv)
                 else{
                     bool update = true;
                     switch(key.c) {
-                        case 'q' :
+                        case 'S' :
                             return 0;
+                        case 'q' :
+                            level.m_player->doQuaff();break;
                         case 'h' :
                             level.m_player->walk(-1,0); break;
                         case 'j' :
@@ -178,6 +173,9 @@ main(int argc, char **argv)
                             break;
                         case 'o':
                             level.m_player->doOpen();
+                            break;
+                        case '1':
+                            level.m_player->invokeAbility(0);
                             break;
                         case 'd':
                             DEBUG = !DEBUG;

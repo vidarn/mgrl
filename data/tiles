@@ -39,22 +39,23 @@ tile "Spider Egg"{
 tile "Right Facing Chair"{
 	glyph=2
 	transparent
+    walkable
 }
 tile "Left Facing Chair"{
 	glyph=1
 	transparent
+    walkable
 }
 tile "Table"{
 	glyph=5
 	transparent
+    walkable
 }
 tile "Cupboard"{
 	glyph=14
-	transparent
 }
 tile "Stove"{
 	glyph=6
-	transparent
 }
 tile "Campfire"{
 	glyph='w'

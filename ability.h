@@ -1,7 +1,11 @@
 #ifndef ABILITY_EK9W4SK
 #define ABILITY_EK9W4SK
+#include <libtcod/libtcod.hpp>
 #include <string>
 #include <vector>
+
+class Actor;
+class Level;
 
 enum{
 	AB_NONE,
@@ -24,17 +28,26 @@ struct ManaCost
 		m_color = color;
 		switch(m_color){
 			case COLOR_RED:
-				m_char = 'R'; break;
+				m_char = 20; 
+                m_col = TCODColor::lightRed;
+                break;
 			case COLOR_BLUE:
-				m_char = 'B'; break;
+				m_char = 19; 
+                m_col = TCODColor::lightBlue;
+                break;
 			case COLOR_WHITE:
-				m_char = 'W'; break;
+				m_char = 21; 
+                m_col = TCODColor::white;
+                break;
 			case COLOR_LESS:
-				m_char = 'N'; break;
+				m_char = 22; 
+                m_col = TCODColor::lightGrey;
+                break;
 		}
 	}
 	int m_amount;
 	int m_color;
+	TCODColor m_col;
 	char m_char;
 };
 
@@ -42,9 +55,12 @@ class Ability
 {
 	public:
 		Ability(int id);
+        virtual bool invoke(Actor *invoker, Level *level)=0;
+        virtual void deactivate(Actor *invoker, Level *level);
 		std::string m_name;
 		std::string m_description;
 		std::string m_flavour;
+		bool m_active;
 		int m_id;
 		std::vector<ManaCost> m_cost;
 };
@@ -53,12 +69,16 @@ class AbSacredNectar: public Ability
 {
 	public:
 		AbSacredNectar(int id);
+        Actor *m_nectar;
+        virtual bool invoke(Actor *invoker, Level *level);
+        virtual void deactivate(Actor *invoker, Level *level);
 };
 
 class AbLightningBolt: public Ability
 {
 	public:
 		AbLightningBolt(int id);
+        virtual bool invoke(Actor *invoker, Level *level);
 };
 
 #endif /* end of include guard: ABILITY_EK9W4SK */

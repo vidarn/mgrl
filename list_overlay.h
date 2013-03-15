@@ -25,12 +25,12 @@ enum ListEntryType{
 
 struct ListDefinition
 {
-    ListDefinition(ListEntryType type, char key, const char *name):
+    ListDefinition(ListEntryType type, char key, std::string name):
         m_type(type), m_key(key), m_name(name), m_selected(false)
     {}
 	ListEntryType m_type;
 	char m_key;
-	const char *m_name;
+    std::string m_name;
     bool m_selected;
 };
 

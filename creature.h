@@ -9,7 +9,11 @@ class Creature: public Actor
 		virtual void act();
 		virtual void playerSpotted();
 		void attack(Actor *target);
+		virtual void quaffPotion(Actor *potion);
+        virtual void removeFromInventory(Actor *item);
 		void calculateBonuses();
+		void calculateHp();
+		void calculateAc();
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
         virtual void handleTag(std::string &tag);
         virtual void finish(Level *level);
@@ -24,9 +28,11 @@ class Creature: public Actor
 		int m_playerSpottedMemory;
         int m_weapon;
         int m_shield;
+        int m_helmet;
         int m_bodyArmor;
         int m_gloves;
         int m_boots;
+        int m_unarmedDamage;
 };
 
 #endif /* end of include guard: CREATURE_EV3PTLWG */

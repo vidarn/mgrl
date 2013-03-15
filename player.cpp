@@ -81,6 +81,10 @@ Player::finish(Level *level)
 {
     m_level = level;
 	calculateBonuses();
+    pickUp(level->m_actorFactory.getActor("Short Sword",level));
+    pickUp(level->m_actorFactory.getActor("Leather Cap",level));
+    m_weapon = 0;
+    m_helmet = 1;
 }
 
 void
@@ -98,13 +102,129 @@ Player::doOpen()
 }
 
 void
-Player::showInventory()
+Player::doQuaff()
 {
     std::vector<ListDefinition>itemList;
-    char k = 'a';
+    bool empty = true;
     for(int i=0;i<m_inventory.size();i++){
-        itemList.push_back(ListDefinition(LIST_ENTRY, k++ , m_inventory[i]->m_name));
+        Actor *actor = m_inventory[i];
+        if(actor->hasTag(ITEM_QUAFF)){
+            std::string st = actor->m_name;
+            itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
+        }
+    }
+    ListOverlay itemOverlay(30, 30, "Quaff What?", false, itemList);
+    itemOverlay.main(m_level);
+    for(int i=0;i<itemOverlay.m_definition.size();i++){
+        ListDefinition &def = itemOverlay.m_definition[i];
+        if(def.m_selected){
+            Actor *item = getFromInventory(def.m_key);
+            if(item != 0){
+                item->quaff(this);
+            }
+        }
+    }
+}
+
+void
+Player::pickUp(Actor *item)
+{
+    m_inventory.push_back(item);
+    bool keepLetter = item->m_letter != 0;
+    char freeLetter = 'a';
+    bool done=false;
+    if(keepLetter){
+        for(int i=0;i<m_inventory.size();i++){
+            Actor *a = m_inventory[i];
+            if(a->m_letter == item->m_letter){
+                keepLetter = false;
+            }
+        }
+    }
+    if(!keepLetter){
+        while(!done){
+            done = true;
+            for(int i=0;i<m_inventory.size();i++){
+                Actor *a = m_inventory[i];
+                if(a->m_letter == freeLetter){
+                    done = false;
+                }
+            }
+            if(!done){
+                freeLetter++;
+            }
+        }
+        item->m_letter = freeLetter;
+    }
+    std::string msg = "";
+    msg += item->m_letter;
+    msg += " - ";
+    msg += item->m_name;
+    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+}
+
+void
+Player::showInventory()
+{
+    std::vector<int>tagList;
+    std::vector<ListDefinition>categoryList;
+    tagList.push_back(ITEM_WEAPON);categoryList.push_back(ListDefinition(LIST_CATEGORY,')',"Weapons"));
+    tagList.push_back(ITEM_ARMOR );categoryList.push_back(ListDefinition(LIST_CATEGORY,'[',"Armor"));
+    tagList.push_back(ITEM_POTION);categoryList.push_back(ListDefinition(LIST_CATEGORY,'!',"Potions"));
+    std::vector<ListDefinition>itemList;
+    for(int category=0;category<categoryList.size();category++){
+        int tag = tagList[category];
+        itemList.push_back(categoryList[category]);
+        bool empty = true;
+        for(int i=0;i<m_inventory.size();i++){
+            Actor *actor = m_inventory[i];
+            if(actor->hasTag(tag)){
+                std::string st = actor->m_name;
+                if(m_weapon == i){
+                    st += " (in hand)";
+                }
+                if(m_helmet==i||m_shield==i||m_bodyArmor==i||m_gloves==i||m_boots==i){
+                    st += " (worn)";
+                }
+                itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
+                empty = false;
+            }
+        }
+        if(empty){
+            itemList.pop_back();
+        }
     }
     ListOverlay itemOverlay(30, 30, "Inventory", false, itemList);
     itemOverlay.main(m_level);
+}
+
+void
+Player::invokeAbility(int id)
+{
+    Ability *ab = m_abilities[id];
+    if(!ab->m_active){
+        std::string msg = "You invoke ";
+        msg += ab->m_name;
+        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+        if(ab->invoke(this,m_level)){
+        }
+        else{
+            ab->m_active = true;
+        }
+    }
+    else{
+        ab->deactivate(this,m_level);
+        ab->m_active = false;
+    }
+}
+
+Actor *
+Player::getFromInventory(char key){
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *item = m_inventory[i];
+        if(item->m_letter == key){
+            return item;
+        }
+    }
+    return 0;
 }

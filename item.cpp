@@ -6,7 +6,10 @@
 
 
 Item::Item()
-	:Actor()
+	:Actor(),
+    m_acBonus(0),m_armorCheckPenalty(0),
+    m_enchantment(0),m_damageDie(3),
+    m_damageNumDice(1)
 {
 	addTag(TAG_ITEM);
 }
@@ -52,18 +55,26 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
         addTag(ITEM_SCROLL);addTag(ITEM_READ);addTag(ITEM_PICK_UP);}
     if(name == "potion" && val.b){
         addTag(ITEM_POTION);addTag(ITEM_QUAFF);addTag(ITEM_PICK_UP);}
-    if(name == "food" && val.b){
-        addTag(ITEM_FOOD);addTag(ITEM_EAT);addTag(ITEM_PICK_UP);}
+    if(name == "minor_heal_potion" && val.b){
+        addTag(POTION_MINOR_HEAL);}
+    if(name == "heal_potion" && val.b){
+        addTag(POTION_HEAL);}
+    if(name == "major_heal_potion" && val.b){
+        addTag(POTION_MAJOR_HEAL);}
     if(name == "container"){
-        printf("open!\n");
         addTag(ITEM_OPEN);addTag(ITEM_CONTAINER);
         for ( char ** iterator = (char **)TCOD_list_begin(val.list); iterator != (char **)TCOD_list_end(val.list); iterator ++ ) {
             char *currentValue=*iterator;
-            printf("value : %s\n", currentValue );
             m_inventoryStrings.push_back(currentValue);
         }
     }
-    printf("name: %s!\n",name.c_str());
+    if(name == "damage"){
+        m_damageNumDice = val.dice.nb_rolls;
+        m_damageDie = val.dice.nb_faces;
+    }
+    if(name == "ac"){
+        m_acBonus = val.i;
+    }
 }
 
 void
@@ -109,7 +120,7 @@ Item::open(Actor *opener)
                         msg += " take a ";
                         msg += item->m_name;
                         m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
-                        opener->m_inventory.push_back(item);
+                        opener->pickUp(item);
                         m_inventory.erase(m_inventory.begin()+val-i);
                     }
                 }
@@ -123,3 +134,26 @@ Item::open(Actor *opener)
         }
     }
 }
+
+void
+Item::quaff(Actor *drinker)
+{
+    bool showMessage = true;
+    std::string msg = "The ";
+    msg += m_name;
+    if(hasTag(ITEM_QUAFF)){
+        if(hasTag(POTION_MINOR_HEAL)){
+            drinker->healDamage(20,this);
+            msg += " replenishes your health";
+        }
+        if(hasTag(POTION_HEAL)){
+            drinker->healDamage(70,this);
+        }
+        if(hasTag(POTION_MAJOR_HEAL)){
+            drinker->healDamage(150,this);
+        }
+    }
+    if(showMessage)
+        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+}
+
