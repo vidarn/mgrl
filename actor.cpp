@@ -163,8 +163,9 @@ Actor::quaff(Actor *drinker)
 }
 
 Actor *
-getTarget(int type)
+Actor::getTarget(int type)
 {
+    return 0;
 }
 
 void
