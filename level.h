@@ -16,8 +16,8 @@ class Level
 		void updatePathFinder(int playerX, int playerY);
 		void computeFov(int playerX, int playerY);
 		void killActor(Actor *victim, Actor *killer);
-		std::vector<Actor *> getVisibleActors();
-		Creature *getCreature(int x, int y);
+		std::vector<Actor *> getVisibleActors(std::vector<int> tags);
+        std::vector<Actor *> getActors(int x, int y, std::vector<int> tags);
 		Dungeon *m_dungeon;
 		TileFactory m_tileFactory;
 		ActorFactory m_actorFactory;

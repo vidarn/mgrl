@@ -5,7 +5,6 @@
 #include <vector>
 #include <ctime>
 #include "callback_overlay.h"
-#include "list_overlay.h"
 #include "level.h"
 #include "actor.h"
 #include "player.h"
@@ -104,7 +103,6 @@ main(int argc, char **argv)
     level.generate();
 
 
-    std::vector<Overlay*> overlays;
     Overlay *statusWin = new CallbackOverlay(5,5,"Status",level.m_player, &drawStatus, &handleInventoryInput);
     statusWin->setPos(DUNGEON_WIN_W+1,1);
     statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
@@ -117,9 +115,6 @@ main(int argc, char **argv)
         level.render();
         statusWin->render();
         messagesWin->render();
-        for(int i=0;i<overlays.size();i++){
-            overlays[i]->render();
-        }
         TCODConsole::flush();
         if(level.m_player->m_running){
             level.m_player->run();
@@ -130,12 +125,6 @@ main(int argc, char **argv)
             if(key.pressed){
                 if(!level.m_playerAlive){
                     return 0;
-                }
-                if(overlays.size() > 0){
-                    if(!overlays.back()->handleInput(key.c)){
-                        delete overlays.back();
-                        overlays.pop_back();
-                    }
                 }
                 else{
                     bool update = true;
@@ -179,24 +168,16 @@ main(int argc, char **argv)
                         case 'w' :
                             level.m_player->m_hp++;update=false; break;
                         case 'i':
-                            if(overlays.size() < 1){
-                                ListDefinition inventoryList[] = {
-                                    { LIST_CATEGORY,  { "/","Weapons"}},
-                                    { LIST_ENTRY,     { "a","Short Sword"}},
-                                    { LIST_ENTRY,     { "b","War Axe"}},
-                                    { LIST_CATEGORY,  { "[","Armour"}},
-                                    { LIST_ENTRY,     { "c","Iron Chestplate"}},
-                                    { LIST_CATEGORY,  { "~","Misc"}},
-                                    { LIST_DONE,NULL}
-                                };
-                                overlays.push_back(new ListOverlay(30, 30, "Inventory", inventoryList));
-                            }
+                            level.m_player->showInventory();
                             update=false;
                             break;
                         case 'r':
                             level.generate();
                             break;
                         case '.':
+                            break;
+                        case 'o':
+                            level.m_player->doOpen();
                             break;
                         case 'd':
                             DEBUG = !DEBUG;

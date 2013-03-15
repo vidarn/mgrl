@@ -1,16 +1,13 @@
+#include "overlay.h"
 #include "list_overlay.h"
 #include <cstdio>
+#include <algorithm>
 
-ListOverlay::ListOverlay(int height, int width, const char *title, ListDefinition *definition):
+ListOverlay::ListOverlay(int height, int width, const char *title, bool multiSelection, std::vector<ListDefinition> definition):
 	Overlay(height,width, title)
 {
 	m_definition = definition;
-	ListDefinition *d = m_definition;
-	m_numEntries=0;
-	while(d->m_type != LIST_DONE){
-		m_numEntries++;
-		d++;
-	}
+	m_numEntries=m_definition.size();
 	m_numLines = m_numEntries;
 	if(m_numLines > m_height){
 		m_numLines = m_height-2;
@@ -19,6 +16,7 @@ ListOverlay::ListOverlay(int height, int width, const char *title, ListDefinitio
 	else{
 		m_scroll = -1;
 	}
+	m_multiSelection = multiSelection;
 }
 
 void
@@ -26,26 +24,29 @@ ListOverlay::render()
 {
 	drawBorder();
 	int numEntries = 0;
-	ListDefinition *d = m_definition;
 	char buffer[256];
 	int y=0;
-	while(d->m_type != LIST_DONE){
+    for(int i=0;i<m_numEntries;i++){
+        ListDefinition *d = &(m_definition[i]);
 		numEntries++;
 		if(numEntries>=m_scroll){
 			if(y < m_numLines){
 				if(d->m_type == LIST_ENTRY){
-					sprintf(buffer," [%s] %s", d->m_data.m_key, d->m_data.m_name);
+                    char separator = '-';
+                    if(d->m_selected)
+                        separator = '+';
+					sprintf(buffer," %c %c %s", d->m_key, separator, d->m_name);
 				}
 				if(d->m_type == LIST_CATEGORY){
-					sprintf(buffer,"%s (%s):", d->m_data.m_name, d->m_data.m_key);
+					sprintf(buffer,"%s (%c):", d->m_name, d->m_key);
 				}
-				int i=0;
-				while(buffer[i] != 0){
-					m_console->putChar(i,y,buffer[i]);
-					i++;
-					if(i >= m_width){
-						for(int ii=i-1;ii>0 && i-ii <= 3;ii--){
-							m_console->putChar(ii,y,'.');
+				int ii=0;
+				while(buffer[ii] != 0){
+					m_console->putChar(ii,y,buffer[ii]);
+					ii++;
+					if(ii >= m_width){
+						for(int iii=i-1;iii>0 && ii-iii <= 3;iii--){
+							m_console->putChar(iii,y,'.');
 						}
 						break;
 					}
@@ -53,7 +54,6 @@ ListOverlay::render()
 			}
 			y++;
 		}
-		d++;
 	}
 	if(m_scroll != -1){
 		m_console->print(0,m_height-2,"--");
@@ -65,6 +65,7 @@ ListOverlay::render()
 bool
 ListOverlay::handleInput(char key)
 {
+    bool cont = true;
 	switch(key){
 		case '<':
 			if(m_scroll != -1)
@@ -74,8 +75,20 @@ ListOverlay::handleInput(char key)
 			if(m_scroll != -1)
 				m_scroll = m_scroll < m_numEntries - m_numLines +1 ? m_scroll +1 : m_numEntries - m_numLines +1;
 			break;
-		case 'q':
-			return false;
+		case ESC:
+			cont =  false;
+		case ENTER:
+            if(m_multiSelection)
+                cont =  false;
 	}
-	return true;
+    for(int i=0;i<m_numEntries;i++){
+        ListDefinition &d = m_definition[i];
+        if(key == d.m_key){
+            d.m_selected = !d.m_selected;
+            if(!m_multiSelection){
+                cont = false;
+            }
+        }
+    }
+	return cont;
 }

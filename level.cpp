@@ -132,26 +132,43 @@ Level::killActor(Actor *victim, Actor *killer)
 }
 
 std::vector<Actor *>
-Level::getVisibleActors()
+Level::getVisibleActors(std::vector<int> tags)
 {
 	std::vector<Actor *> actors;
 	for(int i=0;i<m_actors.size();i++){
 		Actor *actor = m_actors[i];
 		if(m_fovMap->isInFov(actor->m_x, actor->m_y)){
-			actors.push_back(actor);
+            bool ok = true;
+            for(int ii=0;ii<tags.size();ii++){
+                if(!actor->hasTag(tags[ii])){
+                    ok=false;
+                }
+            }
+            if(ok){
+                actors.push_back(actor);
+            }
 		}
 	}
 	return actors;
 }
 
-Creature *
-Level::getCreature(int x, int y)
+std::vector<Actor *>
+Level::getActors(int x, int y, std::vector<int> tags)
 {
+    std::vector<Actor *> actors;
 	for(int i=0;i<m_actors.size();i++){
+        bool ok=true;
 		Actor *actor = m_actors[i];
-		if(actor->hasTag(TAG_CREATURE) && actor->m_x==x && actor->m_y==y){
-			return static_cast<Creature *>(actor);
+		if(actor->m_x==x && actor->m_y==y){
+            for(int ii=0;ii<tags.size();ii++){
+                if(!actor->hasTag(tags[ii])){
+                    ok=false;
+                }
+            }
+            if(ok){
+                actors.push_back(actor);
+            }
 		}
 	}
-	return 0;
+    return actors;
 }

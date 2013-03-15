@@ -1,4 +1,5 @@
 #include "overlay.h"
+#include "level.h"
 #include <cstring>
 
 Overlay::Overlay(int height, int width, const char *title)
@@ -31,6 +32,21 @@ Overlay::setSize(int w, int h)
 	m_width = w; m_height = h;
 	delete m_console;
 	m_console = new TCODConsole(m_width,m_height);
+}
+
+void
+Overlay::main(Level *level)
+{
+    bool run=true;
+    while(run){
+        level->render();
+        render();
+        TCODConsole::flush();
+        TCOD_key_t key = TCODConsole::waitForKeypress(true);
+        if(key.pressed){
+            run = handleInput(key.c);
+        }
+    }
 }
 
 void

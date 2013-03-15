@@ -7,6 +7,7 @@ MessageHandler::MessageHandler(Player *player)
 		m_messages[i].m_message = "";
 	}
 	m_player = player;
+    m_currMessage = 0;
 }
 
 void

@@ -57,4 +57,10 @@ creature "Orc"{
 item "Short Sword"{
 	glyph=')'
     name="Short Sword"
+    bool melee=true
+}
+item "Sarcophagus"{
+	glyph=15
+    name="Sarcophagus"
+    string[] container=["Short Sword","Bat"]
 }

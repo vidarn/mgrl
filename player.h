@@ -12,6 +12,8 @@ class Player: public Creature
 		void run();
 		virtual void die(Actor *source);
 		virtual void finish(Level *level);
+		virtual void doOpen();
+		virtual void showInventory();
 		bool m_running;
 		std::vector<Ability *> m_abilities;
 	private:

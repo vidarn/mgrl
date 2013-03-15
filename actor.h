@@ -15,6 +15,27 @@ enum{
 	TAG_CREATURE,
 	TAG_PLAYER,
 	TAG_ITEM,
+	TAG_ATTACKABLE,
+    ITEM_OPEN,
+    ITEM_PICK_UP,
+    ITEM_APPLY,
+    ITEM_READ,
+    ITEM_QUAFF,
+    ITEM_EAT,
+    ITEM_EVOKE,
+    ITEM_WEAPON,
+        ITEM_MELEE,
+        ITEM_RANGED,
+    ITEM_ARMOR,
+        ITEM_SHIELD,
+        ITEM_HELMET,
+        ITEM_BODY_ARMOR,
+        ITEM_GLOVES,
+        ITEM_BOOTS,
+    ITEM_SCROLL,
+    ITEM_POTION,
+    ITEM_FOOD,
+    ITEM_CONTAINER,
 };
 
 enum{
@@ -42,6 +63,7 @@ class Actor
 		virtual bool reflSave(int dc);
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
         virtual void handleTag(std::string &tag);
+        virtual void open(Actor *opener);
 		int m_x, m_y;
 		char m_glyph;
 		TCODColor m_color;
@@ -50,6 +72,7 @@ class Actor
 		int m_ac;
 		const char *m_name;
 		std::vector<int> m_tags;
+        std::vector<Actor *> m_inventory;
 	protected:
 		Level *m_level;
 };

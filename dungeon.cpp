@@ -21,14 +21,14 @@ Dungeon::render()
 			if(y<m_height && x<m_width){
 				Tile &tile = m_tiles[x+y*m_width];
 				if(tile.m_discovered){
-                    TCODColor col = tile.m_color;
+                    TCODColor col = tile.m_color*TCODColor::lighterGrey;
 					if(!tile.m_visible)
 						col = col * TCODColor::grey;
                     TCODConsole::root->setDefaultForeground(col);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
                 if(DEBUG){
-                    TCODColor col = tile.m_color;
+                    TCODColor col = tile.m_color*TCODColor::lighterGrey;
 					if(!tile.m_visible)
 						col = col * TCODColor::grey;
                     TCODConsole::root->setDefaultForeground(col);
@@ -74,7 +74,7 @@ Dungeon::generate(Level *level)
         if(isWalkable(x,y)){
             std::vector<std::string> tags;
             //tags.push_back("spider");
-            Actor *actor = level->m_actorFactory.getActor("Short Sword",level);
+            Actor *actor = level->m_actorFactory.getActor("Sarcophagus",level);
             actor->m_x = x;
             actor->m_y = y;
             level->m_actors.push_back(actor);

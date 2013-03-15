@@ -22,6 +22,11 @@ class Creature: public Actor
 		int m_hitDie;
 		int m_playerSpottedCooldown;
 		int m_playerSpottedMemory;
+        int m_weapon;
+        int m_shield;
+        int m_bodyArmor;
+        int m_gloves;
+        int m_boots;
 };
 
 #endif /* end of include guard: CREATURE_EV3PTLWG */

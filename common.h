@@ -18,5 +18,7 @@ extern boost::random::uniform_int_distribution<> d8;
 extern boost::random::uniform_int_distribution<> d6;
 extern boost::random::uniform_int_distribution<> d4;
 extern boost::random::uniform_int_distribution<> d3;
+#define ESC 27
+#define ENTER 13
 
 #endif /* end of include guard: COMMON_Y7J3P1ZQ */

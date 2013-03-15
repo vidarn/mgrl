@@ -140,6 +140,11 @@ Actor::handleTag(std::string &tag)
 {
 }
 
+void
+Actor::open(Actor *opener)
+{
+}
+
 ActorFactory::ActorFactory()
 {
 	TCODParser parser;

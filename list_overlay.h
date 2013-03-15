@@ -7,32 +7,31 @@ struct ListDefinition;
 class ListOverlay: public Overlay
 {
 	public:
-		ListOverlay(int height, int width, const char *title, ListDefinition *definition);
+		ListOverlay(int height, int width, const char *title, bool multiSelection, std::vector<ListDefinition> definition);
 		virtual void render();
 		virtual bool handleInput(char key);
+        std::vector<ListDefinition> m_definition;
 	private:
-		ListDefinition *m_definition;
 		int m_numLines;
 		int m_numEntries;
 		int m_scroll;
+        bool m_multiSelection;
 };
 
 enum ListEntryType{
 	LIST_ENTRY,
 	LIST_CATEGORY,
-	LIST_DONE,
-};
-
-struct ListEntryData
-{
-	const char *m_key;
-	const char *m_name;
 };
 
 struct ListDefinition
 {
+    ListDefinition(ListEntryType type, char key, const char *name):
+        m_type(type), m_key(key), m_name(name), m_selected(false)
+    {}
 	ListEntryType m_type;
-	ListEntryData m_data;
+	char m_key;
+	const char *m_name;
+    bool m_selected;
 };
 
 #endif /* end of include guard: LIST_OVERLAY_6PB8HFUZ */

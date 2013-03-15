@@ -1,5 +1,6 @@
 #include "player.h"
 #include "level.h"
+#include "list_overlay.h"
 
 Player::Player():
 	Creature()
@@ -20,9 +21,11 @@ Player::walk(int dx, int dy)
 	int tmpX = m_x + dx;
 	int tmpY = m_y + dy;
 	if(m_level->m_dungeon->isWalkable(tmpX,tmpY)){
-		Creature *creature = m_level->getCreature(tmpX, tmpY);
-		if(creature != 0){
-			attack(creature);
+        std::vector<int> tags;
+        tags.push_back(TAG_ATTACKABLE);
+        std::vector<Actor *> actors = m_level->getActors(tmpX, tmpY,tags);
+		if(actors.size()>0){
+			attack(actors[0]);
 		}
 		else{
 			m_x = tmpX;
@@ -36,7 +39,9 @@ Player::walk(int dx, int dy)
 void
 Player::startRun(int dx, int dy)
 {
-	if(m_level->getVisibleActors().size() == 0){
+    std::vector<int> tags;
+    tags.push_back(TAG_CREATURE);
+	if(m_level->getVisibleActors(tags).size() == 0){
 		m_running = true;
 		m_runX = dx;
 		m_runY = dy;
@@ -49,7 +54,8 @@ Player::startRun(int dx, int dy)
 	}
 }
 
-void Player::run()
+void
+Player::run()
 {
 	if(m_glyphLeft == m_level->m_dungeon->getGlyph(     m_x+m_runY+m_runX,m_y-m_runX+m_runY)){
 		if(m_glyphRight == m_level->m_dungeon->getGlyph(m_x-m_runY+m_runX,m_y+m_runX+m_runY)){
@@ -60,7 +66,8 @@ void Player::run()
 	m_running = false;
 }
 
-void Player::die(Actor *source)
+void
+Player::die(Actor *source)
 {
 	std::string msg = "You were killed by ";
 	msg += source->m_name;
@@ -74,4 +81,30 @@ Player::finish(Level *level)
 {
     m_level = level;
 	calculateBonuses();
+}
+
+void
+Player::doOpen()
+{
+    std::vector<int> tags;
+    tags.push_back(ITEM_OPEN);
+    std::vector<Actor *> actors = m_level->getActors(m_x, m_y,tags);
+    if(actors.size()>0){
+        actors[0]->open(this);
+    }
+    else{
+        m_level->m_messages->showMessage("There is nothing here to open", MESSAGE_NOTIFICATION);
+    }
+}
+
+void
+Player::showInventory()
+{
+    std::vector<ListDefinition>itemList;
+    char k = 'a';
+    for(int i=0;i<m_inventory.size();i++){
+        itemList.push_back(ListDefinition(LIST_ENTRY, k++ , m_inventory[i]->m_name));
+    }
+    ListOverlay itemOverlay(30, 30, "Inventory", false, itemList);
+    itemOverlay.main(m_level);
 }

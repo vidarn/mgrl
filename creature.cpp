@@ -11,6 +11,7 @@ Creature::Creature()
 	m_bab(0),m_hitDie(6)
 {
 	addTag(TAG_CREATURE);
+	addTag(TAG_ATTACKABLE);
 }
 
 void

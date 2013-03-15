@@ -3,6 +3,8 @@
 #include <libtcod/libtcod.hpp>
 #include "common.h"
 
+class Level;
+
 class Overlay{
 	public:
 		Overlay(int height, int width, const char *title);
@@ -11,6 +13,7 @@ class Overlay{
 		void setSize(int w, int h);
 		virtual void render()=0;
 		virtual bool handleInput(char key)=0;
+        void main(Level *level);
 		void drawBorder();
 	protected:
 		int     m_y      , m_x;
