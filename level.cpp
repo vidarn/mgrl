@@ -22,15 +22,15 @@ Level::render()
 	for(int i=0;i<m_actors.size();i++){
 		Actor &actor = *(m_actors[i]);
 		if(m_fovMap->isInFov(actor.m_x, actor.m_y)){
-			actor.render();
+			actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1));
 		}
 		else{
 			if(DEBUG){
-				actor.render();
+                actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1));
 			}
 		}
 	}
-	m_player->render();
+	m_player->render(m_dungeon->isHilighted(m_player->m_x,m_player->m_y,1));
 }
 
 void

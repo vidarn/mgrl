@@ -15,6 +15,7 @@ class Player: public Creature
 		virtual void doOpen();
 		virtual void doQuaff();
         virtual void pickUp(Actor *item);
+        virtual Actor *getTarget(int type);
 		virtual void showInventory();
 		virtual void invokeAbility(int id);
         Actor *getFromInventory(char key);

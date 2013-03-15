@@ -52,9 +52,13 @@ Actor::walk(int dx,int dy)
 }
 
 void
-Actor::render()
+Actor::render(bool hilight)
 {
 	TCODConsole::root->setDefaultForeground(m_color);
+    if(hilight)
+        TCODConsole::root->setCharBackground(m_x,m_y,TCODColor::lighterGrey);
+    else
+        TCODConsole::root->setCharBackground(m_x,m_y,TCODColor::black);
 	TCODConsole::root->putChar(m_x,m_y,m_glyph);
 }
 
@@ -114,7 +118,10 @@ Actor::die(Actor *source)
     if(!source->hasTag(TAG_PLAYER))
         msg = "The ";
 	msg += source->m_name;
-	msg += " destroy the ";
+    if(source->hasTag(TAG_PLAYER))
+        msg += " destroy the ";
+    else
+        msg += " destroys the ";
 	msg += m_name;
 	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 }

@@ -19,7 +19,11 @@ class Dungeon{
 		bool isTransparent(int x, int y);
 		char getGlyph(int x, int y);
 		void setVisible(int x, int y, bool state);
+		bool isVisible(int x, int y);
 		void setDiscovered(int x, int y, bool state);
+		void clearHilight();
+		void setHilight(int x, int y, char val);
+		bool isHilighted(int x, int y, char val);
 		int m_width, m_height;
 	private:
         void generateCavern(int miny, int maxy, int minx, int maxx, Level *level);
@@ -33,5 +37,6 @@ class Dungeon{
 		Tile *m_tiles;
 		TileFactory *m_tileFactory;
         std::vector<Room *> m_rooms;
+		char *m_hilight;
 };
 #endif /* end of include guard: DUNGEON_CM9N55L0 */

@@ -105,9 +105,10 @@ main(int argc, char **argv)
 
     while ( !TCODConsole::isWindowClosed() ) {
         TCODConsole::root->clear();
-        level.render();
+        TCODConsole::root->setDefaultForeground(TCODColor::white);
         statusWin->render();
         messagesWin->render();
+        level.render();
         TCODConsole::flush();
         if(level.m_player->m_running){
             level.m_player->run();
@@ -176,6 +177,9 @@ main(int argc, char **argv)
                             break;
                         case '1':
                             level.m_player->invokeAbility(0);
+                            break;
+                        case '2':
+                            level.m_player->invokeAbility(1);
                             break;
                         case 'd':
                             DEBUG = !DEBUG;

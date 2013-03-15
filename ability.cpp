@@ -53,7 +53,41 @@ AbLightningBolt::AbLightningBolt(int id):
 }
 
 bool
-AbLightningBolt::invoke(Actor *invoke, Level *level)
+AbLightningBolt::invoke(Actor *invoker, Level *level)
 {
+    bool done = false;
+    Actor *target;
+    while(!done){
+        target = invoker->getTarget(TARGET_HOSTILE);
+        if(target ==0){
+            level->m_messages->showMessage("Are you sure you do not want to target anyone? (y/n)", MESSAGE_WARNING);
+            level->render();
+            bool selected = false;
+            while(!selected){
+                TCOD_key_t key = TCODConsole::waitForKeypress(true);
+                if(key.pressed){
+                    switch(key.c) {
+                        case 'y':
+                        case 'Y':
+                            done = true;selected = true; break;
+                        case 'n':
+                        case 'N':
+                            selected = true; break;
+                    }
+                }
+            }
+        }
+        else{
+            done = true;
+        }
+    }
+    if(target != 0){
+        Actor *bolt = level->m_actorFactory.getActor("Lightning Bolt",level);
+        int damage = 5 + d8(RAND);
+        if(!target->takeDamage(damage, DAMAGE_FIRE, bolt)){
+            level->killActor(target,bolt);
+        }
+        delete bolt;
+    }
     return true;
 }

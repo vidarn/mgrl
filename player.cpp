@@ -1,3 +1,4 @@
+#include <libtcod/libtcod.hpp>
 #include "player.h"
 #include "level.h"
 #include "list_overlay.h"
@@ -85,6 +86,77 @@ Player::finish(Level *level)
     pickUp(level->m_actorFactory.getActor("Leather Cap",level));
     m_weapon = 0;
     m_helmet = 1;
+}
+
+Actor *
+Player::getTarget(int type)
+{
+    Actor *target=0;
+    std::vector<int> tags;
+	m_level->m_messages->showMessage("Choose a target",MESSAGE_ACTION);
+    bool done=false;
+    int targetX = m_x;
+    int targetY = m_y;
+    if(type == TARGET_HOSTILE){
+        tags.push_back(ACTOR_CREATURE);
+        std::vector<Actor *> visibleActors = m_level->getVisibleActors(tags);
+        if(visibleActors.size()>0){
+            targetX = visibleActors[0]->m_x;
+            targetY = visibleActors[0]->m_y;
+        }
+    }
+    while(!done){
+        m_level->m_dungeon->clearHilight();
+        int tmpX = m_x;
+        int tmpY = m_y;
+        TCODLine::init (tmpX, tmpY, targetX, targetY);
+        do {
+            if(m_level->m_dungeon->isWalkable(tmpX,tmpY) && m_level->m_dungeon->isVisible(tmpX,tmpY)){
+                m_level->m_dungeon->setHilight(tmpX,tmpY,1);
+                std::vector<Actor *> hitActors = m_level->getActors(tmpX,tmpY,tags);
+                if(hitActors.size() >0){
+                    target = hitActors[0];
+                    break;
+                }
+            }
+            else{
+                break;
+            }
+        } while (!TCODLine::step(&tmpX,&tmpY));
+        m_level->m_dungeon->setHilight(targetX,targetY,1);
+        m_level->render();
+        TCODConsole::flush();
+
+        TCOD_key_t key = TCODConsole::waitForKeypress(true);
+        if(key.pressed){
+            switch(key.c) {
+                case 'h' :
+                    targetX--; break;
+                case 'j' :
+                    targetY++; break;
+                case 'k' :
+                    targetY--; break;
+                case 'l' :
+                    targetX++; break;
+                case 'y' :
+                    targetX--;targetY--; break;
+                case 'u' :
+                    targetX++;targetY--; break;
+                case 'b' :
+                    targetX--;targetY++; break;
+                case 'n' :
+                    targetX++;targetY++; break;
+                case ENTER :
+                    done=true; break;
+                case ESC :
+                    target=0; done=true; break;
+            }
+        }
+        targetX = std::min(DUNGEON_WIN_W-1, std::max(0, targetX));
+        targetY = std::min(DUNGEON_WIN_H-1, std::max(0, targetY));
+    }
+    m_level->m_dungeon->clearHilight();
+    return target;
 }
 
 void

@@ -46,6 +46,11 @@ enum{
 	ACTOR_ITEM,
 };
 
+enum{
+	TARGET_HOSTILE,
+	TARGET_FRIENDLY,
+};
+
 class Actor
 {
 	public:
@@ -53,7 +58,7 @@ class Actor
 		virtual void finish(Level *level);
 		void walkTowardsPlayer();
 		void walkRandomly();
-		void render();
+		void render(bool hilight);
 		void addTag(int tag);
 		bool hasTag(int tag);
 		virtual bool walk(int dx, int dy);

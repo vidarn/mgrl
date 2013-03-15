@@ -10,7 +10,9 @@ Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
 	m_width  = width;
 	m_height = height;
 	m_tiles  = new Tile[m_width * m_height];
+	m_hilight= new char[m_width * m_height];
 	m_tileFactory = tileFactory;
+    clearHilight();
 }
 
 void
@@ -21,14 +23,26 @@ Dungeon::render()
 			if(y<m_height && x<m_width){
 				Tile &tile = m_tiles[x+y*m_width];
 				if(tile.m_discovered){
-                    TCODColor col = tile.m_color*TCODColor::lighterGrey;
+                    TCODColor col = tile.m_color * TCODColor::lighterGrey;
+                    if(m_hilight[x+y*m_width] == 1){
+                        TCODConsole::root->setCharBackground(x,y,TCODColor::grey);
+                    }
+                    else{
+                        TCODConsole::root->setCharBackground(x,y,TCODColor::black);
+                    }
 					if(!tile.m_visible)
 						col = col * TCODColor::grey;
                     TCODConsole::root->setDefaultForeground(col);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
                 if(DEBUG){
-                    TCODColor col = tile.m_color*TCODColor::lighterGrey;
+                    TCODColor col = tile.m_color * TCODColor::lighterGrey;
+                    if(m_hilight[x+y*m_width] == 1){
+                        TCODConsole::root->setCharBackground(x,y,TCODColor::grey);
+                    }
+                    else{
+                        TCODConsole::root->setCharBackground(x,y,TCODColor::black);
+                    }
 					if(!tile.m_visible)
 						col = col * TCODColor::grey;
                     TCODConsole::root->setDefaultForeground(col);
@@ -165,10 +179,36 @@ Dungeon::setVisible(int x, int y, bool state)
 	m_tiles[x+y*m_width].m_visible = state;
 }
 
+bool
+Dungeon::isVisible(int x, int y)
+{
+	return m_tiles[x+y*m_width].m_visible;
+}
+
 void
 Dungeon::setDiscovered(int x, int y, bool state)
 {
 	m_tiles[x+y*m_width].m_discovered = state;
+}
+
+void
+Dungeon::clearHilight()
+{
+    for(int i=0;i<m_width*m_height;i++){
+        m_hilight[i] = 0;
+    }
+}
+
+void
+Dungeon::setHilight(int x, int y, char val)
+{
+    m_hilight[x+y*m_width] = val;
+}
+
+bool
+Dungeon::isHilighted(int x, int y, char val)
+{
+    return m_hilight[x+y*m_width] == val;
 }
 
 static

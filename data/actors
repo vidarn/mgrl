@@ -78,3 +78,6 @@ item "Sacred Nectar"{
     bool potion=true
     bool minor_heal_potion=true
 }
+item "Lightning Bolt"{
+    name="Lightning Bolt"
+}
