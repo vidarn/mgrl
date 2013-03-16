@@ -101,9 +101,9 @@ main(int argc, char **argv)
                             level.m_player->startRun(-1,1);update=false; break;
                         case 'N' :
                             level.m_player->startRun(1,1);update=false; break;
-                        case 'e' :
+                        case '-' :
                             level.m_player->m_hp--;update=false; break;
-                        case 'w' :
+                        case '+' :
                             level.m_player->m_hp++;update=false; break;
                         case 'z' :
                             level.m_player->gainExp(300);update=false; break;
@@ -115,9 +115,25 @@ main(int argc, char **argv)
                             level.generate();
                             break;
                         case '.':
+                            level.m_player->act();
+                            break;
+                        case 'g':
+                            level.m_player->doPickUp();
+                            break;
+                        case 'f':
+                            level.m_player->doFire();
                             break;
                         case 'o':
                             level.m_player->doOpen();
+                            break;
+                        case 'Q':
+                            level.m_player->doQuiver();
+                            break;
+                        case 'w':
+                            level.m_player->doWield();
+                            break;
+                        case 'd':
+                            level.m_player->doDrop();
                             break;
                         case '1':
                             level.m_player->invokeAbility(0);
@@ -137,7 +153,7 @@ main(int argc, char **argv)
                         case '<':
                             level.m_player->goUp();
                             break;
-                        case 'd':
+                        case 'D':
                             DEBUG = !DEBUG;
                             if(DEBUG)
                                 level.m_messages->showMessage("DEBUG MODE ON",MESSAGE_WARNING);

@@ -35,6 +35,7 @@ class Level
         bool isWalkable(int x, int y);
 		std::vector<Actor *> getVisibleActors(std::vector<int> tags);
         std::vector<Actor *> getActors(int x, int y, std::vector<int> tags);
+        void removeActor(Actor *actor);
 		Dungeon *m_dungeon;
 		TileFactory m_tileFactory;
 		ActorFactory m_actorFactory;

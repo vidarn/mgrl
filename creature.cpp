@@ -12,7 +12,8 @@ Creature::Creature()
     m_weapon(-1), m_shield(-1),
     m_bodyArmor(-1), m_gloves(-1),
     m_boots(-1), m_unarmedDamage(3),
-    m_helmet(-1),m_expValue(50)
+    m_helmet(-1), m_quiver(-1),
+    m_expValue(50)
 {
 	addTag(TAG_CREATURE);
 	addTag(TAG_ATTACKABLE);
@@ -28,7 +29,7 @@ Creature::act()
 {
 	if(m_playerSpottedCooldown>0){
 		if(abs(m_x - m_level->m_player->m_x) <= 1 && abs(m_y - m_level->m_player->m_y) <= 1){
-			attack(m_level->m_player);
+			attack(m_level->m_player,ATTACK_MELEE);
 		}
 		else{
 			walkTowardsPlayer();
@@ -61,7 +62,7 @@ Creature::playerSpotted()
 }
 
 void
-Creature::attack(Actor *target)
+Creature::attack(Actor *target, int type)
 {
 	bool showMessage = true;
     std::string targetName = target->m_name;
@@ -71,7 +72,11 @@ Creature::attack(Actor *target)
 	msg += m_name;
 	int die = d20(RAND);
     bool dealtDamage = true;
-    int toHit = die + m_bab + m_strBonus;
+    int toHit = die + m_bab;
+    if(type == ATTACK_MELEE)
+        toHit += m_strBonus;
+    if(type == ATTACK_RANGED)
+        toHit += m_dexBonus;
 	if(toHit > target->m_ac || die == 20){
         if(hasTag(TAG_PLAYER))
             msg += " hit the ";
@@ -83,13 +88,18 @@ Creature::attack(Actor *target)
             Item *weapon  = static_cast<Item *>(m_inventory[m_weapon]);
             damageDie     = weapon->m_damageDie;
             damageNumDice = weapon->m_damageNumDice;
+            if(type == ATTACK_MELEE && !(weapon->hasTag(ITEM_MELEE))){
+                damageDie     = 3;
+                damageNumDice = 1;
+            }
         }
         boost::random::uniform_int_distribution<> damageDist(1,damageDie);
         int damage = 0;
         for(int i=0;i<damageNumDice;i++){
             damage += damageDist(RAND);
         }
-        damage += m_strBonus;
+        if(type == ATTACK_MELEE)
+            damage += m_strBonus;
         if(damage>0){
             if(!target->takeDamage(damage, DAMAGE_PHYSICAL, this)){
                 m_level->killActor(target,this);
@@ -156,6 +166,8 @@ Creature::removeFromInventory(Actor *item)
             if(m_gloves > i)m_gloves--;
             if(m_boots == i)m_boots = -1;
             if(m_boots > i)m_boots--;
+            if(m_quiver == i)m_boots = -1;
+            if(m_quiver > i)m_boots--;
             i--;
         }
     }

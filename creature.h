@@ -8,7 +8,7 @@ class Creature: public Actor
 		Creature();
 		virtual void act();
 		virtual void playerSpotted();
-		void attack(Actor *target);
+		void attack(Actor *target, int type);
         void die(Actor *source);
 		virtual void quaffPotion(Actor *potion);
         virtual void removeFromInventory(Actor *item);
@@ -30,6 +30,7 @@ class Creature: public Actor
 		int m_playerSpottedCooldown;
 		int m_playerSpottedMemory;
         int m_weapon;
+        int m_quiver;
         int m_shield;
         int m_helmet;
         int m_bodyArmor;

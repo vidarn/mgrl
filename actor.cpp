@@ -7,7 +7,7 @@
 Actor::Actor():
 	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(0), m_dx(0),
 	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white), m_letter(0),
-    m_discovered(false)
+    m_discovered(false), m_amount(1)
 {
 }
 void

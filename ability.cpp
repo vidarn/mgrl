@@ -35,6 +35,7 @@ bool
 AbSacredNectar::invoke(Actor *invoker, Level *level, bool &cancelled)
 {
     m_nectar = level->m_actorFactory.getActor("Sacred Nectar",level);
+    m_nectar->addTag(ITEM_DONT_DROP);
     invoker->pickUp(m_nectar);
     cancelled = false;
     return false;

@@ -97,8 +97,12 @@ Player::customize()
         }
     }
     pickUp(m_level->m_actorFactory.getActor("Short Sword",m_level));
-    pickUp(m_level->m_actorFactory.getActor("Leather Cap",m_level));
+    //pickUp(m_level->m_actorFactory.getActor("Leather Cap",m_level));
     pickUp(m_level->m_actorFactory.getActor("Minor Mana Potion",m_level));
+    pickUp(m_level->m_actorFactory.getActor("Short Bow",m_level));
+    Actor *arrow = m_level->m_actorFactory.getActor("Arrow",m_level);
+    arrow->m_amount = 20;
+    pickUp(arrow);
     m_weapon = 0;
     m_helmet = 1;
     int manaPoints = generateAttributes();
@@ -227,7 +231,7 @@ Player::walk(int dx, int dy)
         tags.push_back(TAG_ATTACKABLE);
         std::vector<Actor *> actors = m_level->getActors(tmpX, tmpY,tags);
 		if(actors.size()>0){
-			attack(actors[0]);
+			attack(actors[0],ATTACK_MELEE);
             return true;
 		}
         else{
@@ -384,6 +388,78 @@ Player::getTarget(int type)
 }
 
 void
+Player::doFire()
+{
+    if(m_quiver == -1){
+        m_level->m_messages->showMessage("You have nothing quivered", MESSAGE_NOTIFICATION);
+        return;
+    }
+    bool ok = false;
+    if(m_weapon != -1){
+        if(m_inventory[m_weapon]->hasTag(ITEM_RANGED)){
+            if(m_quiver != -1 && m_inventory[m_quiver]->hasTag(ITEM_AMMO_BOW)){
+                ok = true;
+            }
+        }
+    }
+    if(ok){
+        Actor *target = getTarget(TARGET_HOSTILE);
+        if(target != 0){
+            double breakProbability[] = {0.3, 0.7};
+            boost::random::discrete_distribution<> breakDist(breakProbability);
+            if(breakDist(RAND) == 1){
+                bool done = false;
+                std::vector<int> tags;
+                tags.push_back(ITEM_STACK);
+                std::vector<Actor *> onGround= m_level->getActors(target->m_x,target->m_y,tags);
+                for(int i=0;i<onGround.size();i++){
+                    Actor *a = onGround[i];
+                    if(a->m_name == m_inventory[m_quiver]->m_name){
+                        a->m_amount++;
+                        done = true;
+                    }
+                }
+                if(!done){
+                    Actor *shot;
+                    shot = new Actor;
+                    *shot = *(m_inventory[m_quiver]);
+                    shot->m_amount = 1;
+                    shot->m_x = target->m_x;
+                    shot->m_y = target->m_y;
+                    m_level->m_actors.push_back(shot);
+                }
+            }
+
+            attack(target,ATTACK_RANGED);
+            act();
+
+            m_inventory[m_quiver]->m_amount--;
+            if(m_inventory[m_quiver]->m_amount <=0){
+                m_quiver = -1;
+                Actor *tmp = m_inventory[m_quiver];
+                removeFromInventory(tmp);
+            }
+        }
+        else
+        {
+            m_level->m_messages->showMessage("You change your mind", MESSAGE_FLAVOUR);
+        }
+    }
+    else{
+        std::string msg = "You cannot fire ";
+        msg += m_inventory[m_quiver]->m_name;
+        msg += " with your ";
+        if(m_weapon != -1){
+            msg += m_inventory[m_weapon]->m_name;
+        }
+        else{
+            msg += "bare hands";
+        }
+        m_level->m_messages->showMessage(msg, MESSAGE_NOTIFICATION);
+    }
+}
+
+void
 Player::doOpen()
 {
     act();
@@ -411,7 +487,7 @@ Player::doQuaff()
             itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
         }
     }
-    ListOverlay itemOverlay(30, 30, "Quaff What?", false, true, itemList);
+    ListOverlay itemOverlay(30, 30, "Drink what?", false, true, itemList);
     itemOverlay.main(m_level);
     for(int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
@@ -428,39 +504,192 @@ Player::doQuaff()
 }
 
 void
-Player::pickUp(Actor *item)
+Player::doQuiver()
 {
-    m_inventory.push_back(item);
-    bool keepLetter = item->m_letter != 0;
-    char freeLetter = 'a';
-    bool done=false;
-    if(keepLetter){
-        for(int i=0;i<m_inventory.size();i++){
-            Actor *a = m_inventory[i];
-            if(a->m_letter == item->m_letter){
-                keepLetter = false;
-            }
+    act();
+    std::vector<ListDefinition>itemList;
+    bool empty = true;
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *actor = m_inventory[i];
+        if(actor->hasTag(ITEM_QUIVER)){
+            std::string st = actor->m_name;
+            itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
         }
     }
-    if(!keepLetter){
-        while(!done){
-            done = true;
-            for(int i=0;i<m_inventory.size();i++){
-                Actor *a = m_inventory[i];
-                if(a->m_letter == freeLetter){
-                    done = false;
+    ListOverlay itemOverlay(30, 30, "Quiver what?", false, true, itemList);
+    itemOverlay.main(m_level);
+    for(int i=0;i<itemOverlay.m_definition.size();i++){
+        ListDefinition &def = itemOverlay.m_definition[i];
+        if(def.m_selected){
+            for(int ii=0;ii<m_inventory.size();ii++){
+                Actor *item = m_inventory[ii];
+                if(item->m_letter == def.m_key){
+                    std::string msg = "You quiver the ";
+                    msg += item->m_name;
+                    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+                    m_quiver = ii;
                 }
             }
-            if(!done){
-                freeLetter++;
+        }
+    }
+}
+
+void
+Player::doWield()
+{
+    act();
+    std::vector<ListDefinition>itemList;
+    bool empty = true;
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *actor = m_inventory[i];
+        if(actor->hasTag(ITEM_WEAPON)){
+            std::string st = actor->m_name;
+            itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
+        }
+    }
+    ListOverlay itemOverlay(30, 30, "Wield what?", false, true, itemList);
+    itemOverlay.main(m_level);
+    for(int i=0;i<itemOverlay.m_definition.size();i++){
+        ListDefinition &def = itemOverlay.m_definition[i];
+        if(def.m_selected){
+            for(int ii=0;ii<m_inventory.size();ii++){
+                Actor *item = m_inventory[ii];
+                if(item->m_letter == def.m_key){
+                    std::string msg = "You wield the ";
+                    msg += item->m_name;
+                    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+                    m_weapon = ii;
+                }
             }
         }
-        item->m_letter = freeLetter;
+    }
+}
+
+void
+Player::doDrop()
+{
+    act();
+    std::vector<ListDefinition>itemList;
+    bool empty = true;
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *actor = m_inventory[i];
+        if(!actor->hasTag(ITEM_DONT_DROP)){
+            std::string st = actor->m_name;
+            itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
+        }
+    }
+    ListOverlay itemOverlay(30, 30, "Drop what?", false, true, itemList);
+    itemOverlay.main(m_level);
+    for(int i=0;i<itemOverlay.m_definition.size();i++){
+        ListDefinition &def = itemOverlay.m_definition[i];
+        if(def.m_selected){
+            Actor *item = getFromInventory(def.m_key);
+            if(item != 0){
+                std::string msg = "You drop the ";
+                msg += item->m_name;
+                m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+                item->m_x = m_x;
+                item->m_y = m_y;
+                m_level->m_actors.push_back(item);
+                removeFromInventory(item);
+            }
+        }
+    }
+}
+
+void
+Player::doPickUp()
+{
+    bool pickedUp = false;
+    std::vector<int> tags;
+    tags.push_back(ITEM_PICK_UP);
+    std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
+    if(actors.size()>0){
+        std::vector<ListDefinition>itemList;
+        bool empty = true;
+        char letter = 'a';
+        for(int i=0;i<actors.size();i++,letter++){
+            Actor *actor = actors[i];
+            std::stringstream st;
+            st << actor->m_name;
+            if(actor->hasTag(ITEM_STACK)){
+                st << " x";
+                st << actor->m_amount;
+            }
+            itemList.push_back(ListDefinition(LIST_ENTRY, letter, st.str()));
+        }
+        ListOverlay itemOverlay(30, 30, "Pick up what?", itemList.size()>1, true, itemList);
+        itemOverlay.main(m_level);
+        for(int i=0;i<itemOverlay.m_definition.size();i++){
+            ListDefinition &def = itemOverlay.m_definition[i];
+            if(def.m_selected){
+                Actor *item = actors[i];
+                if(item != 0){
+                    std::string msg = "You pick up the ";
+                    msg += item->m_name;
+                    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+                    pickUp(item);
+                    m_level->removeActor(item);
+                    pickedUp = true;
+                }
+            }
+        }
+    }
+    else{
+        m_level->m_messages->showMessage("There is nothing here to pick up",MESSAGE_NOTIFICATION);
+    }
+    if(pickedUp)
+        act();
+}
+
+void
+Player::pickUp(Actor *item)
+{
+    char itemLetter = item->m_letter;
+    std::string itemName = item->m_name;
+    bool done = false;
+    for(int i=0;i<m_inventory.size();i++){
+        Actor *a = m_inventory[i];
+        if(a->m_name == item->m_name && item->hasTag(ITEM_STACK)){
+            a->m_amount += item->m_amount;
+            m_level->removeActor(item);
+            delete item;
+            done = true;
+        }
+    }
+    if(!done){
+        m_inventory.push_back(item);
+        bool keepLetter = item->m_letter != 0;
+        char freeLetter = 'a';
+        bool done=false;
+        if(keepLetter){
+            for(int i=0;i<m_inventory.size();i++){
+                Actor *a = m_inventory[i];
+                if(a->m_letter == item->m_letter){
+                    keepLetter = false;
+                }
+            }
+        }
+        if(!keepLetter){
+            while(!done){
+                done = true;
+                for(int i=0;i<m_inventory.size();i++){
+                    Actor *a = m_inventory[i];
+                    if(a->m_letter == freeLetter){
+                        done = false;
+                    }
+                }
+                if(!done){
+                    freeLetter++;
+                }
+            }
+            item->m_letter = freeLetter;
+        }
     }
     std::string msg = "";
-    msg += item->m_letter;
+    msg += itemLetter;
     msg += " - ";
-    msg += item->m_name;
+    msg += itemName;
     m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 }
 
@@ -480,14 +709,22 @@ Player::showInventory()
         for(int i=0;i<m_inventory.size();i++){
             Actor *actor = m_inventory[i];
             if(actor->hasTag(tag)){
-                std::string st = actor->m_name;
+                std::stringstream st;
+                st << actor->m_name;
+                if(actor->hasTag(ITEM_STACK)){
+                    st << " x";
+                    st << actor->m_amount;
+                }
                 if(m_weapon == i){
-                    st += " (in hand)";
+                    st << " (in hand)";
                 }
                 if(m_helmet==i||m_shield==i||m_bodyArmor==i||m_gloves==i||m_boots==i){
-                    st += " (worn)";
+                    st << " (worn)";
                 }
-                itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
+                if(m_quiver==i){
+                    st << " (in quiver)";
+                }
+                itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st.str()));
                 empty = false;
             }
         }

@@ -36,17 +36,22 @@ Level::render()
         m_statusWin->render();
         m_messagesWin->render();
         m_dungeon->render();
-        for(int i=0;i<m_actors.size();i++){
-            Actor &actor = *(m_actors[i]);
-            bool visible = false;
-            if(m_fovMap->isInFov(actor.m_x, actor.m_y))
-                visible = true;
-            if(visible || (actor.m_discovered && actor.hasTag(TAG_REMEMBER))){
-                actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),visible);
-            }
-            else{
-                if(DEBUG){
-                    actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),false);
+        for(int ii=0;ii<2;ii++){
+            for(int i=0;i<m_actors.size();i++){
+                Actor &actor = *(m_actors[i]);
+                if((ii==0 && !actor.hasTag(TAG_CREATURE)) || (ii==1 && actor.hasTag(TAG_CREATURE)))
+                {
+                    bool visible = false;
+                    if(m_fovMap->isInFov(actor.m_x, actor.m_y))
+                        visible = true;
+                    if(visible || (actor.m_discovered && actor.hasTag(TAG_REMEMBER))){
+                        actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),visible);
+                    }
+                    else{
+                        if(DEBUG){
+                            actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),false);
+                        }
+                    }
                 }
             }
         }
@@ -280,6 +285,18 @@ Level::getActors(int x, int y, std::vector<int> tags)
 }
 
 void
+Level::removeActor(Actor *actor)
+{
+	for(int i=0;i<m_actors.size();i++){
+		Actor *a = m_actors[i];
+        if(a == actor){
+            m_actors.erase(m_actors.begin()+i);
+            i--;
+        }
+    }
+}
+
+void
 drawMessages(TCODConsole *console, void *data, int width, int height)
 {
     MessageHandler *messages = static_cast<MessageHandler *>(data);
@@ -294,8 +311,9 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
     Player *player = static_cast<Player *>(data);
 	console->setDefaultForeground(TCODColor::white);
 
-    console->print(0 ,0,"Level:%2d EXP:%6d",player->m_hd,player->m_exp);
-    console->print(0 ,1,"AC:%2d",   player->m_ac);
+    console->print(0 ,0,"Dungeon:%2d",player->m_level->m_dungeonLevel);
+    console->print(0 ,1,"Level:%2d EXP:%6d",player->m_hd,player->m_exp);
+    console->print(0 ,2,"AC:%2d",   player->m_ac);
 
     int health = 16.0f * float(player->m_hp)/float(player->m_maxHp);
     if(health < 16)
@@ -306,23 +324,23 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
         console->setDefaultForeground(TCODColor::orange);
     if(health < 3)
         console->setDefaultForeground(TCODColor::red);
-    console->print(0 ,3,"HP: %d/%d",player->m_hp,player->m_maxHp);
-    console->print(0 ,4," [                ]");
+    console->print(0 ,4,"HP: %d/%d",player->m_hp,player->m_maxHp);
+    console->print(0 ,5," [                ]");
     for(int i=0;i<16;i++){
         if(i<health){
-            console->putChar(2+i,4,'+');
+            console->putChar(2+i,5,'+');
         }
         else{
-            console->putChar(2+i,4,'.');
+            console->putChar(2+i,5,'.');
         }
     }
 	console->setDefaultForeground(TCODColor::white);
-    console->print(0 ,5,"STR:%2d",player->m_str);
-    console->print(7 ,5,"DEX:%2d",player->m_dex);
-    console->print(14,5,"CON:%2d",player->m_con);
-    console->print(0 ,6,"INT:%2d",player->m_int);
-    console->print(7 ,6,"WIS:%2d",player->m_wis);
-    console->print(14,6,"CHA:%2d",player->m_cha);
+    console->print(0 ,6,"STR:%2d",player->m_str);
+    console->print(7 ,6,"DEX:%2d",player->m_dex);
+    console->print(14,6,"CON:%2d",player->m_con);
+    console->print(0 ,7,"INT:%2d",player->m_int);
+    console->print(7 ,7,"WIS:%2d",player->m_wis);
+    console->print(14,7,"CHA:%2d",player->m_cha);
 
     ManaCost manaColors[] = {
         ManaCost(0,COLOR_RED),
@@ -332,7 +350,7 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
     for(int i=0;i<3;i++){
         ManaCost &col = manaColors[i];
         console->setDefaultForeground(col.m_col);
-        console->print(i*7,8,"%2d/%2d%c",player->m_mana[i],player->m_maxMana[i]-player->m_lockedMana[i],col.m_char);
+        console->print(i*7,9,"%2d/%2d%c",player->m_mana[i],player->m_maxMana[i]-player->m_lockedMana[i],col.m_char);
     }
 
     for(int i=0;i<player->m_abilities.size();i++){
@@ -353,18 +371,18 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
                 break;
         }
         console->setDefaultForeground(TCODColor::white);
-        console->print(0,10+4*i,"      - %d -",i+1);
+        console->print(0,11+4*i,"      - %d -",i+1);
         if(ability->m_active)
             col = col * TCODColor::grey;
         console->setDefaultForeground(col);
-        console->print(0,11+4*i,"%s",ability->m_name.c_str());
+        console->print(0,12+4*i,"%s",ability->m_name.c_str());
         for(int ii=0;ii<ability->m_cost.size();ii++){
             ManaCost &cost = ability->m_cost[ii];
             col = cost.m_col;
             if(ability->m_active)
                 col = col * TCODColor::grey;
             console->setDefaultForeground(col);
-            console->print(ii*4,12+4*i,"%2d%c",cost.m_amount,cost.m_char);
+            console->print(ii*4,13+4*i,"%2d%c",cost.m_amount,cost.m_char);
         }
     }
 }

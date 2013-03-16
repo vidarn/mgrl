@@ -40,31 +40,34 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
         m_hp = val.i;
     }
     if(name == "melee" && val.b){
-        addTag(ITEM_MELEE);addTag(ITEM_WEAPON);addTag(ITEM_PICK_UP);
+        addTag(ITEM_MELEE);addTag(ITEM_WEAPON);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "ranged" && val.b){
-        addTag(ITEM_RANGED);addTag(ITEM_WEAPON);addTag(ITEM_PICK_UP);
+        addTag(ITEM_RANGED);addTag(ITEM_WEAPON);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
+    }
+    if(name == "ammo_bow" && val.b){
+        addTag(ITEM_AMMO_BOW);addTag(ITEM_WEAPON);addTag(ITEM_PICK_UP);addTag(ITEM_STACK);addTag(ITEM_QUIVER);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "helmet" && val.b){
-        addTag(ITEM_HELMET);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);
+        addTag(ITEM_HELMET);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "body_armor" && val.b){
-        addTag(ITEM_BODY_ARMOR);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);
+        addTag(ITEM_BODY_ARMOR);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "gloves" && val.b){
-        addTag(ITEM_GLOVES);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);
+        addTag(ITEM_GLOVES);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "boots" && val.b){
-        addTag(ITEM_BOOTS);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);
+        addTag(ITEM_BOOTS);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "shield" && val.b){
-        addTag(ITEM_SHIELD);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);
+        addTag(ITEM_SHIELD);addTag(ITEM_ARMOR);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "scroll" && val.b){
-        addTag(ITEM_SCROLL);addTag(ITEM_READ);addTag(ITEM_PICK_UP);
+        addTag(ITEM_SCROLL);addTag(ITEM_READ);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "potion" && val.b){
-        addTag(ITEM_POTION);addTag(ITEM_QUAFF);addTag(TAG_WALKABLE);addTag(ITEM_PICK_UP);
+        addTag(ITEM_POTION);addTag(ITEM_QUAFF);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);addTag(ITEM_PICK_UP);
     }
     if(name == "heal_potion" && val.b){
         addTag(POTION_HEAL);
@@ -117,6 +120,9 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
     }
     if(name == "shard" && val.b){
         addTag(ITEM_SHARD_OF_KNOWLEDGE);
+    }
+    if(name == "stack" && val.b){
+        addTag(ITEM_STACK);
     }
 }
 

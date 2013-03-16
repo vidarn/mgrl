@@ -12,6 +12,11 @@ enum{
 };
 
 enum{
+	ATTACK_MELEE,
+	ATTACK_RANGED,
+};
+
+enum{
 	TAG_CREATURE,
 	TAG_PLAYER,
 	TAG_ITEM,
@@ -24,6 +29,7 @@ enum{
     TAG_TRANSPARENT,
     TAG_OPEN,
     ITEM_OPEN,
+    ITEM_DONT_DROP,
     ITEM_BLEND_IN,
     ITEM_DOOR,
     ITEM_PICK_UP,
@@ -32,9 +38,12 @@ enum{
     ITEM_QUAFF,
     ITEM_EAT,
     ITEM_EVOKE,
+    ITEM_STACK,
     ITEM_WEAPON,
         ITEM_MELEE,
         ITEM_RANGED,
+        ITEM_QUIVER,
+        ITEM_AMMO_BOW,
     ITEM_ARMOR,
         ITEM_SHIELD,
         ITEM_HELMET,
@@ -96,13 +105,14 @@ class Actor
 		int m_hp, m_maxHp;
 		int m_dx, m_dy;
 		int m_ac;
+		int m_amount;
         bool m_discovered;
         std::string m_name;
 		std::vector<int> m_tags;
         std::vector<Actor *> m_inventory;
         std::vector<std::string> m_inventoryStrings;
-	protected:
 		Level *m_level;
+	protected:
 };
 
 struct ActorDefinition

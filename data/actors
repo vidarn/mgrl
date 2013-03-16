@@ -64,6 +64,18 @@ item "Short Sword"{
     bool melee=true
     dice damage="1d6"
 }
+item "Short Bow"{
+	glyph=')'
+    name="Short Bow"
+    bool ranged=true
+    dice damage="1d6"
+}
+item "Arrow"{
+	glyph=')'
+    name="Arrow"
+    bool ammo_bow=true
+    dice damage="1d6"
+}
 item "Leather Cap"{
 	glyph=')'
     name="Leather Cap"

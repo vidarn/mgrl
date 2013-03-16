@@ -23,8 +23,13 @@ class Player: public Creature
 		virtual void die(Actor *source);
 		virtual void finish(Level *level);
         virtual void act();
+		virtual void doFire();
 		virtual void doOpen();
 		virtual void doQuaff();
+		virtual void doQuiver();
+		virtual void doWield();
+		virtual void doDrop();
+		virtual void doPickUp();
         virtual void pickUp(Actor *item);
         virtual Actor *getTarget(int type);
 		virtual void showInventory();
