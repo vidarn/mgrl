@@ -106,6 +106,7 @@ class Actor
 		int m_dx, m_dy;
 		int m_ac;
 		int m_amount;
+        float m_time, m_speed;
         bool m_discovered;
         std::string m_name;
 		std::vector<int> m_tags;

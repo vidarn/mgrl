@@ -115,9 +115,23 @@ Level::update()
         m_fovMap->setProperties(m_actors[i]->m_x,m_actors[i]->m_y,actor->hasTag(TAG_TRANSPARENT),actor->hasTag(TAG_WALKABLE));
 	}
 	computeFov(m_player->m_x, m_player->m_y);
-	for(int i=0;i<m_actors.size();i++){
-		m_actors[i]->act();
-	}
+    while(m_player->m_time > 0.0f){
+        float smallestTimeIncrement = m_player->m_time;
+        for(int i=0;i<m_actors.size();i++){
+            Actor *actor = m_actors[i];
+            if(actor->m_time < smallestTimeIncrement){
+                smallestTimeIncrement = actor->m_time;
+            }
+        }
+        m_player->m_time -= smallestTimeIncrement;
+        for(int i=0;i<m_actors.size();i++){
+            Actor *actor = m_actors[i];
+            actor->m_time -= smallestTimeIncrement;
+            if(actor->m_time<=0.0f){
+                actor->act();
+            }
+        }
+    }
 }
 
 void

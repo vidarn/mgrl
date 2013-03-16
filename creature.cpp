@@ -27,6 +27,7 @@ Creature::Creature()
 void
 Creature::act()
 {
+    m_time += m_speed;
 	if(m_playerSpottedCooldown>0){
 		if(abs(m_x - m_level->m_player->m_x) <= 1 && abs(m_y - m_level->m_player->m_y) <= 1){
 			attack(m_level->m_player,ATTACK_MELEE);
@@ -233,6 +234,8 @@ Creature::handleProperty(std::string &name, TCOD_value_t &val)
         m_inventoryStrings.push_back("Short Sword");
     }
     if(name == "expValue") m_expValue = val.i;
+    if(name == "speed")    m_speed    = val.f;
+    if(name == "memory")   m_playerSpottedMemory = val.i;
 }
 
 void
@@ -250,7 +253,6 @@ Creature::finish(Level *level)
         if(actor != 0){
             m_inventory.push_back(actor);
         }
-        std::cout << actor->m_name << std::endl;
     }
     calculateHp();
     calculateAc();
@@ -271,8 +273,6 @@ Creature::regainMana(int amount, int color)
                 break;
     }
     for(int i=0;i<3;i++){
-        std::cout << m_mana[i] << amount << "Mana\n";
         m_mana[i] = std::min(m_maxMana[i]-m_lockedMana[i], std::max(0, m_mana[i]));
     }
-    std::cout << "Regain\n";
 }

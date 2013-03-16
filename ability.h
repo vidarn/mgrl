@@ -88,6 +88,13 @@ class AbBlink: public Ability
         virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
 };
 
+/*class AbInstantTunnel: public Ability
+{
+	public:
+		AbInstantTunnel(int id);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
+};*/
+
 class AbSmallManaStream: public Ability
 {
 	public:

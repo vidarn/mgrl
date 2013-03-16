@@ -40,6 +40,7 @@ creature "Spider"{
     int cha=4
     dice hp="1d4"
     int expValue=100
+    float speed = 0.8
     spider
 }
 creature "Orc"{

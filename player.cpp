@@ -297,6 +297,7 @@ Player::finish(Level *level)
 void
 Player::act()
 {
+    m_time += m_speed;
     for(int i=0; i<m_abilities.size();i++){
         Ability *ability = m_abilities[i];
         if(ability->m_active)

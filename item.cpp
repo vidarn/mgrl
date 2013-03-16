@@ -13,6 +13,7 @@ Item::Item()
 {
 	addTag(TAG_ITEM);
 	addTag(TAG_REMEMBER);
+    m_speed = 100.0f;
 }
 
 Item::~Item()
@@ -25,6 +26,7 @@ Item::~Item()
 void
 Item::act()
 {
+    m_time += m_speed;
 }
 
 void

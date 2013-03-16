@@ -63,7 +63,6 @@ main(int argc, char **argv)
                     return 0;
                 }
                 else{
-                    bool update = true;
                     switch(key.c) {
                         case 'S' :
                             return 0;
@@ -86,30 +85,29 @@ main(int argc, char **argv)
                         case 'n' :
                             level.m_player->walk(1,1); break;
                         case 'H' :
-                            level.m_player->startRun(-1,0);update=false; break;
+                            level.m_player->startRun(-1,0); break;
                         case 'J' :
-                            level.m_player->startRun(0,1);update=false; break;
+                            level.m_player->startRun(0,1); break;
                         case 'K' :
-                            level.m_player->startRun(0,-1);update=false; break;
+                            level.m_player->startRun(0,-1); break;
                         case 'L' :
-                            level.m_player->startRun(1,0);update=false; break;
+                            level.m_player->startRun(1,0); break;
                         case 'Y' :
-                            level.m_player->startRun(-1,-1);update=false; break;
+                            level.m_player->startRun(-1,-1); break;
                         case 'U' :
-                            level.m_player->startRun(1,-1);update=false; break;
+                            level.m_player->startRun(1,-1); break;
                         case 'B' :
-                            level.m_player->startRun(-1,1);update=false; break;
+                            level.m_player->startRun(-1,1); break;
                         case 'N' :
-                            level.m_player->startRun(1,1);update=false; break;
+                            level.m_player->startRun(1,1); break;
                         case '-' :
-                            level.m_player->m_hp--;update=false; break;
+                            level.m_player->m_hp--; break;
                         case '+' :
-                            level.m_player->m_hp++;update=false; break;
+                            level.m_player->m_hp++; break;
                         case 'z' :
-                            level.m_player->gainExp(300);update=false; break;
+                            level.m_player->gainExp(300); break;
                         case 'i':
                             level.m_player->showInventory();
-                            update=false;
                             break;
                         case 'r':
                             level.generate();
@@ -159,14 +157,13 @@ main(int argc, char **argv)
                                 level.m_messages->showMessage("DEBUG MODE ON",MESSAGE_WARNING);
                             else
                                 level.m_messages->showMessage("DEBUG MODE OFF",MESSAGE_WARNING);
-                            update=false;
                             break;
                         default:
-                            update=false;
                             break;
                     }
-                    if(update)
+                    if(level.m_player->m_time > 0.0f){
                         level.update();
+                    }
                 }
             }
         }
