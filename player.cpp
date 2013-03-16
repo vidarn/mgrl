@@ -553,6 +553,31 @@ Player::levelUp(){
 }
 
 void
+Player::goDown(){
+    std::vector<int> tags;
+    tags.push_back(ITEM_STAIRS_DOWN);
+    std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
+    if(actors.size() > 0){
+        m_level->descend();
+    }
+}
+
+void
+Player::goUp(){
+    std::vector<int> tags;
+    tags.push_back(ITEM_STAIRS_UP);
+    std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
+    if(actors.size() > 0){
+        if(m_level->m_dungeonLevel > 1){
+            m_level->ascend();
+        }
+        else{
+            m_level->m_messages->showMessage("You have not yet retrieved the Orb of Knowledge",MESSAGE_NOTIFICATION);
+        }
+    }
+}
+
+void
 Player::gainExp(int amount){
     m_exp += amount;
     while(m_exp >= m_expForNextLevel){

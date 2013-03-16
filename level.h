@@ -8,8 +8,11 @@
 
 struct LevelData
 {
-    std::vector<Actor *> m_actors;
+    LevelData(Dungeon *dungeon, std::vector<Actor *> actors):
+        m_dungeon(dungeon), m_actors(actors)
+    {}
     Dungeon *m_dungeon;
+    std::vector<Actor *> m_actors;
 };
 
 class Level
@@ -24,6 +27,11 @@ class Level
 		void updatePathFinder(int playerX, int playerY);
 		void computeFov(int playerX, int playerY);
 		void killActor(Actor *victim, Actor *killer);
+		void descend();
+		void ascend();
+        void placePlayerAtStairs(bool down);
+        void storeLevel(int level);
+        void loadLevel(int level);
         bool isWalkable(int x, int y);
 		std::vector<Actor *> getVisibleActors(std::vector<int> tags);
         std::vector<Actor *> getActors(int x, int y, std::vector<int> tags);
@@ -36,6 +44,7 @@ class Level
 		bool m_playerAlive;
 		bool m_playerGenerated;
         int  m_dungeonLevel;
+        int  m_dungeonW, m_dungeonH;
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;
 		TCODDijkstra *m_pathFinder;

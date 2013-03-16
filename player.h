@@ -32,6 +32,8 @@ class Player: public Creature
         void shuffleLibrary();
         void restockLibrary();
         void levelUp();
+        void goDown();
+        void goUp();
         void gainExp(int amount);
 		virtual void invokeAbility(int id);
         Actor *getFromInventory(char key);

@@ -8,7 +8,8 @@ static void drawStatus(TCODConsole *console, void *data, int width, int height);
 Level::Level(int dungeonWidth, int dungeonHeight, int statusWinWidth, int statusWinHeight,
                 int messagesWinWidth, int messagesWinHeight)
 {
-	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory);
+    m_dungeonW = dungeonWidth;
+    m_dungeonH = dungeonHeight;
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_player = new Player(PLAYER_HUMAN);
@@ -57,8 +58,8 @@ Level::render()
 void
 Level::generate()
 {
-    //TODO free actors
     m_actors.clear();
+	m_dungeon = new Dungeon(m_dungeonW, m_dungeonH, &m_tileFactory);
 	m_dungeon->generate(this);
 	int w = m_dungeon->m_width;
 	int h = m_dungeon->m_height;
@@ -67,14 +68,7 @@ Level::generate()
 			m_dungeonFovMap->setProperties(x,y,m_dungeon->isTransparent(x,y), m_dungeon->isWalkable(x,y));
 		}
 	}
-    for(int i=0;i<m_actors.size();i++){
-        Actor *actor = m_actors[i];
-        if(actor->hasTag(ITEM_STAIRS_DOWN)){
-            m_player->m_x = actor->m_x;
-            m_player->m_y = actor->m_y;
-        }
-    }
-
+    placePlayerAtStairs(false);
 }
 
 void
@@ -161,6 +155,69 @@ Level::killActor(Actor *victim, Actor *killer)
 	victim->die(killer);
     if(!victim->hasTag(TAG_PLAYER)){
         delete victim;
+    }
+}
+
+void
+Level::descend()
+{
+    storeLevel(m_dungeonLevel);
+    m_dungeonLevel++;
+    loadLevel(m_dungeonLevel);
+    placePlayerAtStairs(false);
+}
+
+void
+Level::ascend()
+{
+    storeLevel(m_dungeonLevel);
+    m_dungeonLevel--;
+    loadLevel(m_dungeonLevel);
+    placePlayerAtStairs(true);
+}
+
+void
+Level::storeLevel(int level)
+{
+    if(m_storedLevels.size()>=level){
+        m_storedLevels[level-1].m_actors = m_actors;
+    }
+    else{
+        m_storedLevels.push_back(LevelData(m_dungeon,m_actors));
+    }
+}
+
+void
+Level::loadLevel(int level)
+{
+    if(m_storedLevels.size()>=level){
+        m_dungeon = m_storedLevels[level-1].m_dungeon;
+        m_actors  = m_storedLevels[level-1].m_actors;
+        int w = m_dungeon->m_width;
+        int h = m_dungeon->m_height;
+        for(int y=0;y<h;y++){
+            for(int x=0;x<w;x++){
+                m_dungeonFovMap->setProperties(x,y,m_dungeon->isTransparent(x,y), m_dungeon->isWalkable(x,y));
+            }
+        }
+    }
+    else{
+        generate();
+    }
+}
+
+void
+Level::placePlayerAtStairs(bool down)
+{
+    int tag = ITEM_STAIRS_UP;
+    if(down)
+        tag = ITEM_STAIRS_DOWN;
+    for(int i=0;i<m_actors.size();i++){
+        Actor *actor = m_actors[i];
+        if(actor->hasTag(tag)){
+            m_player->m_x = actor->m_x;
+            m_player->m_y = actor->m_y;
+        }
     }
 }
 

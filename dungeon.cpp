@@ -241,10 +241,18 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
 {
     int height = maxy - miny;
     int width = maxx - minx;
+    int numRooms = 20;
     char *tiles = new char[width*height];
     char *tmpTiles = new char[width*height];
     double probabilities[] = {0.55, 0.45};
     probabilities[1] = 0.2;
+    if(level->m_dungeonLevel > 10){
+        probabilities[1] = 0.0;
+        numRooms = 40;
+    }
+    if(level->m_dungeonLevel < 3){
+        probabilities[1] = 0.6;
+    }
     boost::random::discrete_distribution<> dist(probabilities);
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
@@ -256,7 +264,6 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     }
     m_rooms.clear();
     std::vector<CavernConnectivityPoint> points;
-    int numRooms = 20;
     int roomID = 0;
 
     Room *stairsRoom = new StairsRoom(tiles, width, height);
@@ -314,9 +321,13 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
             switch(a){
                 case 0:
                     t = "Stone Floor";
+                    if(level->m_dungeonLevel > 10)
+                        t = "Dungeon Floor";
                     break;
                 case 1:
                     t = "Rock Wall";
+                    if(level->m_dungeonLevel > 10)
+                        t = "Dungeon Wall";
                     break;
                 case 2:
                     t = "Water Stream";
