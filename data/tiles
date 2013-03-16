@@ -11,6 +11,16 @@ tile "Dungeon Floor"{
 	walkable
 	flyable
 }
+tile "Crystal Floor"{
+	glyph=29
+	transparent
+	walkable
+	flyable
+}
+tile "Shard of Knowledge"{
+	glyph=28
+	walkable
+}
 tile "Rock Wall"{
 	glyph=9
 }
@@ -35,6 +45,8 @@ tile "Web"{
 }
 tile "Spider Egg"{
 	glyph=16
+    walkable
+    transparent
 }
 tile "Right Facing Chair"{
 	glyph=2

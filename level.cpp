@@ -11,43 +11,47 @@ Level::Level(int dungeonWidth, int dungeonHeight, int statusWinWidth, int status
 	m_dungeon = new Dungeon(dungeonWidth, dungeonHeight, &m_tileFactory);
 	m_fovMap = new TCODMap(dungeonWidth, dungeonHeight);
 	m_dungeonFovMap = new TCODMap(dungeonWidth, dungeonHeight);
-	m_player = new Player();
+	m_player = new Player(PLAYER_HUMAN);
 	m_messages = new MessageHandler(m_player);
     m_player->m_x = DUNGEON_WIN_W-1;
     m_player->m_y = (DUNGEON_WIN_H)/2;
     m_player->finish(this);
 	m_playerAlive = true;
+	m_playerGenerated = false;
 	m_pathFinder = 0;
     m_statusWin = new CallbackOverlay(5,5,"Status",m_player, &drawStatus, 0);
     m_statusWin->setPos(DUNGEON_WIN_W+1,1);
     m_statusWin->setSize(statusWinWidth-1,statusWinHeight-1);
     m_messagesWin = new CallbackOverlay(messagesWinHeight,messagesWinWidth,"Messages",m_messages, &drawMessages, 0);
     m_messagesWin->setPos(0,DUNGEON_WIN_H+1);
+    m_dungeonLevel = 1;
 }
 
 void
 Level::render()
 {
     TCODConsole::root->setDefaultForeground(TCODColor::white);
-    m_statusWin->render();
-    m_messagesWin->render();
-	m_dungeon->render();
-	for(int i=0;i<m_actors.size();i++){
-		Actor &actor = *(m_actors[i]);
-        bool visible = false;
-		if(m_fovMap->isInFov(actor.m_x, actor.m_y))
-            visible = true;
-        if(visible || (actor.m_discovered && actor.hasTag(TAG_REMEMBER))){
-			actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),visible);
-		}
-		else{
-			if(DEBUG){
-                actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),false);
-			}
-		}
-	}
-    if(m_playerAlive)
-        m_player->render(m_dungeon->isHilighted(m_player->m_x,m_player->m_y,1),true);
+    if(m_playerGenerated){
+        m_statusWin->render();
+        m_messagesWin->render();
+        m_dungeon->render();
+        for(int i=0;i<m_actors.size();i++){
+            Actor &actor = *(m_actors[i]);
+            bool visible = false;
+            if(m_fovMap->isInFov(actor.m_x, actor.m_y))
+                visible = true;
+            if(visible || (actor.m_discovered && actor.hasTag(TAG_REMEMBER))){
+                actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),visible);
+            }
+            else{
+                if(DEBUG){
+                    actor.render(m_dungeon->isHilighted(actor.m_x,actor.m_y,1),false);
+                }
+            }
+        }
+        if(m_playerAlive)
+            m_player->render(m_dungeon->isHilighted(m_player->m_x,m_player->m_y,1),true);
+    }
 }
 
 void
@@ -63,6 +67,14 @@ Level::generate()
 			m_dungeonFovMap->setProperties(x,y,m_dungeon->isTransparent(x,y), m_dungeon->isWalkable(x,y));
 		}
 	}
+    for(int i=0;i<m_actors.size();i++){
+        Actor *actor = m_actors[i];
+        if(actor->hasTag(ITEM_STAIRS_DOWN)){
+            m_player->m_x = actor->m_x;
+            m_player->m_y = actor->m_y;
+        }
+    }
+
 }
 
 void
@@ -99,10 +111,11 @@ void
 Level::update()
 {
 	m_fovMap->copy(m_dungeonFovMap);
-	computeFov(m_player->m_x, m_player->m_y);
 	for(int i=0;i<m_actors.size();i++){
-		m_fovMap->setProperties(m_actors[i]->m_x,m_actors[i]->m_y,true,false);
+        Actor *actor = m_actors[i];
+        m_fovMap->setProperties(m_actors[i]->m_x,m_actors[i]->m_y,actor->hasTag(TAG_TRANSPARENT),actor->hasTag(TAG_WALKABLE));
 	}
+	computeFov(m_player->m_x, m_player->m_y);
 	for(int i=0;i<m_actors.size();i++){
 		m_actors[i]->act();
 	}
@@ -149,6 +162,22 @@ Level::killActor(Actor *victim, Actor *killer)
     if(!victim->hasTag(TAG_PLAYER)){
         delete victim;
     }
+}
+
+bool
+Level::isWalkable(int x, int y)
+{
+    bool walkable = m_dungeon->isWalkable(x,y);
+    if(walkable){
+        std::vector<int> tags;
+        std::vector<Actor *> actors = getActors(x,y,tags);
+        for(int i=0;i<actors.size();i++){
+            if(!actors[i]->hasTag(TAG_WALKABLE)){
+                walkable = false;
+            }
+        }
+    }
+    return walkable;
 }
 
 std::vector<Actor *>
@@ -207,6 +236,10 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
 {
     Player *player = static_cast<Player *>(data);
 	console->setDefaultForeground(TCODColor::white);
+
+    console->print(0 ,0,"Level:%2d EXP:%6d",player->m_hd,player->m_exp);
+    console->print(0 ,1,"AC:%2d",   player->m_ac);
+
     int health = 16.0f * float(player->m_hp)/float(player->m_maxHp);
     if(health < 16)
         console->setDefaultForeground(TCODColor::darkGreen);
@@ -216,23 +249,23 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
         console->setDefaultForeground(TCODColor::orange);
     if(health < 3)
         console->setDefaultForeground(TCODColor::red);
-    console->print(0 ,0,"HP: %d/%d",player->m_hp,player->m_maxHp);
-    console->print(0 ,1," [                ]");
+    console->print(0 ,3,"HP: %d/%d",player->m_hp,player->m_maxHp);
+    console->print(0 ,4," [                ]");
     for(int i=0;i<16;i++){
         if(i<health){
-            console->putChar(2+i,1,'+');
+            console->putChar(2+i,4,'+');
         }
         else{
-            console->putChar(2+i,1,'.');
+            console->putChar(2+i,4,'.');
         }
     }
 	console->setDefaultForeground(TCODColor::white);
-    console->print(0 ,3,"STR:%2d",player->m_str);
-    console->print(7 ,3,"DEX:%2d",player->m_dex);
-    console->print(14,3,"CON:%2d",player->m_con);
-    console->print(0 ,4,"INT:%2d",player->m_int);
-    console->print(7 ,4,"WIS:%2d",player->m_wis);
-    console->print(14,4,"CHA:%2d",player->m_cha);
+    console->print(0 ,5,"STR:%2d",player->m_str);
+    console->print(7 ,5,"DEX:%2d",player->m_dex);
+    console->print(14,5,"CON:%2d",player->m_con);
+    console->print(0 ,6,"INT:%2d",player->m_int);
+    console->print(7 ,6,"WIS:%2d",player->m_wis);
+    console->print(14,6,"CHA:%2d",player->m_cha);
 
     ManaCost manaColors[] = {
         ManaCost(0,COLOR_RED),
@@ -242,20 +275,39 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
     for(int i=0;i<3;i++){
         ManaCost &col = manaColors[i];
         console->setDefaultForeground(col.m_col);
-        console->print(i*7,6,"%2d/%2d%c",player->m_mana[i],player->m_maxMana[i],col.m_char);
+        console->print(i*7,8,"%2d/%2d%c",player->m_mana[i],player->m_maxMana[i]-player->m_lockedMana[i],col.m_char);
     }
 
     for(int i=0;i<player->m_abilities.size();i++){
         Ability *ability = player->m_abilities[i];
+        TCODColor col;
+        switch(ability->m_color){
+            case COLOR_RED:
+                col = TCODColor::lightRed;
+                break;
+            case COLOR_BLUE:
+                col = TCODColor::lightBlue;
+                break;
+            case COLOR_WHITE:
+                col = TCODColor::white;
+                break;
+            case COLOR_MULTI:
+                col = TCODColor::yellow;
+                break;
+        }
+        console->setDefaultForeground(TCODColor::white);
+        console->print(0,10+4*i,"      - %d -",i+1);
         if(ability->m_active)
-            console->setDefaultForeground(TCODColor::grey);
-        else
-            console->setDefaultForeground(TCODColor::white);
-        console->print(0,8+3*i,"%s",ability->m_name.c_str());
+            col = col * TCODColor::grey;
+        console->setDefaultForeground(col);
+        console->print(0,11+4*i,"%s",ability->m_name.c_str());
         for(int ii=0;ii<ability->m_cost.size();ii++){
             ManaCost &cost = ability->m_cost[ii];
-            console->setDefaultForeground(cost.m_col);
-            console->print(ii*4,9+3*i,"%2d%c",cost.m_amount,cost.m_char);
+            col = cost.m_col;
+            if(ability->m_active)
+                col = col * TCODColor::grey;
+            console->setDefaultForeground(col);
+            console->print(ii*4,12+4*i,"%2d%c",cost.m_amount,cost.m_char);
         }
     }
 }

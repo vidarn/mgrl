@@ -13,7 +13,7 @@ int SCREEN_W = 100;
 int SCREEN_H = 40;
 int DUNGEON_WIN_W;
 int DUNGEON_WIN_H;
-bool DEBUG = true;
+bool DEBUG = false;
 boost::random::mt19937 RAND;
 boost::random::uniform_int_distribution<> d100(0,100);
 boost::random::uniform_int_distribution<> d20(0,20);
@@ -43,6 +43,7 @@ main(int argc, char **argv)
     Level level(DUNGEON_WIN_W,DUNGEON_WIN_H,statusWinWidth,statusWinHeight
             ,messagesWinWidth,messagesWinHeight);
     level.generate();
+    level.m_player->customize();
 
 
     level.update();
@@ -104,6 +105,8 @@ main(int argc, char **argv)
                             level.m_player->m_hp--;update=false; break;
                         case 'w' :
                             level.m_player->m_hp++;update=false; break;
+                        case 'z' :
+                            level.m_player->gainExp(300);update=false; break;
                         case 'i':
                             level.m_player->showInventory();
                             update=false;
@@ -124,6 +127,9 @@ main(int argc, char **argv)
                             break;
                         case '3':
                             level.m_player->invokeAbility(2);
+                            break;
+                        case '4':
+                            level.m_player->invokeAbility(3);
                             break;
                         case 'd':
                             DEBUG = !DEBUG;

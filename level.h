@@ -6,6 +6,12 @@
 #include "item.h"
 #include "messages.h"
 
+struct LevelData
+{
+    std::vector<Actor *> m_actors;
+    Dungeon *m_dungeon;
+};
+
 class Level
 {
 	public:
@@ -18,6 +24,7 @@ class Level
 		void updatePathFinder(int playerX, int playerY);
 		void computeFov(int playerX, int playerY);
 		void killActor(Actor *victim, Actor *killer);
+        bool isWalkable(int x, int y);
 		std::vector<Actor *> getVisibleActors(std::vector<int> tags);
         std::vector<Actor *> getActors(int x, int y, std::vector<int> tags);
 		Dungeon *m_dungeon;
@@ -27,11 +34,14 @@ class Level
 		MessageHandler *m_messages;
 		std::vector<Actor *> m_actors;
 		bool m_playerAlive;
+		bool m_playerGenerated;
+        int  m_dungeonLevel;
 	private:
 		TCODMap *m_fovMap, *m_dungeonFovMap;
 		TCODDijkstra *m_pathFinder;
         Overlay *m_statusWin;
         Overlay *m_messagesWin;
+        std::vector<LevelData> m_storedLevels;
 };
 
 #endif /* end of include guard: LEVEL_WF504OFN */

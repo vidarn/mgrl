@@ -56,6 +56,8 @@ void
 Actor::render(bool hilight, bool visible)
 {
 	TCODColor col = m_color;
+    if(hasTag(ITEM_BLEND_IN))
+        col = col * TCODColor::lighterGrey;
     if(!visible)
         col = col * TCODColor::grey;
 	TCODConsole::root->setDefaultForeground(col);
@@ -103,9 +105,9 @@ bool
 Actor::takeDamage(int amount, int type, Actor *source)
 {
 	m_hp -= amount;
-    std::stringstream ss;
+    /*std::stringstream ss;
     ss << m_name << " takes " << amount << " damage and has " << m_hp << " hp left";
-    m_level->m_messages->showMessage(ss.str(), MESSAGE_ACTION);
+    m_level->m_messages->showMessage(ss.str(), MESSAGE_ACTION);*/
 	return m_hp > 0;
 }
 

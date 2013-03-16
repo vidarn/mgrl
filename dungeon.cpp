@@ -4,6 +4,8 @@
 #include "dungeon.h"
 #include "level.h"
 #include "decorations/flood.h"
+#include "rooms/stairs.h"
+#include "rooms/shard.h"
 
 Dungeon::Dungeon(int width, int height, TileFactory *tileFactory)
 {
@@ -70,16 +72,6 @@ Dungeon::generate(Level *level)
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width,level);
-    for(int i=0;i<10;i++){
-        boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
-        boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
-        int x = xDist(RAND);
-        int y = yDist(RAND);
-        if(isWalkable(x,y)){
-            level->m_player->m_x = x;
-            level->m_player->m_y = y;
-        }
-    }
     for(int i=0;i<10;i++){
         boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
         boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
@@ -252,7 +244,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     char *tiles = new char[width*height];
     char *tmpTiles = new char[width*height];
     double probabilities[] = {0.55, 0.45};
-    //probabilities[1] = 0.0;
+    probabilities[1] = 0.2;
     boost::random::discrete_distribution<> dist(probabilities);
     for(int y=0;y<height;y++){
         for(int x=0;x<width;x++){
@@ -264,10 +256,19 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     }
     m_rooms.clear();
     std::vector<CavernConnectivityPoint> points;
-    //boost::random::uniform_int_distribution<> roomNumDist(3,30);
-    //int numRooms = roomNumDist(RAND);
     int numRooms = 20;
     int roomID = 0;
+
+    Room *stairsRoom = new StairsRoom(tiles, width, height);
+    stairsRoom->reserve(tiles);
+    stairsRoom->validate(tiles,points,roomID);
+    roomID++;
+
+    Room *shardRoom  = new ShardRoom(tiles, width, height);
+    shardRoom->reserve(tiles);
+    shardRoom->validate(tiles,points,roomID);
+    roomID++;
+
     for(int i=0;i<numRooms;i++){
         Room *room = Room::getRoom(0,tiles,width,height);
         if(room->validate(tiles,points,roomID)){
@@ -279,6 +280,10 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
             delete room;
         }
     }
+
+    m_rooms.push_back(shardRoom);
+    m_rooms.push_back(stairsRoom);
+
     int numRepetitions = 4;
     for(int r=0;r<numRepetitions;r++){
         cellularAutomata(height,width,&tiles,&tmpTiles,cavernFirstPass);

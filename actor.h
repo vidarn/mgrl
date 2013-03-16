@@ -17,7 +17,15 @@ enum{
 	TAG_ITEM,
 	TAG_ATTACKABLE,
 	TAG_REMEMBER,
+    TAG_MINOR,
+    TAG_MEDIUM,
+    TAG_MAJOR,
+    TAG_WALKABLE,
+    TAG_TRANSPARENT,
+    TAG_OPEN,
     ITEM_OPEN,
+    ITEM_BLEND_IN,
+    ITEM_DOOR,
     ITEM_PICK_UP,
     ITEM_APPLY,
     ITEM_READ,
@@ -34,12 +42,15 @@ enum{
         ITEM_GLOVES,
         ITEM_BOOTS,
     ITEM_SCROLL,
-    ITEM_POTION,
     ITEM_FOOD,
     ITEM_CONTAINER,
-    POTION_MINOR_HEAL,
-    POTION_HEAL,
-    POTION_MAJOR_HEAL
+    ITEM_POTION,
+        POTION_HEAL,
+        POTION_MANA,
+        POTION_NOT_NAME,
+    ITEM_STAIRS_DOWN,
+    ITEM_STAIRS_UP,
+    ITEM_SHARD_OF_KNOWLEDGE,
 };
 
 enum{
@@ -86,7 +97,7 @@ class Actor
 		int m_dx, m_dy;
 		int m_ac;
         bool m_discovered;
-		const char *m_name;
+        std::string m_name;
 		std::vector<int> m_tags;
         std::vector<Actor *> m_inventory;
         std::vector<std::string> m_inventoryStrings;

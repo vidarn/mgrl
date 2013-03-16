@@ -16,6 +16,11 @@ enum{
 enum{
     DEC_PATTERN,
     DEC_RANDOM,
+    DEC_DOOR,
+    DEC_DOOR_CLOSED,
+    DEC_STAIRS_UP,
+    DEC_STAIRS_DOWN,
+    DEC_SHARD,
 };
 
 struct
@@ -54,7 +59,10 @@ class Room
         void setTile(int x, int y, std::string tile, Tile *tiles, TileFactory *tileFactory);
         Tile * getTile(int x, int y,  Tile *tiles);
         Decoration * getPatternDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
-        Decoration * getRandomDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
+        Decoration * getRandomDecoration (int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
+        Decoration * getDoorDecoration   (int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags, int closed);
+        Decoration * getStairsDecoration (int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags, bool down);
+        Decoration * getShardDecoration (int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags);
         static Room *getRoom(int dungeonLevel, char *tiles, int w, int h);
         int m_x, m_y;
         int m_stride, m_height;

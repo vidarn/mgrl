@@ -11,13 +11,15 @@ enum{
 	AB_NONE,
 	AB_SACRED_NECTAR,
 	AB_LIGHTNING_BOLT,
-	AB_SMALL_RED_MANA_STREAM,
+	AB_BLINK,
+	AB_SMALL_MANA_STREAM,
 };
 
 enum{
 	COLOR_RED,
 	COLOR_BLUE,
 	COLOR_WHITE,
+	COLOR_MULTI,
 };
 
 struct ManaCost
@@ -51,7 +53,7 @@ class Ability
 {
 	public:
 		Ability(int id);
-        virtual bool invoke(Actor *invoker, Level *level)=0;
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled)=0;
         virtual void deactivate(Actor *invoker, Level *level);
         virtual bool act(Actor *invoker, Level *level);
 		std::string m_name;
@@ -59,6 +61,7 @@ class Ability
 		std::string m_flavour;
 		bool m_active;
 		int m_id;
+        int m_color;
 		std::vector<ManaCost> m_cost;
 };
 
@@ -66,7 +69,7 @@ class AbSacredNectar: public Ability
 {
 	public:
 		AbSacredNectar(int id);
-        virtual bool invoke(Actor *invoker, Level *level);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
         virtual void deactivate(Actor *invoker, Level *level);
         Actor *m_nectar;
 };
@@ -75,16 +78,24 @@ class AbLightningBolt: public Ability
 {
 	public:
 		AbLightningBolt(int id);
-        virtual bool invoke(Actor *invoker, Level *level);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
 };
 
-class AbSmallRedManaStream: public Ability
+class AbBlink: public Ability
 {
 	public:
-		AbSmallRedManaStream(int id);
-        virtual bool invoke(Actor *invoker, Level *level);
+		AbBlink(int id);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
+};
+
+class AbSmallManaStream: public Ability
+{
+	public:
+		AbSmallManaStream(int id, int color);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
         virtual bool act(Actor *invoker, Level *level);
         int m_cooldown;
+        std::string m_colorName;
 };
 
 #endif /* end of include guard: ABILITY_EK9W4SK */

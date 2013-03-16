@@ -12,18 +12,20 @@ creature "Goblin"{
     int cha=4
     dice hp="1d6"
     string weapon="Short Sword"
+    int expValue=200
 }
 creature "Bat"{
 	glyph=17
     name="Giant Bat"
-    int bab=0
+    int bab=-1
     int str=6
-    int dex=12
+    int dex=10
     int con=7
     int in=6
     int wis=8
     int cha=4
     dice hp="1d4"
+    int expValue=70
 }
 creature "Spider"{
 	glyph=18
@@ -37,6 +39,7 @@ creature "Spider"{
     int wis=8
     int cha=4
     dice hp="1d4"
+    int expValue=100
     spider
 }
 creature "Orc"{
@@ -70,13 +73,58 @@ item "Leather Cap"{
 item "Sarcophagus"{
 	glyph=15
     name="Sarcophagus"
-    string[] container=["Short Sword"]
+    string[] container=["Minor Mana Potion"]
+    bool transparent=true
+    bool walkable=true
+}
+item "Door"{
+	glyph=24
+    name="Door"
+    bool door=true
+}
+item "Open Door"{
+	glyph=25
+    name="Open Door"
+    bool transparent=true
+    bool walkable=true
+    bool blend_in=true
+}
+item "Stairs Down"{
+	glyph=27
+    name="Stairs Down"
+    bool walkable=true
+    bool transparent=true
+    bool blend_in=true
+    bool stairs_down=true
+}
+item "Stairs Up"{
+	glyph=26
+    name="Stairs Up"
+    bool walkable=true
+    bool transparent=true
+    bool blend_in=true
+    bool stairs_up=true
+}
+item "Shard of Knowledge"{
+	glyph=28
+    name="Shard of Knowledge"
+    bool walkable=true
+    bool shard=true
+}
+item "Minor Mana Potion"{
+    glyph=23
+    name="Minor Mana"
+    bool potion=true
+    bool minor=true
+    bool mana_potion=true
 }
 item "Sacred Nectar"{
-    glyph='!'
+    glyph=23
     name="Sacred Nectar"
     bool potion=true
-    bool minor_heal_potion=true
+    bool not_potion_name=true
+    bool heal_potion=true
+    bool minor=true
 }
 item "Lightning Bolt"{
     name="Lightning Bolt"

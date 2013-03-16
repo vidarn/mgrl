@@ -12,12 +12,14 @@ Creature::Creature()
     m_weapon(-1), m_shield(-1),
     m_bodyArmor(-1), m_gloves(-1),
     m_boots(-1), m_unarmedDamage(3),
-    m_helmet(-1)
+    m_helmet(-1),m_expValue(50)
 {
 	addTag(TAG_CREATURE);
 	addTag(TAG_ATTACKABLE);
+	addTag(TAG_TRANSPARENT);
     for(int i=0;i<3;i++){
         m_mana[i] = m_maxMana[i] = 1;
+        m_lockedMana[i] = 0;
     }
 }
 
@@ -50,9 +52,10 @@ void
 Creature::playerSpotted()
 {
 	if(m_playerSpottedCooldown ==0){
-		char buffer[512];
-		sprintf(buffer,"A %s comes into view", m_name);
-		m_level->m_messages->showMessage(buffer, MESSAGE_NOTIFICATION);
+        std::string msg = "A ";
+        msg += m_name;
+        msg += " comes into view";
+		m_level->m_messages->showMessage(msg, MESSAGE_NOTIFICATION);
 	}
 	m_playerSpottedCooldown = m_playerSpottedMemory;
 }
@@ -61,6 +64,7 @@ void
 Creature::attack(Actor *target)
 {
 	bool showMessage = true;
+    std::string targetName = target->m_name;
 	std::string msg;
     if(!hasTag(TAG_PLAYER))
         msg = "The ";
@@ -102,7 +106,7 @@ Creature::attack(Actor *target)
         else
             msg += " misses ";
 	}
-	msg += target->m_name;
+	msg += targetName;
     if(!dealtDamage){
         if(hasTag(TAG_PLAYER))
             msg += " but deal no damage";
@@ -112,6 +116,25 @@ Creature::attack(Actor *target)
 	if(showMessage){
 		m_level->m_messages->showMessage(msg, MESSAGE_ACTION);
 	}
+}
+
+void
+Creature::die(Actor *source)
+{
+	std::string msg;
+    if(!source->hasTag(TAG_PLAYER))
+        msg = "The ";
+	msg += source->m_name;
+    if(source->hasTag(TAG_PLAYER))
+        msg += " kill the ";
+    else
+        msg += " kills the ";
+	msg += m_name;
+	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+    if(source->hasTag(TAG_PLAYER)){
+        Player *player = static_cast<Player *>(source);
+        player->gainExp(m_expValue);
+    }
 }
 
 void
@@ -197,6 +220,7 @@ Creature::handleProperty(std::string &name, TCOD_value_t &val)
         m_weapon = m_inventoryStrings.size();
         m_inventoryStrings.push_back("Short Sword");
     }
+    if(name == "expValue") m_expValue = val.i;
 }
 
 void
@@ -236,7 +260,7 @@ Creature::regainMana(int amount, int color)
     }
     for(int i=0;i<3;i++){
         std::cout << m_mana[i] << amount << "Mana\n";
-        m_mana[i] = std::min(m_maxMana[i], std::max(0, m_mana[i]));
+        m_mana[i] = std::min(m_maxMana[i]-m_lockedMana[i], std::max(0, m_mana[i]));
     }
     std::cout << "Regain\n";
 }

@@ -9,14 +9,37 @@ ROOM_CONS(RoundRoom)
     boost::random::uniform_int_distribution<> yDist(2+m_radius,h-2-m_radius);
     m_x = xDist(RAND);
     m_y = yDist(RAND);
-    boost::random::uniform_real_distribution<> angleDist(0.f,3.14f*2.f);
-	CavernConnectivityPoint point;
-	float doorAngle = angleDist(RAND);
-	point.x = m_x+cos(doorAngle)*float(m_radius-1.0f);
-	point.y = m_y+sin(doorAngle)*float(m_radius-1.0f);
-	point.tag = -1;
-	point.type = CON_DUN;
-	m_doors.push_back(point);
+    boost::random::uniform_int_distribution<> numDoorsDist(1,3);
+    boost::random::uniform_int_distribution<> doorDist(0,3);
+    int numDoors = numDoorsDist(RAND);
+    for(int i=0;i<numDoors;i++){
+        CavernConnectivityPoint point;
+        point.x = m_radius;
+        point.y = m_radius;
+        switch(doorDist(RAND)){
+            case 0:
+                point.x *= 0;
+                point.y *= -1;
+                break;
+            case 1:
+                point.x *= 0;
+                point.y *= 1;
+                break;
+            case 2:
+                point.x *= 1;
+                point.y *= 0;
+                break;
+            case 3:
+                point.x *= -1;
+                point.y *= 0;
+                break;
+        }
+        point.x += m_x;
+        point.y += m_y;
+        point.tag = -1;
+        point.type = CON_DUN;
+        m_doors.push_back(point);
+    }
 }
 
 void
@@ -49,6 +72,10 @@ RoundRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Decor
     int pattern = patternDist(RAND);
     if(pattern >=0){
         addDecoration(0,0,DEC_PATTERN,places);
+    }
+    for(int i=0;i<m_doors.size();i++){
+        CavernConnectivityPoint &point = m_doors[i];
+        addDecoration(point.x-m_x,point.y-m_y,DEC_DOOR,places);
     }
 }
 

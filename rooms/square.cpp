@@ -134,6 +134,10 @@ SquareRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Deco
             }
         }
     }
+    for(int i=0;i<m_doors.size();i++){
+        CavernConnectivityPoint &point = m_doors[i];
+        addDecoration(point.x-m_x,point.y-m_y,DEC_DOOR,places);
+    }
 }
 
 void

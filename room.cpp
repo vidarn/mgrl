@@ -7,6 +7,9 @@
 #include "decorations/spider.h"
 #include "decorations/sarcophagus.h"
 #include "decorations/flood.h"
+#include "decorations/door.h"
+#include "decorations/stairs.h"
+#include "decorations/shard.h"
 #include "level.h"
 
 Room::Room(char *tiles, int w, int h):
@@ -28,14 +31,25 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
     std::vector<Decoration *> decorations;
     decorateRoom(tiles, tileFactory, decorationPlacements);
     int patternId = -1;
-    int randomId = -1;
+    int randomId  = -1;
+    int doorId    = -1;
     for(int i=0;i<decorationPlacements.size();i++){
         DecorationPlacement &place = decorationPlacements[i];
         Decoration *dec;
         if(place.m_type == DEC_PATTERN)
             dec = getPatternDecoration(patternId,place, creatureTags);
-        else
+        if(place.m_type == DEC_RANDOM)
             dec = getRandomDecoration(randomId, place, creatureTags);
+        if(place.m_type == DEC_DOOR)
+            dec = getDoorDecoration(doorId, place, creatureTags,-1);
+        if(place.m_type == DEC_DOOR_CLOSED)
+            dec = getDoorDecoration(doorId, place, creatureTags, 1);
+        if(place.m_type == DEC_STAIRS_DOWN)
+            dec = getStairsDecoration(doorId, place, creatureTags, true);
+        if(place.m_type == DEC_STAIRS_UP)
+            dec = getStairsDecoration(doorId, place, creatureTags, false);
+        if(place.m_type == DEC_SHARD)
+            dec = getShardDecoration(doorId, place, creatureTags);
         if(dec != 0){
             if(dec->validate(charTiles)){
                 dec->reserve(charTiles);
@@ -184,6 +198,42 @@ Room::getRandomDecoration(int &id, DecorationPlacement &place, std::vector<std::
             return new SpiderDecoration(place.m_x, place.m_y, m_stride, m_height);
     }
     return 0;
+}
+
+Decoration *
+Room::getDoorDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags, int closed)
+{
+    if(closed == 1){
+        return new DoorDecoration(place.m_x, place.m_y, m_stride, m_height, false);
+    }
+    double weights[] = {
+        1.00f,
+        1.00f,
+        0.00f,
+    };
+    boost::random::discrete_distribution<> dist(weights);
+    int a = dist(RAND);
+    if(id != -1)
+        a = id;
+    switch(a){
+        case 0:
+            return new DoorDecoration(place.m_x, place.m_y, m_stride, m_height, true);
+        case 1:
+            return new DoorDecoration(place.m_x, place.m_y, m_stride, m_height, false);
+    }
+    return 0;
+}
+
+Decoration *
+Room::getStairsDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags, bool down)
+{
+    return new StairsDecoration(place.m_x, place.m_y, m_stride, m_height, down);
+}
+
+Decoration *
+Room::getShardDecoration(int &id, DecorationPlacement &place, std::vector<std::string> &creatureTags)
+{
+    return new ShardDecoration(place.m_x, place.m_y, m_stride, m_height);
 }
 
 Room *

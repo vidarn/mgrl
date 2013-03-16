@@ -7,7 +7,8 @@ struct ListDefinition;
 class ListOverlay: public Overlay
 {
 	public:
-		ListOverlay(int height, int width, const char *title, bool multiSelection, std::vector<ListDefinition> definition);
+		ListOverlay(int height, int width, const char *title, bool multiSelection,
+                bool cancelable, std::vector<ListDefinition> definition);
 		virtual void render();
 		virtual bool handleInput(char key);
         std::vector<ListDefinition> m_definition;
@@ -16,6 +17,7 @@ class ListOverlay: public Overlay
 		int m_numEntries;
 		int m_scroll;
         bool m_multiSelection;
+        bool m_cancelable;
 };
 
 enum ListEntryType{

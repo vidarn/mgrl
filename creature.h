@@ -9,6 +9,7 @@ class Creature: public Actor
 		virtual void act();
 		virtual void playerSpotted();
 		void attack(Actor *target);
+        void die(Actor *source);
 		virtual void quaffPotion(Actor *potion);
         virtual void removeFromInventory(Actor *item);
 		void calculateBonuses();
@@ -18,6 +19,7 @@ class Creature: public Actor
         virtual void handleTag(std::string &tag);
         virtual void finish(Level *level);
         virtual void regainMana(int amount, int color);
+		int m_expValue;
 		int m_hd;
 		int m_str;int m_dex;int m_con;
 		int m_int;int m_wis;int m_cha;
@@ -34,7 +36,7 @@ class Creature: public Actor
         int m_gloves;
         int m_boots;
         int m_unarmedDamage;
-        int m_mana[3]; int m_maxMana[3];
+        int m_mana[3]; int m_maxMana[3]; int m_lockedMana[3];
 };
 
 #endif /* end of include guard: CREATURE_EV3PTLWG */

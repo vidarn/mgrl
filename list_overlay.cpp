@@ -3,7 +3,8 @@
 #include <cstdio>
 #include <algorithm>
 
-ListOverlay::ListOverlay(int height, int width, const char *title, bool multiSelection, std::vector<ListDefinition> definition):
+ListOverlay::ListOverlay(int height, int width, const char *title, bool multiSelection,
+        bool cancelable, std::vector<ListDefinition> definition):
 	Overlay(height,width, title)
 {
 	m_definition = definition;
@@ -17,6 +18,7 @@ ListOverlay::ListOverlay(int height, int width, const char *title, bool multiSel
 		m_scroll = -1;
 	}
 	m_multiSelection = multiSelection;
+	m_cancelable = cancelable;
 }
 
 void
@@ -76,10 +78,18 @@ ListOverlay::handleInput(char key)
 				m_scroll = m_scroll < m_numEntries - m_numLines +1 ? m_scroll +1 : m_numEntries - m_numLines +1;
 			break;
 		case ESC:
-			cont =  false;
+            if(m_cancelable){
+                for(int i=0;i<m_numEntries;i++){
+                    ListDefinition &d = m_definition[i];
+                    d.m_selected = false;
+                }
+                cont =  false;
+            }
+            break;
 		case ENTER:
             if(m_multiSelection)
                 cont =  false;
+            break;
 	}
     for(int i=0;i<m_numEntries;i++){
         ListDefinition &d = m_definition[i];
