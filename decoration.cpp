@@ -3,7 +3,11 @@
 
 
 Decoration::Decoration(int x, int y, int w, int h):
-    m_w(w),m_h(h), m_x(x), m_y(y)
+    m_x(x), m_y(y), m_w(w),m_h(h)
+{
+}
+
+Decoration::~Decoration()
 {
 }
 

@@ -13,6 +13,7 @@ DEC_VAL(SarcophagusDecoration)
 DEC_RES(SarcophagusDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(SarcophagusDecoration)

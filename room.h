@@ -48,6 +48,7 @@ class Room
 {
     public:
         Room(char *tiles, int w, int h);
+        virtual ~Room();
         void render(Tile *tiles, TileFactory *tileFactory);
         void decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level);
         void reserve (char *tiles);

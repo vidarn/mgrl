@@ -39,6 +39,7 @@ DEC_RES(DinnerDecoration)
 			reserveTile(0,0, tiles);
 			break;
     }
+    return true;
 }
 
 DEC_REN(DinnerDecoration)

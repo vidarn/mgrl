@@ -13,6 +13,7 @@ DEC_VAL(ShardDecoration)
 DEC_RES(ShardDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(ShardDecoration)

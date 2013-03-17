@@ -1,4 +1,4 @@
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include <algorithm>
 #include <cfloat>
 #include <sstream>
@@ -77,7 +77,6 @@ handleWinScreen(char key, void *data)
 static void
 drawWinScreen(TCODConsole *console, void *data, int width, int height)
 {
-    std::string *str = static_cast<std::string *>(data);
     console->print(0,1,"You have obtained the Orb of Knowledge");
     console->print(0,2,"Your new powers are beyond human imagination");
     console->print(0,3,"Game Over");
@@ -88,7 +87,6 @@ static void
 drawDeathScreen(TCODConsole *console, void *data, int width, int height)
 {
 	console->setDefaultForeground(TCODColor::red);
-    std::string *str = static_cast<std::string *>(data);
     console->print(0,1,"You have been slain");
     console->print(0,3,"Game Over");
     console->print(0,5,"Press q to quit");
@@ -108,7 +106,7 @@ Player::customize()
     raceList.push_back(ListDefinition(LIST_ENTRY,'r',"Random"));
     ListOverlay raceOverlay(5, 30, "Select starting race", false, false, raceList);
     raceOverlay.main(m_level);
-    for(int i=0;i<raceOverlay.m_definition.size();i++){
+    for(unsigned int i=0;i<raceOverlay.m_definition.size();i++){
         ListDefinition &def = raceOverlay.m_definition[i];
         if(def.m_selected){
             switch(i){
@@ -175,7 +173,7 @@ Player::increaseMana(int amount)
         heading << "Select mana to increase (" << i+1 << "/" << amount << ")";
         ListOverlay manaOverlay(3, 32, heading.str().c_str(), false, false, manaList);
         manaOverlay.main(m_level);
-        for(int i=0;i<manaOverlay.m_definition.size();i++){
+        for(unsigned int i=0;i<manaOverlay.m_definition.size();i++){
             ListDefinition &def = manaOverlay.m_definition[i];
             if(def.m_selected){
                 m_maxMana[i] += 1;
@@ -341,7 +339,7 @@ void
 Player::act(float time)
 {
     m_time += m_speed*time;
-    for(int i=0; i<m_abilities.size();i++){
+    for(unsigned int i=0; i<m_abilities.size();i++){
         Ability *ability = m_abilities[i];
         if(ability->m_active)
             ability->act(this, m_level);
@@ -368,7 +366,7 @@ Player::getTarget(int type)
         if(visibleActors.size()>0){
             int closestActor=0;
             float closestDist = FLT_MAX;
-            for(int i=0;i<visibleActors.size();i++){
+            for(unsigned int i=0;i<visibleActors.size();i++){
                 Actor *actor = visibleActors[i];
                 float x = m_x - actor->m_x;
                 float y = m_y - actor->m_y;
@@ -498,7 +496,7 @@ Player::doFire()
                 std::vector<int> tags;
                 tags.push_back(ITEM_STACK);
                 std::vector<Actor *> onGround= m_level->getActors(target->m_x,target->m_y,tags);
-                for(int i=0;i<onGround.size();i++){
+                for(unsigned int i=0;i<onGround.size();i++){
                     Actor *a = onGround[i];
                     if(a->m_name == m_inventory[m_quiver]->m_name){
                         a->m_amount++;
@@ -565,8 +563,7 @@ Player::doQuaff()
 {
     act();
     std::vector<ListDefinition>itemList;
-    bool empty = true;
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *actor = m_inventory[i];
         if(actor->hasTag(ITEM_QUAFF)){
             std::string st = actor->m_name;
@@ -575,7 +572,7 @@ Player::doQuaff()
     }
     ListOverlay itemOverlay(30, 30, "Drink what?", false, true, itemList);
     itemOverlay.main(m_level);
-    for(int i=0;i<itemOverlay.m_definition.size();i++){
+    for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
         if(def.m_selected){
             Actor *item = getFromInventory(def.m_key);
@@ -588,7 +585,7 @@ Player::doQuaff()
                 if(item->m_amount <= 0){
                     removeFromInventory(item);
                     if(item->hasTag(POTION_SACRED_NECTAR)){
-                        for(int i=0;i<m_abilities.size();i++){
+                        for(unsigned int i=0;i<m_abilities.size();i++){
                             Ability *ab = m_abilities[i];
                             if(ab->m_id == AB_SACRED_NECTAR && ab->m_active){
                                 AbSacredNectar *bt = static_cast<AbSacredNectar *>(ab);
@@ -609,8 +606,7 @@ Player::doQuiver()
 {
     act();
     std::vector<ListDefinition>itemList;
-    bool empty = true;
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *actor = m_inventory[i];
         if(actor->hasTag(ITEM_QUIVER)){
             std::string st = actor->m_name;
@@ -619,10 +615,10 @@ Player::doQuiver()
     }
     ListOverlay itemOverlay(30, 30, "Quiver what?", false, true, itemList);
     itemOverlay.main(m_level);
-    for(int i=0;i<itemOverlay.m_definition.size();i++){
+    for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
         if(def.m_selected){
-            for(int ii=0;ii<m_inventory.size();ii++){
+            for(unsigned int ii=0;ii<m_inventory.size();ii++){
                 Actor *item = m_inventory[ii];
                 if(item->m_letter == def.m_key){
                     std::string msg = "You quiver the ";
@@ -640,8 +636,7 @@ Player::doWield()
 {
     act();
     std::vector<ListDefinition>itemList;
-    bool empty = true;
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *actor = m_inventory[i];
         if(actor->hasTag(ITEM_WEAPON)){
             std::string st = actor->m_name;
@@ -650,10 +645,10 @@ Player::doWield()
     }
     ListOverlay itemOverlay(30, 30, "Wield what?", false, true, itemList);
     itemOverlay.main(m_level);
-    for(int i=0;i<itemOverlay.m_definition.size();i++){
+    for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
         if(def.m_selected){
-            for(int ii=0;ii<m_inventory.size();ii++){
+            for(unsigned int ii=0;ii<m_inventory.size();ii++){
                 Actor *item = m_inventory[ii];
                 if(item->m_letter == def.m_key){
                     std::string msg = "You wield the ";
@@ -671,8 +666,7 @@ Player::doDrop()
 {
     bool dropped = false;
     std::vector<ListDefinition>itemList;
-    bool empty = true;
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *actor = m_inventory[i];
         if(!actor->hasTag(ITEM_DONT_DROP)){
             std::string st = actor->m_name;
@@ -681,7 +675,7 @@ Player::doDrop()
     }
     ListOverlay itemOverlay(30, 30, "Drop what?", true, true, itemList);
     itemOverlay.main(m_level);
-    for(int i=0;i<itemOverlay.m_definition.size();i++){
+    for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
         if(def.m_selected){
             Actor *item = getFromInventory(def.m_key);
@@ -732,9 +726,8 @@ Player::doPickUp()
         if(actors.size()>0){
             showNothingMessage = false;
             std::vector<ListDefinition>itemList;
-            bool empty = true;
             char letter = 'a';
-            for(int i=0;i<actors.size();i++,letter++){
+            for(unsigned int i=0;i<actors.size();i++,letter++){
                 Actor *actor = actors[i];
                 std::stringstream st;
                 st << actor->m_name;
@@ -746,7 +739,7 @@ Player::doPickUp()
             }
             ListOverlay itemOverlay(30, 30, "Pick up what?", itemList.size()>1, true, itemList);
             itemOverlay.main(m_level);
-            for(int i=0;i<itemOverlay.m_definition.size();i++){
+            for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
                 ListDefinition &def = itemOverlay.m_definition[i];
                 if(def.m_selected){
                     Actor *item = actors[i];
@@ -781,7 +774,7 @@ Player::pickUp(Actor *item)
         char itemLetter = item->m_letter;
         std::string itemName = item->m_name;
         bool done = false;
-        for(int i=0;i<m_inventory.size();i++){
+        for(unsigned int i=0;i<m_inventory.size();i++){
             Actor *a = m_inventory[i];
             if(a->m_name == item->m_name && item->hasTag(ITEM_STACK)){
                 a->m_amount += item->m_amount;
@@ -796,7 +789,7 @@ Player::pickUp(Actor *item)
             char freeLetter = 'a';
             bool done=false;
             if(keepLetter){
-                for(int i=0;i<m_inventory.size();i++){
+                for(unsigned int i=0;i<m_inventory.size();i++){
                     Actor *a = m_inventory[i];
                     if(a->m_letter == item->m_letter){
                         keepLetter = false;
@@ -806,7 +799,7 @@ Player::pickUp(Actor *item)
             if(!keepLetter){
                 while(!done){
                     done = true;
-                    for(int i=0;i<m_inventory.size();i++){
+                    for(unsigned int i=0;i<m_inventory.size();i++){
                         Actor *a = m_inventory[i];
                         if(a->m_letter == freeLetter){
                             done = false;
@@ -837,11 +830,11 @@ Player::showInventory()
     tagList.push_back(ITEM_ARMOR );categoryList.push_back(ListDefinition(LIST_CATEGORY,'[',"Armor"));
     tagList.push_back(ITEM_POTION);categoryList.push_back(ListDefinition(LIST_CATEGORY,'!',"Potions"));
     std::vector<ListDefinition>itemList;
-    for(int category=0;category<categoryList.size();category++){
+    for(unsigned int category=0;category<categoryList.size();category++){
         int tag = tagList[category];
         itemList.push_back(categoryList[category]);
         bool empty = true;
-        for(int i=0;i<m_inventory.size();i++){
+        for(int i=0;i<int(m_inventory.size());i++){
             Actor *actor = m_inventory[i];
             if(actor->hasTag(tag)){
                 std::stringstream st;
@@ -918,7 +911,7 @@ Player::drawNewCard(int slot, bool mana)
         }
         done = m_maxMana[ab->m_color] > 0;
         if(done){
-            for(int i=0;i<ab->m_cost.size();i++){
+            for(unsigned int i=0;i<ab->m_cost.size();i++){
                 ManaCost &cost = ab->m_cost[i];
                 if(m_maxMana[cost.m_color] < cost.m_amount){
                     done = false;
@@ -929,7 +922,7 @@ Player::drawNewCard(int slot, bool mana)
             delete ab;
         }
     }
-    if(m_abilities.size() > slot){
+    if(int(m_abilities.size()) > slot){
         if(m_abilities[slot] != 0){
             delete m_abilities[slot];
         }
@@ -959,7 +952,7 @@ void
 Player::restockLibrary()
 {
     m_library.clear();
-    for(int i=0;i<m_deck.size();i++){
+    for(unsigned int i=0;i<m_deck.size();i++){
         bool ok=true;
         Ability *ab = m_deck[i];
         for(int ii=0;ii<3;ii++){
@@ -997,6 +990,12 @@ Player::goDown(){
     std::vector<int> tags;
     tags.push_back(ITEM_STAIRS_DOWN);
     std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
+    for(unsigned int i=0;i<m_abilities.size();i++){
+        Ability *ab = m_abilities[i];
+        if(ab->m_id == AB_BLAST_TRAP && ab->m_active){
+            invokeAbility(i);
+        }
+    }
     if(actors.size() > 0){
         m_level->descend();
         act();
@@ -1034,7 +1033,7 @@ Player::invokeAbility(int id)
 {
     Ability *ab = m_abilities[id];
     int cost[3] = {0,0,0};
-    for(int i=0;i<ab->m_cost.size();i++){
+    for(unsigned int i=0;i<ab->m_cost.size();i++){
         ManaCost &abCost = ab->m_cost[i];
         switch(abCost.m_color){
             case COLOR_RED:
@@ -1096,7 +1095,7 @@ Player::invokeAbility(int id)
 
 Actor *
 Player::getFromInventory(char key){
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *item = m_inventory[i];
         if(item->m_letter == key){
             return item;

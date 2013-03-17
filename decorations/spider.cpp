@@ -18,6 +18,7 @@ DEC_VAL(SpiderDecoration)
 DEC_RES(SpiderDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(SpiderDecoration)

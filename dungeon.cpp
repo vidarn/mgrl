@@ -71,7 +71,6 @@ void
 Dungeon::generate(Level *level)
 {
 	for(int i=0; i<m_width*m_height;i++){
-		int t = T_VOID;
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width,level);
@@ -264,18 +263,6 @@ setFloor(char *tile)
     *tile = 0;
 }
 
-static
-char 
-cavernEntrance(char *tiles, char axis, char sign, int posY, int posX, int width){
-        for(int tmp1=0;tmp1<6;tmp1++){
-            for(int tmp2=-tmp1;tmp2<=tmp1;tmp2++){
-                int y = axis ? posY + sign*tmp1 : posY + tmp2;
-                int x = axis ? posX + tmp2      : posX + sign*tmp1;
-                tiles[x + y*width] = 126;
-            }
-        }
-}
-
 void
 Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
 {
@@ -299,7 +286,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
             tiles[x+y*width] = dist(RAND);
         }
     }
-    for(int i=0;i<m_rooms.size();i++){
+    for(unsigned int i=0;i<m_rooms.size();i++){
         delete m_rooms[i];
     }
     m_rooms.clear();
@@ -401,7 +388,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
             tiles[x+y*width] = m_tiles[minx+x+(miny+y)*m_width].m_walkable? 0 : 1;
         }
     }
-    for(int i=0;i<points.size();i++){
+    for(unsigned int i=0;i<points.size();i++){
         if(points[i].type == CON_DUN){
             FloodDecoration fd(points[i].x, points[i].y, m_width, m_height);
             fd.render(m_tiles,m_tileFactory,level);
@@ -417,7 +404,7 @@ recursiveConnectCaverns(int width, int height, int y, int x, char *tiles, std::v
     int val = tiles[x+y*width];
     if(val==0 || val==4 || val == 126){
         if(val==4){
-            for(int i=0;i<points->size();i++){
+            for(unsigned int i=0;i<points->size();i++){
                 if((*points)[i].x == x && (*points)[i].y == y){
                     (*points)[i].tag = 1;
                 }
@@ -462,9 +449,9 @@ Dungeon::connectCaverns(int miny, int maxy, int minx, int maxx, char *tiles, std
             float closestDist = FLT_MAX;
             int   closestPoint = -1;
             int   originPoint;
-            for(int i=0;i<points.size();i++){
+            for(unsigned int i=0;i<points.size();i++){
                 if(points[i].tag == 1){
-                    for(int ii=0;ii<points.size();ii++){
+                    for(unsigned int ii=0;ii<points.size();ii++){
                         CavernConnectivityPoint &tmpPoint = points[ii];
                         if(tmpPoint.tag == -1 && (tmpPoint.roomID != points[i].roomID || tmpPoint.type != CON_DUN)){
                             float y = tmpPoint.y - points[i].y;
@@ -539,7 +526,7 @@ Dungeon::cellularAutomata(int height, int width, char **tiles,
 void
 Dungeon::roomsReserve(char *tiles)
 {
-    for(int i=0;i<m_rooms.size();i++){
+    for(unsigned int i=0;i<m_rooms.size();i++){
         m_rooms[i]->reserve(tiles);
     }
 }
@@ -547,7 +534,7 @@ Dungeon::roomsReserve(char *tiles)
 void
 Dungeon::roomsRender(Tile *tiles, TileFactory *tileFactory)
 {
-    for(int i=0;i<m_rooms.size();i++){
+    for(unsigned int i=0;i<m_rooms.size();i++){
         m_rooms[i]->render(tiles, tileFactory);
     }
 }
@@ -555,7 +542,7 @@ Dungeon::roomsRender(Tile *tiles, TileFactory *tileFactory)
 void
 Dungeon::roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level)
 {
-    for(int i=0;i<m_rooms.size();i++){
+    for(unsigned int i=0;i<m_rooms.size();i++){
         m_rooms[i]->decorate(charTiles, tiles, tileFactory, level);
     }
 }

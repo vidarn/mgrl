@@ -5,11 +5,16 @@
 #include "level.h"
 
 Actor::Actor():
-	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(0), m_dx(0),
-	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white), m_letter(0),
-    m_discovered(false), m_amount(1), m_time(0.0f), m_speed(1.0f),m_hd(1)
+	m_x(0),m_y(0),m_glyph('A'), m_letter(0), m_color(TCODColor::white), m_hp(1),m_maxHp(1),m_hd(1),
+    m_dx(0), m_dy(0), m_ac(0), m_amount(1), m_enchantment(0), m_time(0.0f), m_speed(1.0f), m_discovered(false),
+    m_name("something"), m_level(0)
 {
 }
+
+Actor::~Actor()
+{
+}
+
 void
 Actor::finish(Level *level)
 {
@@ -72,7 +77,7 @@ void
 Actor::addTag(int tag)
 {
 	bool add = true;
-	for(int i=0;i<m_tags.size();i++){
+	for(unsigned int i=0;i<m_tags.size();i++){
 		if(m_tags[i] == tag)
 			add = false;
 	}
@@ -83,7 +88,7 @@ Actor::addTag(int tag)
 void
 Actor::removeTag(int tag, bool all)
 {
-	for(int i=0;i<m_tags.size();i++){
+	for(unsigned int i=0;i<m_tags.size();i++){
 		if(m_tags[i] == tag){
             m_tags.erase(m_tags.begin()+i);
             if(!all){
@@ -97,7 +102,7 @@ Actor::removeTag(int tag, bool all)
 bool
 Actor::hasTag(int tag)
 {
-	for(int i=0;i<m_tags.size();i++){
+	for(unsigned int i=0;i<m_tags.size();i++){
 		if(m_tags[i] == tag)
 			return true;
 	}
@@ -203,7 +208,7 @@ Actor::getTarget(int type)
 void
 Actor::removeFromInventory(Actor *item)
 {
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         Actor *invItem = m_inventory[i];
         if(invItem == item){
             m_inventory.erase(m_inventory.begin()+i);
@@ -261,7 +266,7 @@ ActorFactory::getActor(std::string name, Level *level)
         }
     }
     actor->m_name = name.c_str();
-    for(int i=0;i<def.m_propertyNames.size();i++){
+    for(unsigned int i=0;i<def.m_propertyNames.size();i++){
         bool handled=false;
         std::string  &name = def.m_propertyNames[i];
         TCOD_value_t &val  = def.m_propertyData[i];
@@ -278,7 +283,7 @@ ActorFactory::getActor(std::string name, Level *level)
             actor->handleProperty(name,val);
         }
     }
-    for(int i=0;i<def.m_flags.size();i++){
+    for(unsigned int i=0;i<def.m_flags.size();i++){
         actor->handleTag(def.m_flags[i]);
     }
     actor->finish(level);
@@ -307,7 +312,7 @@ ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
         ActorDefinition &def = iter->second;
         if(def.m_type == ACTOR_CREATURE){
             int creatureHd = 1;
-            for(int i=0;i<def.m_propertyNames.size();i++){
+            for(unsigned int i=0;i<def.m_propertyNames.size();i++){
                 std::string  &name = def.m_propertyNames[i];
                 TCOD_value_t &val  = def.m_propertyData[i];
                 if(name == "hp"){
@@ -315,19 +320,19 @@ ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
                 }
             }
             std::vector<bool> tagMatches;
-            for(int i=0;i<tags.size();i++){
+            for(unsigned int i=0;i<tags.size();i++){
                 tagMatches.push_back(false);
             }
-            for(int i=0;i<def.m_flags.size();i++){
+            for(unsigned int i=0;i<def.m_flags.size();i++){
                 std::string &flag = def.m_flags[i];
-                for(int ii=0;ii<tags.size();ii++){
+                for(unsigned int ii=0;ii<tags.size();ii++){
                     if(tags[ii] == flag){
                         tagMatches[ii] = true;
                     }
                 }
             }
             bool allTagsMatch = true;
-            for(int i=0;i<tags.size();i++){
+            for(unsigned int i=0;i<tags.size();i++){
                 allTagsMatch = allTagsMatch && tagMatches[i];
             }
             if(creatureHd == hd && allTagsMatch){
@@ -369,27 +374,23 @@ ActorFactory::getItem(int dungeonLevel, Level *level, std::vector<std::string> t
         ActorDefinition &def = iter->second;
         bool priv = false;
         if(def.m_type == ACTOR_ITEM){
-            for(int i=0;i<def.m_propertyNames.size();i++){
-                std::string  &name = def.m_propertyNames[i];
-                TCOD_value_t &val  = def.m_propertyData[i];
-            }
             std::vector<bool> tagMatches;
-            for(int i=0;i<tags.size();i++){
+            for(unsigned int i=0;i<tags.size();i++){
                 tagMatches.push_back(false);
             }
-            for(int i=0;i<def.m_flags.size();i++){
+            for(unsigned int i=0;i<def.m_flags.size();i++){
                 std::string &flag = def.m_flags[i];
                 if(flag == "priv"){
                     priv = true;
                 }
-                for(int ii=0;ii<tags.size();ii++){
+                for(unsigned int ii=0;ii<tags.size();ii++){
                     if(tags[ii] == flag){
                         tagMatches[ii] = true;
                     }
                 }
             }
             bool allTagsMatch = true;
-            for(int i=0;i<tags.size();i++){
+            for(unsigned int i=0;i<tags.size();i++){
                 allTagsMatch = allTagsMatch && tagMatches[i];
             }
             if(allTagsMatch && !priv){
@@ -429,6 +430,7 @@ ActorFactory::getColor(std::string name){
         return TCODColor::white;
 	if(name == "flesh")
         return TCODColor::lightYellow * TCODColor::lightPink;
+    return TCODColor::white;
 }
 
 ActorConfigListener::ActorConfigListener(ActorFactory *factory):
@@ -467,6 +469,7 @@ ActorConfigListener::parserProperty(TCODParser *parser,const char *name, TCOD_va
         m_actorDef.m_propertyNames.push_back(name);
         m_actorDef.m_propertyData.push_back(value);
     }
+    return true;
 }
 
 bool

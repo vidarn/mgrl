@@ -17,6 +17,10 @@ Room::Room(char *tiles, int w, int h):
 {
 }
 
+Room::~Room()
+{
+}
+
 void
 Room::render(Tile *tiles, TileFactory *tileFactory)
 {
@@ -33,7 +37,7 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
     int patternId = -1;
     int randomId  = -1;
     int doorId    = -1;
-    for(int i=0;i<decorationPlacements.size();i++){
+    for(unsigned int i=0;i<decorationPlacements.size();i++){
         DecorationPlacement &place = decorationPlacements[i];
         Decoration *dec;
         if(place.m_type == DEC_PATTERN)
@@ -66,7 +70,7 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
             }
         }
     }
-    for(int i=0;i<decorations.size();i++){
+    for(unsigned int i=0;i<decorations.size();i++){
         decorations[i]->render(tiles, tileFactory, level);
         delete decorations[i];
     }
@@ -96,7 +100,7 @@ void
 Room::reserve(char *tiles)
 {
     reserveRoom(tiles);
-    for(int i=0;i<m_doors.size();i++){
+    for(unsigned int i=0;i<m_doors.size();i++){
         CavernConnectivityPoint &point = m_doors[i];
         tiles[point.x+point.y*m_stride] = 126;
     }
@@ -108,7 +112,7 @@ Room::validate(char *tiles, std::vector<CavernConnectivityPoint> &points, int id
     if(!validateRoom(tiles)){
         return false;
     }
-    for(int i=0;i<m_doors.size();i++){
+    for(unsigned int i=0;i<m_doors.size();i++){
         m_doors[i].roomID = id;
         points.push_back(m_doors[i]);
     }
@@ -270,5 +274,6 @@ Room::getRoom(int dungeonLevel, char *tiles, int w, int h)
         case 5:
             return new PoolRoom(tiles, w, h);
     }
+    return 0;
 }
 

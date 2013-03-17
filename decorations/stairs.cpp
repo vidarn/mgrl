@@ -14,6 +14,7 @@ DEC_VAL(StairsDecoration)
 DEC_RES(StairsDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(StairsDecoration)

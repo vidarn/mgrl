@@ -1,6 +1,6 @@
 #ifndef ABILITY_EK9W4SK
 #define ABILITY_EK9W4SK
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include <string>
 #include <vector>
 
@@ -56,14 +56,15 @@ class Ability
 {
 	public:
 		Ability(int id);
+		virtual ~Ability();
         virtual bool invoke(Actor *invoker, Level *level, bool &cancelled)=0;
         virtual void deactivate(Actor *invoker, Level *level);
         virtual bool act(Actor *invoker, Level *level);
 		std::string m_name;
 		std::string m_description;
 		std::string m_flavour;
-		bool m_active;
 		int m_id;
+		bool m_active;
         int m_color;
 		std::vector<ManaCost> m_cost;
 };

@@ -40,7 +40,7 @@ ListOverlay::render()
 					sprintf(buffer," %c %c %s", d->m_key, separator, d->m_name.c_str());
 				}
 				if(d->m_type == LIST_CATEGORY){
-					sprintf(buffer,"%s", d->m_name.c_str(), d->m_key);
+					sprintf(buffer,"%s", d->m_name.c_str());
 				}
 				int ii=0;
 				while(buffer[ii] != 0){

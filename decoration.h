@@ -15,6 +15,7 @@ class Decoration
 {
     public:
         Decoration(int x, int y, int w, int h);
+        virtual ~Decoration();
         bool validate(char *tiles);
         bool validateTile(int x, int y, char *tiles);
         void reserve(char *tiles);
@@ -22,8 +23,10 @@ class Decoration
         void render(Tile *tiles, TileFactory *tileFactory, Level *level);
         void setTile(int x, int y, std::string tile, Tile *tiles, TileFactory *tileFactory);
         Tile *getTile(int x, int y, Tile *tiles);
-        int m_x, m_y;
-        int m_w, m_h;
+        int m_x;
+        int m_y;
+        int m_w;
+        int m_h;
     protected:
         virtual bool validateDecoration(char *tiles) = 0;
         virtual bool reserveDecoration(char *tiles) = 0;

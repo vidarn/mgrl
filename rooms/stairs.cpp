@@ -32,7 +32,7 @@ StairsRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
                 Tile *tile = getTile(x,y,tiles);
                 if(tile!=0){
                     bool ok = true;
-                    for(int i=0;i<m_doors.size();i++){
+                    for(unsigned int i=0;i<m_doors.size();i++){
                         if(m_doors[i].x - m_x == x && m_doors[i].y - m_y == y){
                             ok = false;
                         }
@@ -55,7 +55,7 @@ StairsRoom::renderRoom(Tile *tiles, TileFactory *tileFactory)
 void
 StairsRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<DecorationPlacement> &places)
 {
-    for(int i=0;i<m_doors.size();i++){
+    for(unsigned int i=0;i<m_doors.size();i++){
         CavernConnectivityPoint &point = m_doors[i];
         addDecoration(point.x-m_x,point.y-m_y,DEC_DOOR_CLOSED,places);
     }

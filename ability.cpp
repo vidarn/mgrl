@@ -8,6 +8,10 @@ Ability::Ability(int id):
 {
 }
 
+Ability::~Ability()
+{
+}
+
 void
 Ability::deactivate(Actor *invoker, Level *level)
 {
@@ -142,7 +146,7 @@ AbBlink::invoke(Actor *invoker, Level *level, bool &cancelled)
         return false;
     }
     else{
-        boost::random::uniform_int_distribution<> tileDist(0,xList.size());
+        boost::random::uniform_int_distribution<> tileDist(0,xList.size()-1);
         int tile = tileDist(RAND);
         if(invoker->m_x == xList[tile] && invoker->m_y == yList[tile])
             level->m_messages->showMessage("Your surroundings seem exactly the same",MESSAGE_FLAVOUR);
@@ -314,4 +318,5 @@ AbSmallManaStream::act(Actor *invoker, Level *level)
         m_cooldown = 20-(invoker->m_hd/2);
     }
     m_cooldown--;
+    return false;
 }

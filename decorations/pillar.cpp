@@ -12,6 +12,7 @@ DEC_VAL(PillarDecoration)
 DEC_RES(PillarDecoration)
 {
     reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(PillarDecoration)

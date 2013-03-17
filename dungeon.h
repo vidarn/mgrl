@@ -1,6 +1,6 @@
 #ifndef DUNGEON_CM9N55L0
 #define DUNGEON_CM9N55L0
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include "common.h"
 #include "tile.h"
 #include "creature.h"

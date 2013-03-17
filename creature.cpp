@@ -152,7 +152,7 @@ Creature::die(Actor *source)
 void
 Creature::removeFromInventory(Actor *item)
 {
-    for(int i=0;i<m_inventory.size();i++){
+    for(int i=0;i<int(m_inventory.size());i++){
         Actor *invItem = m_inventory[i];
         if(invItem == item){
             m_inventory.erase(m_inventory.begin()+i);
@@ -250,7 +250,7 @@ Creature::finish(Level *level)
 {
     m_level = level;
 	calculateBonuses();
-    for(int i=0;i<m_inventoryStrings.size();i++){
+    for(unsigned int i=0;i<m_inventoryStrings.size();i++){
         Actor *actor = m_level->m_actorFactory.getActor(m_inventoryStrings[i],level);
         if(actor != 0){
             m_inventory.push_back(actor);

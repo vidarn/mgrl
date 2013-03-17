@@ -18,7 +18,7 @@ Item::Item()
 
 Item::~Item()
 {
-    for(int i=0;i<m_inventory.size();i++){
+    for(unsigned int i=0;i<m_inventory.size();i++){
         delete m_inventory[i];
     }
 }
@@ -33,7 +33,7 @@ Item::act(float time)
             std::vector<int> tags;
             tags.push_back(TAG_CREATURE);
             std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
-            for(int i=0;i<actors.size();i++){
+            for(unsigned int i=0;i<actors.size();i++){
                 Actor *actor = actors[i];
                 if(!actor->hasTag(TAG_PLAYER)){
                     exploded = true;
@@ -45,7 +45,7 @@ Item::act(float time)
                 msg += " explodes";
                 m_level->m_messages->showMessage(msg, MESSAGE_NOTIFICATION);
                 m_level->removeActor(this);
-                for(int i=0;i<actors.size();i++){
+                for(unsigned int i=0;i<actors.size();i++){
                     Actor *actor = actors[i];
                     if(!actor->hasTag(TAG_PLAYER)){
                         int damage = 0;
@@ -58,7 +58,7 @@ Item::act(float time)
                     }
                 }
                 Player *player= m_level->m_player;
-                for(int i=0;i<player->m_abilities.size();i++){
+                for(unsigned int i=0;i<player->m_abilities.size();i++){
                     Ability *ab = player->m_abilities[i];
                     if(ab->m_id == AB_BLAST_TRAP && ab->m_active){
                         AbBlastTrap *bt = static_cast<AbBlastTrap *>(ab);
@@ -186,7 +186,7 @@ void
 Item::finish(Level *level)
 {
     m_level = level;
-    for(int i=0;i<m_inventoryStrings.size();i++){
+    for(unsigned int i=0;i<m_inventoryStrings.size();i++){
         Actor *actor = m_level->m_actorFactory.getActor(m_inventoryStrings[i],level);
         if(actor != 0){
             m_inventory.push_back(actor);
@@ -231,12 +231,12 @@ Item::open(Actor *opener)
             if(m_inventory.size() > 0){
                 std::vector<ListDefinition>itemList;
                 char k = 'a';
-                for(int i=0;i<m_inventory.size();i++){
+                for(unsigned int i=0;i<m_inventory.size();i++){
                     itemList.push_back(ListDefinition(LIST_ENTRY, k++ , m_inventory[i]->m_name));
                 }
                 ListOverlay itemOverlay(30, 30, "Take what?", true, true, itemList);
                 itemOverlay.main(m_level);
-                for(int i=0;i<itemOverlay.m_definition.size();i++){
+                for(unsigned int i=0;i<itemOverlay.m_definition.size();i++){
                     ListDefinition &def = itemOverlay.m_definition[i];
                     if(def.m_selected){
                         char val = def.m_key - 'a';

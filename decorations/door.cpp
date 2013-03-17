@@ -14,6 +14,7 @@ DEC_VAL(DoorDecoration)
 DEC_RES(DoorDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(DoorDecoration)

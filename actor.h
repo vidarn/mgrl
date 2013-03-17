@@ -1,6 +1,6 @@
 #ifndef ACTOR_U9AMWJYS
 #define ACTOR_U9AMWJYS
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include <vector>
 #include <map>
 #include <string>
@@ -81,6 +81,7 @@ class Actor
 {
 	public:
 		Actor();
+		virtual ~Actor();
 		virtual void finish(Level *level);
 		void walkTowardsPlayer();
 		void walkRandomly();

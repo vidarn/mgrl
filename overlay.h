@@ -1,6 +1,6 @@
 #ifndef OVERLAY_X4LZW6PV
 #define OVERLAY_X4LZW6PV
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include "common.h"
 
 class Level;

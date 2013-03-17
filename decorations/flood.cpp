@@ -13,6 +13,7 @@ DEC_VAL(FloodDecoration)
 DEC_RES(FloodDecoration)
 {
 	reserveTile(0,0, tiles);
+    return true;
 }
 
 DEC_REN(FloodDecoration)

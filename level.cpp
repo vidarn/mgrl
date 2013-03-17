@@ -38,7 +38,7 @@ Level::render()
         m_messagesWin->render();
         m_dungeon->render();
         for(int ii=0;ii<2;ii++){
-            for(int i=0;i<m_actors.size();i++){
+            for(unsigned int i=0;i<m_actors.size();i++){
                 Actor &actor = *(m_actors[i]);
                 if((ii==0 && !actor.hasTag(TAG_CREATURE)) || (ii==1 && actor.hasTag(TAG_CREATURE)))
                 {
@@ -75,7 +75,7 @@ Level::generate()
 		}
 	}
     placePlayerAtStairs(false);
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
 		Actor &actor = *(m_actors[i]);
 		if(actor.hasTag(TAG_CREATURE)){
             float dx = actor.m_x - m_player->m_x;
@@ -106,7 +106,7 @@ Level::computeFov(int playerX, int playerY)
 			}
 		}
 	}
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
 		Actor &actor = *(m_actors[i]);
 		if(m_fovMap->isInFov(actor.m_x, actor.m_y)){
 			actor.playerSpotted();
@@ -123,21 +123,21 @@ void
 Level::update()
 {
 	m_fovMap->copy(m_dungeonFovMap);
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
         Actor *actor = m_actors[i];
         m_fovMap->setProperties(m_actors[i]->m_x,m_actors[i]->m_y,actor->hasTag(TAG_TRANSPARENT),actor->hasTag(TAG_WALKABLE));
 	}
 	computeFov(m_player->m_x, m_player->m_y);
     while(m_player->m_time > 0.0f){
         float smallestTimeIncrement = m_player->m_time;
-        for(int i=0;i<m_actors.size();i++){
+        for(unsigned int i=0;i<m_actors.size();i++){
             Actor *actor = m_actors[i];
             if(actor->m_time < smallestTimeIncrement){
                 smallestTimeIncrement = actor->m_time;
             }
         }
         m_player->m_time -= smallestTimeIncrement;
-        for(int i=0;i<m_actors.size();i++){
+        for(unsigned int i=0;i<m_actors.size();i++){
             Actor *actor = m_actors[i];
             actor->m_time -= smallestTimeIncrement;
             if(actor->m_time<=0.0f){
@@ -176,7 +176,7 @@ Level::walkTowardsPlayer(int *creatureX, int *creatureY)
 void
 Level::killActor(Actor *victim, Actor *killer)
 {
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
 		Actor *actor = m_actors[i];
 		if(actor == victim){
             if(!actor->hasTag(TAG_PLAYER)){
@@ -222,7 +222,7 @@ Level::recalculateDungeonFov()
 void
 Level::storeLevel(int level)
 {
-    if(m_storedLevels.size()>=level){
+    if(int(m_storedLevels.size())>=level){
         m_storedLevels[level-1].m_actors = m_actors;
     }
     else{
@@ -233,7 +233,7 @@ Level::storeLevel(int level)
 void
 Level::loadLevel(int level)
 {
-    if(m_storedLevels.size()>=level){
+    if(int(m_storedLevels.size())>=level){
         m_dungeon = m_storedLevels[level-1].m_dungeon;
         m_actors  = m_storedLevels[level-1].m_actors;
         recalculateDungeonFov();
@@ -249,7 +249,7 @@ Level::placePlayerAtStairs(bool down)
     int tag = ITEM_STAIRS_UP;
     if(down)
         tag = ITEM_STAIRS_DOWN;
-    for(int i=0;i<m_actors.size();i++){
+    for(unsigned int i=0;i<m_actors.size();i++){
         Actor *actor = m_actors[i];
         if(actor->hasTag(tag)){
             m_player->m_x = actor->m_x;
@@ -265,7 +265,7 @@ Level::isWalkable(int x, int y)
     if(walkable){
         std::vector<int> tags;
         std::vector<Actor *> actors = getActors(x,y,tags);
-        for(int i=0;i<actors.size();i++){
+        for(unsigned int i=0;i<actors.size();i++){
             if(!actors[i]->hasTag(TAG_WALKABLE)){
                 walkable = false;
             }
@@ -278,11 +278,11 @@ std::vector<Actor *>
 Level::getVisibleActors(std::vector<int> tags)
 {
 	std::vector<Actor *> actors;
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
 		Actor *actor = m_actors[i];
 		if(m_fovMap->isInFov(actor->m_x, actor->m_y)){
             bool ok = true;
-            for(int ii=0;ii<tags.size();ii++){
+            for(unsigned int ii=0;ii<tags.size();ii++){
                 if(!actor->hasTag(tags[ii])){
                     ok=false;
                 }
@@ -299,11 +299,11 @@ std::vector<Actor *>
 Level::getActors(int x, int y, std::vector<int> tags)
 {
     std::vector<Actor *> actors;
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
         bool ok=true;
 		Actor *actor = m_actors[i];
 		if(actor->m_x==x && actor->m_y==y){
-            for(int ii=0;ii<tags.size();ii++){
+            for(unsigned int ii=0;ii<tags.size();ii++){
                 if(!actor->hasTag(tags[ii])){
                     ok=false;
                 }
@@ -319,7 +319,7 @@ Level::getActors(int x, int y, std::vector<int> tags)
 void
 Level::removeActor(Actor *actor)
 {
-	for(int i=0;i<m_actors.size();i++){
+	for(unsigned int i=0;i<m_actors.size();i++){
 		Actor *a = m_actors[i];
         if(a == actor){
             m_actors.erase(m_actors.begin()+i);
@@ -385,7 +385,7 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
         console->print(i*7,9,"%2d/%2d%c",player->m_mana[i],player->m_maxMana[i]-player->m_lockedMana[i],col.m_char);
     }
 
-    for(int i=0;i<player->m_abilities.size();i++){
+    for(unsigned int i=0;i<player->m_abilities.size();i++){
         Ability *ability = player->m_abilities[i];
         TCODColor col;
         switch(ability->m_color){
@@ -408,7 +408,7 @@ drawStatus(TCODConsole *console, void *data, int width, int height)
             col = col * TCODColor::grey;
         console->setDefaultForeground(col);
         console->print(0,12+4*i,"%s",ability->m_name.c_str());
-        for(int ii=0;ii<ability->m_cost.size();ii++){
+        for(unsigned int ii=0;ii<ability->m_cost.size();ii++){
             ManaCost &cost = ability->m_cost[ii];
             col = cost.m_col;
             if(ability->m_active)

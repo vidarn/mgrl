@@ -73,7 +73,7 @@ RoundRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Decor
     if(pattern >=0){
         addDecoration(0,0,DEC_PATTERN,places);
     }
-    for(int i=0;i<m_doors.size();i++){
+    for(unsigned int i=0;i<m_doors.size();i++){
         CavernConnectivityPoint &point = m_doors[i];
         addDecoration(point.x-m_x,point.y-m_y,DEC_DOOR,places);
     }

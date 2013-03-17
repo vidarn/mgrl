@@ -38,6 +38,7 @@ TileFactory::getColor(std::string name){
         return TCODColor::blue;
 	if(strcmp(name.c_str(),"white")==0)
         return TCODColor::white;
+    return TCODColor::white;
 }
 
 TileConfigListener::TileConfigListener(TileFactory *factory):

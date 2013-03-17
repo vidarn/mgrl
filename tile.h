@@ -1,6 +1,6 @@
 #ifndef TILE_IWRFWCCC
 #define TILE_IWRFWCCC
-#include <libtcod/libtcod.hpp>
+#include "libtcod.hpp"
 #include <vector>
 #include <map>
 #include <string>

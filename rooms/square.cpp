@@ -116,7 +116,7 @@ SquareRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Deco
                 case 3: // few random
                     {
                         boost::random::uniform_int_distribution<> numDist(1,3);
-                        int numRand = numDist(RAND);
+                        //int numRand = numDist(RAND);
                         for(int i=0;i<m_w;i++){
                             addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
                         }
@@ -125,7 +125,7 @@ SquareRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Deco
                 case 4: // many random
                     {
                         boost::random::uniform_int_distribution<> numDist(4,7);
-                        int numRand = numDist(RAND);
+                        //int numRand = numDist(RAND);
                         for(int i=0;i<m_w;i++){
                             addDecoration(xDist(RAND),yDist(RAND),DEC_RANDOM,places);
                         }
@@ -134,7 +134,7 @@ SquareRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Deco
             }
         }
     }
-    for(int i=0;i<m_doors.size();i++){
+    for(unsigned int i=0;i<m_doors.size();i++){
         CavernConnectivityPoint &point = m_doors[i];
         addDecoration(point.x-m_x,point.y-m_y,DEC_DOOR,places);
     }
