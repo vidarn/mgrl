@@ -109,9 +109,9 @@ main(int argc, char **argv)
                         case 'i':
                             level.m_player->showInventory();
                             break;
-                        case 'r':
+                        /*case 'r':
                             level.generate();
-                            break;
+                            break;*/
                         case '.':
                             level.m_player->act();
                             break;
