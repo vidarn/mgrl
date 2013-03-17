@@ -29,6 +29,7 @@ class Level
 		void killActor(Actor *victim, Actor *killer);
 		void descend();
 		void ascend();
+        void recalculateDungeonFov();
         void placePlayerAtStairs(bool down);
         void storeLevel(int level);
         void loadLevel(int level);
@@ -43,6 +44,7 @@ class Level
 		MessageHandler *m_messages;
 		std::vector<Actor *> m_actors;
 		bool m_playerAlive;
+		bool m_playerWon;
 		bool m_playerGenerated;
         int  m_dungeonLevel;
         int  m_dungeonW, m_dungeonH;

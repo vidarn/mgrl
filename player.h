@@ -22,7 +22,7 @@ class Player: public Creature
         int generateAttributes();
 		virtual void die(Actor *source);
 		virtual void finish(Level *level);
-        virtual void act();
+        virtual void act(float time=1.0f);
 		virtual void doFire();
 		virtual void doOpen();
 		virtual void doQuaff();
@@ -32,8 +32,9 @@ class Player: public Creature
 		virtual void doPickUp();
         virtual void pickUp(Actor *item);
         virtual Actor *getTarget(int type);
+        virtual bool getDirection(int &x, int &y, bool cancelable);
 		virtual void showInventory();
-        void drawNewCard(int slot);
+        void drawNewCard(int slot,bool mana=false);
         void shuffleLibrary();
         void restockLibrary();
         void levelUp();

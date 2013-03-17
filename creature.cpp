@@ -5,7 +5,7 @@
 
 
 Creature::Creature()
-	:Actor(),m_hd(1),m_playerSpottedCooldown(0),m_playerSpottedMemory(4),
+	:Actor(),m_playerSpottedCooldown(0),m_playerSpottedMemory(4),
 	m_str(8),m_dex(8),m_con(8),
 	m_int(8),m_wis(8),m_cha(8),
 	m_bab(0),m_hitDie(6),
@@ -13,7 +13,7 @@ Creature::Creature()
     m_bodyArmor(-1), m_gloves(-1),
     m_boots(-1), m_unarmedDamage(3),
     m_helmet(-1), m_quiver(-1),
-    m_expValue(50)
+    m_expValue(50), m_regainLifeCooldown(0)
 {
 	addTag(TAG_CREATURE);
 	addTag(TAG_ATTACKABLE);
@@ -25,9 +25,9 @@ Creature::Creature()
 }
 
 void
-Creature::act()
+Creature::act(float time)
 {
-    m_time += m_speed;
+    m_time += m_speed*time;
 	if(m_playerSpottedCooldown>0){
 		if(abs(m_x - m_level->m_player->m_x) <= 1 && abs(m_y - m_level->m_player->m_y) <= 1){
 			attack(m_level->m_player,ATTACK_MELEE);
@@ -101,6 +101,7 @@ Creature::attack(Actor *target, int type)
         }
         if(type == ATTACK_MELEE)
             damage += m_strBonus;
+        damage += m_bab;
         if(damage>0){
             if(!target->takeDamage(damage, DAMAGE_PHYSICAL, this)){
                 m_level->killActor(target,this);
@@ -132,22 +133,22 @@ Creature::attack(Actor *target, int type)
 void
 Creature::die(Actor *source)
 {
-	std::string msg;
-    if(!source->hasTag(TAG_PLAYER))
-        msg = "The ";
-	msg += source->m_name;
-    if(source->hasTag(TAG_PLAYER))
-        msg += " kill the ";
-    else
-        msg += " kills the ";
-	msg += m_name;
-	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
-    if(source->hasTag(TAG_PLAYER)){
-        Player *player = static_cast<Player *>(source);
-        player->gainExp(m_expValue);
+    if(source != 0){
+        std::string msg;
+        if(!source->hasTag(TAG_PLAYER))
+            msg = "The ";
+        msg += source->m_name;
+        if(source->hasTag(TAG_PLAYER))
+            msg += " kill the ";
+        else
+            msg += " kills the ";
+        msg += m_name;
+        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+        if(!hasTag(TAG_PLAYER)){
+            m_level->m_player->gainExp(m_expValue);
+        }
     }
 }
-
 void
 Creature::removeFromInventory(Actor *item)
 {
@@ -167,8 +168,8 @@ Creature::removeFromInventory(Actor *item)
             if(m_gloves > i)m_gloves--;
             if(m_boots == i)m_boots = -1;
             if(m_boots > i)m_boots--;
-            if(m_quiver == i)m_boots = -1;
-            if(m_quiver > i)m_boots--;
+            if(m_quiver == i)m_quiver = -1;
+            if(m_quiver > i)m_quiver--;
             i--;
         }
     }
@@ -236,6 +237,7 @@ Creature::handleProperty(std::string &name, TCOD_value_t &val)
     if(name == "expValue") m_expValue = val.i;
     if(name == "speed")    m_speed    = val.f;
     if(name == "memory")   m_playerSpottedMemory = val.i;
+    if(name == "unarmed")  m_unarmedDamage = val.i;
 }
 
 void

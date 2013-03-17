@@ -56,10 +56,15 @@ enum{
     ITEM_POTION,
         POTION_HEAL,
         POTION_MANA,
+        POTION_SACRED_NECTAR,
         POTION_NOT_NAME,
     ITEM_STAIRS_DOWN,
     ITEM_STAIRS_UP,
     ITEM_SHARD_OF_KNOWLEDGE,
+    TRAP,
+    TRAP_BLAST,
+    STATUS_HELD,
+    STATUS_DEFENDED,
 };
 
 enum{
@@ -81,10 +86,11 @@ class Actor
 		void walkRandomly();
 		void render(bool hilight, bool visible);
 		void addTag(int tag);
+		void removeTag(int tag, bool all);
 		bool hasTag(int tag);
 		virtual bool walk(int dx, int dy);
 		virtual void playerSpotted();
-		virtual void act();
+		virtual void act(float time=1.0f);
 		virtual bool takeDamage(int amount, int type, Actor *source);
 		virtual void healDamage(int amount, Actor *source);
 		virtual void die(Actor *source);
@@ -99,13 +105,15 @@ class Actor
         virtual void quaff(Actor *drinker);
         virtual Actor *getTarget(int type);
 		int m_x, m_y;
-		char m_glyph;
+		int m_glyph;
 		char m_letter;
 		TCODColor m_color;
 		int m_hp, m_maxHp;
+		int m_hd;
 		int m_dx, m_dy;
 		int m_ac;
 		int m_amount;
+        int m_enchantment;
         float m_time, m_speed;
         bool m_discovered;
         std::string m_name;
@@ -139,6 +147,7 @@ class ActorFactory
 		void addActorType(std::string name, ActorDefinition actorDef);
 		Actor *getActor(std::string name, Level *level);
 		Actor *getCreature(int hd, Level *level, std::vector<std::string> tags);
+		Actor *getItem(int dungeonLevel, Level *level, std::vector<std::string> tags);
         TCODColor getColor(std::string name);
 	private:
 		std::map<std::string, ActorDefinition> m_actorDefinitions;

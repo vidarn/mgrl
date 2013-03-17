@@ -21,12 +21,15 @@ Player::Player(int race):
     m_mana[0] = m_maxMana[0] = 0;
     m_mana[1] = m_maxMana[1] = 0;
     m_mana[2] = m_maxMana[2] = 0;
+	/*m_allSpells.push_back(new AbDefensiveStance(AB_DEFENSIVE_STANCE));
+	m_allSpells.push_back(new AbBlastTrap(AB_BLAST_TRAP,0));
+	m_allSpells.push_back(new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_BLUE));
+	m_allSpells.push_back(new AbInstantTunnel(AB_INSTANT_TUNNEL));
+	m_allSpells.push_back(new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_RED));
 	m_allSpells.push_back(new AbBlink(AB_BLINK));
 	m_allSpells.push_back(new AbBlink(AB_BLINK));
 	m_allSpells.push_back(new AbSacredNectar(AB_SACRED_NECTAR));
 	m_allSpells.push_back(new AbLightningBolt(AB_LIGHTNING_BOLT));
-	m_allSpells.push_back(new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_BLUE));
-	m_allSpells.push_back(new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_RED));
 	m_allSpells.push_back(new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_WHITE));
 
     for(int i=0;i<m_allSpells.size();i++){
@@ -35,7 +38,7 @@ Player::Player(int race):
             m_abilities.push_back(m_allSpells[i]);
         }
     }
-    restockLibrary();
+    restockLibrary();*/
 
     addTag(TAG_PLAYER);
 }
@@ -63,12 +66,41 @@ handleNameInput(char key, void *data)
     return key != ENTER;
 }
 
+static bool
+handleWinScreen(char key, void *data)
+{
+    if(key == 'q'){
+        return false;
+    }
+    return true;
+}
+
+static void
+drawWinScreen(TCODConsole *console, void *data, int width, int height)
+{
+    std::string *str = static_cast<std::string *>(data);
+    console->print(0,1,"You have obtained the Orb of Knowledge");
+    console->print(0,2,"Your new powers are beyond human imagination");
+    console->print(0,3,"Game Over");
+    console->print(0,5,"Press q to quit");
+}
+
+static void
+drawDeathScreen(TCODConsole *console, void *data, int width, int height)
+{
+	console->setDefaultForeground(TCODColor::red);
+    std::string *str = static_cast<std::string *>(data);
+    console->print(0,1,"You have been slain");
+    console->print(0,3,"Game Over");
+    console->print(0,5,"Press q to quit");
+}
+
 void
 Player::customize()
 {
     m_characterName = "";
     CallbackOverlay nameInput(3,30, "What is your name?", &m_characterName, &drawNameInput, &handleNameInput);
-    nameInput.main(m_level);
+    //nameInput.main(m_level);
     std::vector<ListDefinition>raceList;
     raceList.push_back(ListDefinition(LIST_ENTRY,'a',"Human"));
     raceList.push_back(ListDefinition(LIST_ENTRY,'b',"Vedalken"));
@@ -97,24 +129,26 @@ Player::customize()
         }
     }
     pickUp(m_level->m_actorFactory.getActor("Short Sword",m_level));
-    //pickUp(m_level->m_actorFactory.getActor("Leather Cap",m_level));
     pickUp(m_level->m_actorFactory.getActor("Minor Mana Potion",m_level));
     pickUp(m_level->m_actorFactory.getActor("Short Bow",m_level));
     Actor *arrow = m_level->m_actorFactory.getActor("Arrow",m_level);
     arrow->m_amount = 20;
     pickUp(arrow);
     m_weapon = 0;
-    m_helmet = 1;
+    m_quiver = 3;
     int manaPoints = generateAttributes();
 	calculateBonuses();
     calculateHp();
     calculateAc();
     TCODConsole::root->clear();
     increaseMana(manaPoints);
+    drawNewCard(0,true);
+    drawNewCard(1);
+    drawNewCard(2);
     m_level->m_playerGenerated = true;
     std::string msg = "Welcome ";
-    msg += m_characterName;
-    msg += " the ";
+    /*msg += m_characterName;
+    msg += " the ";*/
     msg += m_raceName;
     m_level->m_messages->showMessage(msg, MESSAGE_WARNING);
     m_level->m_messages->showMessage("You enter the dungeons of Svogthos in search of the Orb of Knowledge", MESSAGE_WARNING);
@@ -140,7 +174,7 @@ Player::increaseMana(int amount)
 
         std::stringstream heading;
         heading << "Select mana to increase (" << i+1 << "/" << amount << ")";
-        ListOverlay manaOverlay(3, 30, heading.str().c_str(), false, false, manaList);
+        ListOverlay manaOverlay(3, 32, heading.str().c_str(), false, false, manaList);
         manaOverlay.main(m_level);
         for(int i=0;i<manaOverlay.m_definition.size();i++){
             ListDefinition &def = manaOverlay.m_definition[i];
@@ -218,13 +252,19 @@ Player::generateAttributes()
 bool
 Player::walk(int dx, int dy)
 {
-    act();
 	int tmpX = m_x + dx;
 	int tmpY = m_y + dy;
 	if(m_level->isWalkable(tmpX,tmpY)){
-        m_x = tmpX;
-        m_y = tmpY;
-        return true;
+        if(!hasTag(STATUS_HELD)){
+            m_x = tmpX;
+            m_y = tmpY;
+            act();
+            return true;
+        }
+        else{
+            m_level->m_messages->showMessage("You cannot walk", MESSAGE_ACTION);
+            return false;
+        }
     }
     else{
         std::vector<int> tags;
@@ -232,6 +272,7 @@ Player::walk(int dx, int dy)
         std::vector<Actor *> actors = m_level->getActors(tmpX, tmpY,tags);
 		if(actors.size()>0){
 			attack(actors[0],ATTACK_MELEE);
+            act();
             return true;
 		}
         else{
@@ -241,6 +282,7 @@ Player::walk(int dx, int dy)
             if(actors.size()>0){
                 std::cout << "Opening...";
                 actors[0]->open(this);
+                act(0.6);
                 return true;
             }
         }
@@ -286,6 +328,9 @@ Player::die(Actor *source)
 	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 	m_level->m_messages->showMessage("You are dead...",MESSAGE_NOTIFICATION);
 	m_level->m_playerAlive = false;
+
+    CallbackOverlay winScreen(7,50, "You are dead...", 0, &drawDeathScreen, &handleWinScreen);
+    winScreen.main(m_level);
 }
 
 void
@@ -295,14 +340,19 @@ Player::finish(Level *level)
 }
 
 void
-Player::act()
+Player::act(float time)
 {
-    m_time += m_speed;
+    m_time += m_speed*time;
     for(int i=0; i<m_abilities.size();i++){
         Ability *ability = m_abilities[i];
         if(ability->m_active)
             ability->act(this, m_level);
     }
+    if(m_regainLifeCooldown <= 0){
+        m_regainLifeCooldown = 15;
+        healDamage(1+m_hd/2,this);
+    }
+    m_regainLifeCooldown--;
 }
 
 Actor *
@@ -388,6 +438,43 @@ Player::getTarget(int type)
     return target;
 }
 
+bool
+Player::getDirection(int &x, int &y, bool cancelable)
+{
+    m_level->m_messages->showMessage("Choose a direction (hjklyubn)",MESSAGE_NOTIFICATION);
+    m_level->render();
+    TCODConsole::flush();
+    bool done =false;
+    while(!done){
+        TCOD_key_t key = TCODConsole::waitForKeypress(true);
+        if(key.pressed){
+            switch(key.c) {
+                case 'h' :
+                    x=-1;y=0;done=true;break;
+                case 'j' :
+                    x= 0;y= 1;done=true;break;
+                case 'k' :
+                    x= 0;y=-1;done=true;break;
+                case 'l' :
+                    x= 1;y= 0;done=true;break;
+                case 'y' :
+                    x=-1;y=-1;done=true;break;
+                case 'u' :
+                    x= 1;y=-1;done=true;break;
+                case 'b' :
+                    x=-1;y= 1;done=true;break;
+                case 'n' :
+                    x= 1;y= 1;done=true;break;
+                case ESC :
+                    if(cancelable){
+                        return false;
+                    }
+            }
+        }
+    }
+    return true;
+}
+
 void
 Player::doFire()
 {
@@ -408,7 +495,7 @@ Player::doFire()
         if(target != 0){
             double breakProbability[] = {0.3, 0.7};
             boost::random::discrete_distribution<> breakDist(breakProbability);
-            if(breakDist(RAND) == 1){
+            if(true){
                 bool done = false;
                 std::vector<int> tags;
                 tags.push_back(ITEM_STACK);
@@ -499,6 +586,21 @@ Player::doQuaff()
                 msg += item->m_name;
                 m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
                 item->quaff(this);
+                item->m_amount--;
+                if(item->m_amount <= 0){
+                    removeFromInventory(item);
+                    if(item->hasTag(POTION_SACRED_NECTAR)){
+                        for(int i=0;i<m_abilities.size();i++){
+                            Ability *ab = m_abilities[i];
+                            if(ab->m_id == AB_SACRED_NECTAR && ab->m_active){
+                                AbSacredNectar *bt = static_cast<AbSacredNectar *>(ab);
+                                if(bt->m_nectar == item){
+                                    invokeAbility(i);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -569,7 +671,7 @@ Player::doWield()
 void
 Player::doDrop()
 {
-    act();
+    bool dropped = false;
     std::vector<ListDefinition>itemList;
     bool empty = true;
     for(int i=0;i<m_inventory.size();i++){
@@ -579,7 +681,7 @@ Player::doDrop()
             itemList.push_back(ListDefinition(LIST_ENTRY, actor->m_letter, st));
         }
     }
-    ListOverlay itemOverlay(30, 30, "Drop what?", false, true, itemList);
+    ListOverlay itemOverlay(30, 30, "Drop what?", true, true, itemList);
     itemOverlay.main(m_level);
     for(int i=0;i<itemOverlay.m_definition.size();i++){
         ListDefinition &def = itemOverlay.m_definition[i];
@@ -593,105 +695,143 @@ Player::doDrop()
                 item->m_y = m_y;
                 m_level->m_actors.push_back(item);
                 removeFromInventory(item);
+                dropped = true;
             }
         }
     }
+    if(dropped)
+        act();
 }
 
 void
 Player::doPickUp()
 {
+    bool showNothingMessage = true;
+    if(m_level->m_dungeon->getGlyph(m_x,m_y) == 28){
+        m_level->m_messages->showMessage("You absorb the shard of knowledge",MESSAGE_NOTIFICATION);
+        int manaAmount = m_hd/7 + 1;
+        increaseMana(manaAmount);
+        int w = m_level->m_dungeon->m_width;
+        m_level->m_dungeon->m_tiles[m_x+m_y*w] = m_level->m_tileFactory.getTile("Crystal Floor");
+        showNothingMessage = false;
+    }
+    if(m_level->m_dungeon->getGlyph(m_x,m_y) == 31){
+        m_level->m_messages->showMessage("Congratulations",MESSAGE_NOTIFICATION);
+        m_level->m_messages->showMessage("You have obtained the Orb of Knowledge",MESSAGE_NOTIFICATION);
+        int w = m_level->m_dungeon->m_width;
+        m_level->m_dungeon->m_tiles[m_x+m_y*w] = m_level->m_tileFactory.getTile("Crystal Floor");
+        showNothingMessage = false;
+        m_level->m_playerWon = true;
+
+        CallbackOverlay winScreen(7,50, "You Win!", 0, &drawWinScreen, &handleWinScreen);
+        winScreen.main(m_level);
+    }
     bool pickedUp = false;
     std::vector<int> tags;
     tags.push_back(ITEM_PICK_UP);
     std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
-    if(actors.size()>0){
-        std::vector<ListDefinition>itemList;
-        bool empty = true;
-        char letter = 'a';
-        for(int i=0;i<actors.size();i++,letter++){
-            Actor *actor = actors[i];
-            std::stringstream st;
-            st << actor->m_name;
-            if(actor->hasTag(ITEM_STACK)){
-                st << " x";
-                st << actor->m_amount;
+    if(m_inventory.size()<26){
+        if(actors.size()>0){
+            showNothingMessage = false;
+            std::vector<ListDefinition>itemList;
+            bool empty = true;
+            char letter = 'a';
+            for(int i=0;i<actors.size();i++,letter++){
+                Actor *actor = actors[i];
+                std::stringstream st;
+                st << actor->m_name;
+                if(actor->hasTag(ITEM_STACK)){
+                    st << " x";
+                    st << actor->m_amount;
+                }
+                itemList.push_back(ListDefinition(LIST_ENTRY, letter, st.str()));
             }
-            itemList.push_back(ListDefinition(LIST_ENTRY, letter, st.str()));
-        }
-        ListOverlay itemOverlay(30, 30, "Pick up what?", itemList.size()>1, true, itemList);
-        itemOverlay.main(m_level);
-        for(int i=0;i<itemOverlay.m_definition.size();i++){
-            ListDefinition &def = itemOverlay.m_definition[i];
-            if(def.m_selected){
-                Actor *item = actors[i];
-                if(item != 0){
-                    std::string msg = "You pick up the ";
-                    msg += item->m_name;
-                    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
-                    pickUp(item);
-                    m_level->removeActor(item);
-                    pickedUp = true;
+            ListOverlay itemOverlay(30, 30, "Pick up what?", itemList.size()>1, true, itemList);
+            itemOverlay.main(m_level);
+            for(int i=0;i<itemOverlay.m_definition.size();i++){
+                ListDefinition &def = itemOverlay.m_definition[i];
+                if(def.m_selected){
+                    Actor *item = actors[i];
+                    if(item != 0){
+                        std::string msg = "You pick up the ";
+                        msg += item->m_name;
+                        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+                        pickUp(item);
+                        m_level->removeActor(item);
+                        pickedUp = true;
+                    }
                 }
             }
         }
+        if(showNothingMessage){
+            m_level->m_messages->showMessage("There is nothing here to pick up",MESSAGE_NOTIFICATION);
+        }
+        if(pickedUp)
+            act();
     }
     else{
-        m_level->m_messages->showMessage("There is nothing here to pick up",MESSAGE_NOTIFICATION);
+        if(showNothingMessage){
+            m_level->m_messages->showMessage("You cannot carry more things",MESSAGE_NOTIFICATION);
+        }
     }
-    if(pickedUp)
-        act();
 }
 
 void
 Player::pickUp(Actor *item)
 {
-    char itemLetter = item->m_letter;
-    std::string itemName = item->m_name;
-    bool done = false;
-    for(int i=0;i<m_inventory.size();i++){
-        Actor *a = m_inventory[i];
-        if(a->m_name == item->m_name && item->hasTag(ITEM_STACK)){
-            a->m_amount += item->m_amount;
-            m_level->removeActor(item);
-            delete item;
-            done = true;
-        }
-    }
-    if(!done){
-        m_inventory.push_back(item);
-        bool keepLetter = item->m_letter != 0;
-        char freeLetter = 'a';
-        bool done=false;
-        if(keepLetter){
-            for(int i=0;i<m_inventory.size();i++){
-                Actor *a = m_inventory[i];
-                if(a->m_letter == item->m_letter){
-                    keepLetter = false;
-                }
+    if(item != 0){
+        char itemLetter = item->m_letter;
+        std::string itemName = item->m_name;
+        bool done = false;
+        for(int i=0;i<m_inventory.size();i++){
+            Actor *a = m_inventory[i];
+            if(a->m_name == item->m_name && item->hasTag(ITEM_STACK)){
+                a->m_amount += item->m_amount;
+                m_level->removeActor(item);
+                delete item;
+                done = true;
             }
         }
-        if(!keepLetter){
-            while(!done){
-                done = true;
+        if(!done){
+            m_inventory.push_back(item);
+            bool keepLetter = item->m_letter != 0;
+            char freeLetter = 'a';
+            bool done=false;
+            if(keepLetter){
                 for(int i=0;i<m_inventory.size();i++){
                     Actor *a = m_inventory[i];
-                    if(a->m_letter == freeLetter){
-                        done = false;
+                    if(a->m_letter == item->m_letter){
+                        keepLetter = false;
                     }
                 }
-                if(!done){
-                    freeLetter++;
-                }
             }
-            item->m_letter = freeLetter;
+            if(!keepLetter){
+                while(!done){
+                    done = true;
+                    for(int i=0;i<m_inventory.size();i++){
+                        Actor *a = m_inventory[i];
+                        if(a->m_letter == freeLetter){
+                            done = false;
+                        }
+                    }
+                    if(!done){
+                        freeLetter++;
+                    }
+                }
+                item->m_letter = freeLetter;
+            }
+            itemLetter = item->m_letter;
+        }
+        std::string msg = "";
+        msg += itemLetter;
+        msg += " - ";
+        msg += itemName;
+        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+        for(int i=0;i<m_inventory.size();i++){
+            Actor *a = m_inventory[i];
+            std::cout << a->m_name << std::endl;
         }
     }
-    std::string msg = "";
-    msg += itemLetter;
-    msg += " - ";
-    msg += itemName;
-    m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
 }
 
 void
@@ -733,20 +873,85 @@ Player::showInventory()
             itemList.pop_back();
         }
     }
-    ListOverlay itemOverlay(30, 30, "Inventory", false, true, itemList);
+    ListOverlay itemOverlay(40, 40, "Inventory", false, true, itemList);
     itemOverlay.main(m_level);
 }
 
 void
-Player::drawNewCard(int slot)
+Player::drawNewCard(int slot, bool mana)
 {
-    if(slot<m_abilities.size() && slot>=0){
+    Ability *ab;
+    double cardProbability[] = { 1.0, 1.5, 1.0};
+    boost::random::discrete_distribution<> cardDist(cardProbability);
+    boost::random::discrete_distribution<> colorDist(m_maxMana);
+    bool done = false;
+    while(!done){
+        int color = colorDist(RAND);
+        int card = cardDist(RAND);
+        if(mana)
+            card = 2;
+        switch(color){
+            case 0: // RED
+                switch(card){
+                    case 0:
+                        ab = new AbInstantTunnel(AB_INSTANT_TUNNEL);break;
+                    case 1:
+                        ab = new AbLightningBolt(AB_LIGHTNING_BOLT);break;
+                    case 2:
+                        ab = new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_RED);break;
+                }
+                break;
+            case 1: // BLUE
+                switch(card){
+                    case 0:
+                        ab = new AbBlink(AB_BLINK);break;
+                    case 1:
+                        ab = new AbBlastTrap(AB_BLAST_TRAP,0);break;
+                    case 2:
+                        ab = new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_BLUE);break;
+                }
+                break;
+            case 2: // WHITE
+                switch(card){
+                    case 0:
+                        ab = new AbSacredNectar(AB_SACRED_NECTAR);break;
+                    case 1:
+                        ab = new AbDefensiveStance(AB_DEFENSIVE_STANCE);break;
+                    case 2:
+                        ab = new AbSmallManaStream(AB_SMALL_MANA_STREAM, COLOR_WHITE);break;
+                }
+                break;
+        }
+        done = m_maxMana[ab->m_color] > 0;
+        if(done){
+            for(int i=0;i<ab->m_cost.size();i++){
+                ManaCost &cost = ab->m_cost[i];
+                if(m_maxMana[cost.m_color] < cost.m_amount){
+                    done = false;
+                }
+            }
+        }
+        if(!done){
+            delete ab;
+        }
+    }
+    if(m_abilities.size() > slot){
+        if(m_abilities[slot] != 0){
+            delete m_abilities[slot];
+        }
+        m_abilities[slot] = ab;
+    }
+    else{
+        m_abilities.push_back(ab);
+    }
+
+    /*if(slot<m_abilities.size() && slot>=0){
         if(m_library.size()<=0){
             restockLibrary();
         }
         m_abilities[slot] = m_library.back();
         m_library.pop_back();
-    }
+    }*/
 }
 
 void
@@ -763,7 +968,7 @@ Player::restockLibrary()
     for(int i=0;i<m_deck.size();i++){
         bool ok=true;
         Ability *ab = m_deck[i];
-        for(int ii=0;ii<4;ii++){
+        for(int ii=0;ii<3;ii++){
             if(ab == m_abilities[ii]){
                 ok=false;
             }
@@ -777,17 +982,17 @@ Player::restockLibrary()
 
 void
 Player::levelUp(){
-    std::stringstream ss;
-    m_hd++;
-    m_bab++;
-    m_expForNextLevel += m_hd*1000;
-	calculateBonuses();
-    calculateHp();
-    calculateAc();
-    ss << "You are now level " << m_hd;
-    m_level->m_messages->showMessage(ss.str(),MESSAGE_NOTIFICATION);
-    int manaAmount = m_hd/7 + 1;
-    increaseMana(manaAmount);
+    if(m_hd < 20){
+        std::stringstream ss;
+        m_hd++;
+        m_bab++;
+        m_expForNextLevel += m_hd*1000;
+        calculateBonuses();
+        calculateHp();
+        calculateAc();
+        ss << "You are now level " << m_hd;
+        m_level->m_messages->showMessage(ss.str(),MESSAGE_NOTIFICATION);
+    }
 }
 
 void
@@ -797,6 +1002,7 @@ Player::goDown(){
     std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
     if(actors.size() > 0){
         m_level->descend();
+        act();
     }
 }
 
@@ -808,6 +1014,7 @@ Player::goUp(){
     if(actors.size() > 0){
         if(m_level->m_dungeonLevel > 1){
             m_level->ascend();
+            act();
         }
         else{
             m_level->m_messages->showMessage("You have not yet retrieved the Orb of Knowledge",MESSAGE_NOTIFICATION);
@@ -826,7 +1033,6 @@ Player::gainExp(int amount){
 void
 Player::invokeAbility(int id)
 {
-    act();
     Ability *ab = m_abilities[id];
     int cost[3] = {0,0,0};
     for(int i=0;i<ab->m_cost.size();i++){
@@ -857,6 +1063,7 @@ Player::invokeAbility(int id)
             m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
             discard = ab->invoke(this,m_level,cancelled);
             if(!cancelled){
+                act();
                 for(int i=0;i<3;i++){
                     m_mana[i] -= cost[i];
                 }
@@ -870,6 +1077,12 @@ Player::invokeAbility(int id)
                     }
                 }
             }
+            else{
+                m_level->m_messages->showMessage("Never mind",MESSAGE_FLAVOUR);
+            }
+        }
+        else{
+            m_level->m_messages->showMessage("You don't have enough mana",MESSAGE_FLAVOUR);
         }
     }
     else{

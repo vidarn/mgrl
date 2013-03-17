@@ -1,13 +1,14 @@
 #include "shard.h"
 #include <boost/random/uniform_real_distribution.hpp>
 
-ROOM_CONS(ShardRoom)
+ROOM_CONS(ShardRoom, bool orb)
 {
 	m_radius = 4;
     boost::random::uniform_int_distribution<> xDist(2+m_radius,w-2-m_radius);
     boost::random::uniform_int_distribution<> yDist(2+m_radius,h-2-m_radius);
     m_x = xDist(RAND);
     m_y = yDist(RAND);
+    m_orb = orb;
 }
 
 void
@@ -26,7 +27,16 @@ ShardRoom::decorateRoom(Tile *tiles, TileFactory *tileFactory, std::vector<Decor
 			}
 		}
 	}
-    setTile(0,0,"Shard of Knowledge", tiles, tileFactory);
+    if(m_orb){
+        setTile(0,0,"Orb of Knowledge", tiles, tileFactory);
+        setTile( 1, 1,"Shard of Knowledge", tiles, tileFactory);
+        setTile( 1,-1,"Shard of Knowledge", tiles, tileFactory);
+        setTile(-1, 1,"Shard of Knowledge", tiles, tileFactory);
+        setTile(-1,-1,"Shard of Knowledge", tiles, tileFactory);
+    }
+    else{
+        setTile(0,0,"Shard of Knowledge", tiles, tileFactory);
+    }
 }
 
 void

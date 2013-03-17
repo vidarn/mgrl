@@ -18,6 +18,7 @@ Level::Level(int dungeonWidth, int dungeonHeight, int statusWinWidth, int status
     m_player->m_y = (DUNGEON_WIN_H)/2;
     m_player->finish(this);
 	m_playerAlive = true;
+	m_playerWon = false;
 	m_playerGenerated = false;
 	m_pathFinder = 0;
     m_statusWin = new CallbackOverlay(5,5,"Status",m_player, &drawStatus, 0);
@@ -74,6 +75,19 @@ Level::generate()
 		}
 	}
     placePlayerAtStairs(false);
+	for(int i=0;i<m_actors.size();i++){
+		Actor &actor = *(m_actors[i]);
+		if(actor.hasTag(TAG_CREATURE)){
+            float dx = actor.m_x - m_player->m_x;
+            float dy = actor.m_y - m_player->m_y;
+            float dist = dx*dx + dy*dy;
+            if(dist < 10.0f){
+                std::cout << "Killing " << actor.m_name << std::endl;
+                m_actors.erase(m_actors.begin()+i);
+                i--;
+            }
+		}
+	}
 }
 
 void
@@ -194,6 +208,17 @@ Level::ascend()
     loadLevel(m_dungeonLevel);
     placePlayerAtStairs(true);
 }
+void
+Level::recalculateDungeonFov()
+{
+    int w = m_dungeon->m_width;
+    int h = m_dungeon->m_height;
+    for(int y=0;y<h;y++){
+        for(int x=0;x<w;x++){
+            m_dungeonFovMap->setProperties(x,y,m_dungeon->isTransparent(x,y), m_dungeon->isWalkable(x,y));
+        }
+    }
+}
 
 void
 Level::storeLevel(int level)
@@ -212,13 +237,7 @@ Level::loadLevel(int level)
     if(m_storedLevels.size()>=level){
         m_dungeon = m_storedLevels[level-1].m_dungeon;
         m_actors  = m_storedLevels[level-1].m_actors;
-        int w = m_dungeon->m_width;
-        int h = m_dungeon->m_height;
-        for(int y=0;y<h;y++){
-            for(int x=0;x<w;x++){
-                m_dungeonFovMap->setProperties(x,y,m_dungeon->isTransparent(x,y), m_dungeon->isWalkable(x,y));
-            }
-        }
+        recalculateDungeonFov();
     }
     else{
         generate();

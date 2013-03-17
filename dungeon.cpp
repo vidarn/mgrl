@@ -34,6 +34,9 @@ Dungeon::render()
                     }
 					if(!tile.m_visible)
 						col = col * TCODColor::grey;
+                    if(tile.m_glyph == 31){
+                        col = TCODColor::white;
+                    }
                     TCODConsole::root->setDefaultForeground(col);
 					TCODConsole::root->putChar(x,y,tile.m_glyph);
 				}
@@ -72,18 +75,53 @@ Dungeon::generate(Level *level)
 		m_tiles[i] = m_tileFactory->getTile("Stone Floor");
 	}
     generateCavern(0, m_height, 0, m_width,level);
-    for(int i=0;i<10;i++){
-        boost::random::uniform_int_distribution<> xDist(0,DUNGEON_WIN_W-1);
-        boost::random::uniform_int_distribution<> yDist(0,DUNGEON_WIN_H-1);
-        int x = xDist(RAND);
-        int y = yDist(RAND);
-        if(isWalkable(x,y)){
-            std::vector<std::string> tags;
-            //tags.push_back("spider");
-            /*Actor *actor = level->m_actorFactory.getActor("Sarcophagus",level);
-            actor->m_x = x;
-            actor->m_y = y;
-            level->m_actors.push_back(actor);*/
+    bool placedUber = false;
+    for(int i=0;i<4;i++){
+        for(int ii=0;ii<80;ii++){
+            boost::random::uniform_int_distribution<> xDist(1,DUNGEON_WIN_W-2);
+            boost::random::uniform_int_distribution<> yDist(1,DUNGEON_WIN_H-2);
+            int x = xDist(RAND);
+            int y = yDist(RAND);
+            if(level->isWalkable(x,y)){
+                std::vector<std::string> tags;
+                int itemLevel = level->m_dungeonLevel;
+                if(!placedUber){
+                    itemLevel += 3;
+                    placedUber = true;
+                }
+                Actor *actor = level->m_actorFactory.getItem(itemLevel,level,tags);
+                if(actor != 0){
+                    actor->m_x = x;
+                    actor->m_y = y;
+                    level->m_actors.push_back(actor);
+                    ii=200;
+                }
+            }
+        }
+    }
+    int numExtraEnemies = 10;
+    if(level->m_dungeonLevel==15)
+        numExtraEnemies = 150;
+    for(int i=0;i<numExtraEnemies;i++){
+        for(int ii=0;ii<80;ii++){
+            boost::random::uniform_int_distribution<> xDist(1,DUNGEON_WIN_W-2);
+            boost::random::uniform_int_distribution<> yDist(1,DUNGEON_WIN_H-2);
+            int x = xDist(RAND);
+            int y = yDist(RAND);
+            if(level->isWalkable(x,y)){
+                std::vector<std::string> tags;
+                int hd = 1+level->m_dungeonLevel/4;
+                if(level->m_dungeonLevel == 1){
+                    hd = 0;
+                }
+                Actor *actor = level->m_actorFactory.getCreature(hd,level,tags);
+                if(actor != 0){
+                    actor->m_x = x;
+                    actor->m_y = y;
+                    level->m_actors.push_back(actor);
+                    ii=200;
+                }
+            }
         }
     }
 }
@@ -149,6 +187,8 @@ Dungeon::drawLine(int y0, int y1, int x0, int x1, int width, char *tiles, void (
 bool
 Dungeon::isWalkable(int x, int y)
 {
+    if(x<0 || y<0 || x>m_width-1 || y>m_height-1)
+        return false;
 	return m_tiles[x+y*m_width].m_walkable;
 }
 
@@ -246,7 +286,7 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     char *tmpTiles = new char[width*height];
     double probabilities[] = {0.55, 0.45};
     probabilities[1] = 0.2;
-    if(level->m_dungeonLevel > 10){
+    if(level->m_dungeonLevel > 9){
         probabilities[1] = 0.0;
         numRooms = 40;
     }
@@ -271,10 +311,14 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     stairsRoom->validate(tiles,points,roomID);
     roomID++;
 
-    Room *shardRoom  = new ShardRoom(tiles, width, height);
+    Room *shardRoom  = new ShardRoom(tiles, width, height, level->m_dungeonLevel==15);
     shardRoom->reserve(tiles);
     shardRoom->validate(tiles,points,roomID);
     roomID++;
+
+    if(level->m_dungeonLevel==15){
+        numRooms = 0;
+    }
 
     for(int i=0;i<numRooms;i++){
         Room *room = Room::getRoom(0,tiles,width,height);
@@ -291,13 +335,22 @@ Dungeon::generateCavern(int miny, int maxy, int minx, int maxx, Level *level)
     m_rooms.push_back(shardRoom);
     m_rooms.push_back(stairsRoom);
 
-    int numRepetitions = 4;
-    for(int r=0;r<numRepetitions;r++){
-        cellularAutomata(height,width,&tiles,&tmpTiles,cavernFirstPass);
+    if(level->m_dungeonLevel < 14){
+        int numRepetitions = 4;
+        for(int r=0;r<numRepetitions;r++){
+            cellularAutomata(height,width,&tiles,&tmpTiles,cavernFirstPass);
+        }
+        numRepetitions = 3;
+        for(int r=0;r<numRepetitions;r++){
+            cellularAutomata(height,width,&tiles,&tmpTiles,cavernSecondPass);
+        }
     }
-    numRepetitions = 3;
-    for(int r=0;r<numRepetitions;r++){
-        cellularAutomata(height,width,&tiles,&tmpTiles,cavernSecondPass);
+    else{
+        for(int y=0;y<height;y++){
+            for(int x=0;x<width;x++){
+                tiles[x+y*width] = 0;
+            }
+        }
     }
     connectCaverns(miny,maxy,minx,maxx,tiles,points);
     for(int y=0;y<height;y++){

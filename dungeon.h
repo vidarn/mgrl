@@ -25,6 +25,7 @@ class Dungeon{
 		void setHilight(int x, int y, char val);
 		bool isHilighted(int x, int y, char val);
 		int m_width, m_height;
+		Tile *m_tiles;
 	private:
         void generateCavern(int miny, int maxy, int minx, int maxx, Level *level);
         void connectCaverns(int miny, int maxy, int minx, int maxx,
@@ -34,7 +35,6 @@ class Dungeon{
         void roomsReserve(char *tiles);
         void roomsRender(Tile *tiles, TileFactory *tileFactory);
         void roomsDecorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *level);
-		Tile *m_tiles;
 		TileFactory *m_tileFactory;
         std::vector<Room *> m_rooms;
 		char *m_hilight;

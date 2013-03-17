@@ -151,15 +151,18 @@ main(int argc, char **argv)
                         case '<':
                             level.m_player->goUp();
                             break;
-                        case 'D':
+                        /*case 'D':
                             DEBUG = !DEBUG;
                             if(DEBUG)
                                 level.m_messages->showMessage("DEBUG MODE ON",MESSAGE_WARNING);
                             else
                                 level.m_messages->showMessage("DEBUG MODE OFF",MESSAGE_WARNING);
-                            break;
+                            break;*/
                         default:
                             break;
+                    }
+                    if(level.m_playerWon){
+                        return 0;
                     }
                     if(level.m_player->m_time > 0.0f){
                         level.update();

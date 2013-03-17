@@ -7,7 +7,7 @@ class Item: public Actor
 	public:
 		Item();
 		~Item();
-		virtual void act();
+		virtual void act(float time=1.0f);
 		virtual void playerSpotted();
         virtual void handleProperty(std::string &name, TCOD_value_t &val);
         virtual void handleTag(std::string &tag);

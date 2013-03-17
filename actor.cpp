@@ -7,7 +7,7 @@
 Actor::Actor():
 	m_x(0),m_y(0),m_glyph('A'),m_hp(1),m_maxHp(1), m_level(0), m_dx(0),
 	m_dy(0), m_name("something"), m_ac(0), m_color(TCODColor::white), m_letter(0),
-    m_discovered(false), m_amount(1), m_time(0.0f), m_speed(1.0f)
+    m_discovered(false), m_amount(1), m_time(0.0f), m_speed(1.0f),m_hd(1)
 {
 }
 void
@@ -33,7 +33,7 @@ Actor::walkRandomly()
 		m_dy = dist(RAND);
 	}
 	int a =0;
-	while(!m_level->m_dungeon->isWalkable(m_x+m_dx,m_y+m_dy) && a < 5){
+	while(!m_level->isWalkable(m_x+m_dx,m_y+m_dy) && a < 5){
 		m_dx = dist(RAND);
 		m_dy = dist(RAND);
 		a++;
@@ -80,6 +80,19 @@ Actor::addTag(int tag)
 		m_tags.push_back(tag);
 	}
 }
+void
+Actor::removeTag(int tag, bool all)
+{
+	for(int i=0;i<m_tags.size();i++){
+		if(m_tags[i] == tag){
+            m_tags.erase(m_tags.begin()+i);
+            if(!all){
+                return;
+            }
+            i--;
+        }
+	}
+}
 
 bool
 Actor::hasTag(int tag)
@@ -97,14 +110,17 @@ Actor::playerSpotted()
 }
 
 void
-Actor::act()
+Actor::act(float time)
 {
-    m_time += m_speed;
+    m_time += m_speed * time;
 }
 
 bool
 Actor::takeDamage(int amount, int type, Actor *source)
 {
+    if(hasTag(STATUS_DEFENDED)){
+        amount = int(float(amount)*0.7);
+    }
 	m_hp -= amount;
     /*std::stringstream ss;
     ss << m_name << " takes " << amount << " damage and has " << m_hp << " hp left";
@@ -121,16 +137,18 @@ Actor::healDamage(int amount, Actor *source){
 void
 Actor::die(Actor *source)
 {
-	std::string msg;
-    if(!source->hasTag(TAG_PLAYER))
-        msg = "The ";
-	msg += source->m_name;
-    if(source->hasTag(TAG_PLAYER))
-        msg += " destroy the ";
-    else
-        msg += " destroys the ";
-	msg += m_name;
-	m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+    if(source != 0){
+        std::string msg;
+        if(!source->hasTag(TAG_PLAYER))
+            msg = "The ";
+        msg += source->m_name;
+        if(source->hasTag(TAG_PLAYER))
+            msg += " destroy the ";
+        else
+            msg += " destroys the ";
+        msg += m_name;
+        m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
+    }
 }
 
 bool
@@ -200,13 +218,16 @@ ActorFactory::ActorFactory()
 	TCODParserStruct *creatureStruct = parser.newStructure("creature");
 	creatureStruct->addFlag("spider")
 		;
-	creatureStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
+	creatureStruct->addProperty("glyph",TCOD_TYPE_INT,true)
         ->addProperty("col",TCOD_TYPE_STRING,false)
         ->addProperty("name",TCOD_TYPE_STRING,false)
         ->addProperty("genWeight",TCOD_TYPE_FLOAT,false)
         ;
 	TCODParserStruct *itemStruct = parser.newStructure("item");
-	itemStruct->addProperty("glyph",TCOD_TYPE_CHAR,true)
+        itemStruct->addFlag("pickUp")
+        ->addFlag("priv")
+        ;
+	itemStruct->addProperty("glyph",TCOD_TYPE_INT,true)
         ->addProperty("col",TCOD_TYPE_STRING,false)
         ->addProperty("name",TCOD_TYPE_STRING,false)
         ->addProperty("genWeight",TCOD_TYPE_FLOAT,false)
@@ -231,17 +252,21 @@ ActorFactory::getActor(std::string name, Level *level)
     Actor *actor;
     if(def.m_type == ACTOR_CREATURE)
         actor = new Creature();
-    else if(def.m_type == ACTOR_ITEM)
-        actor = new Item();
-    else
-        actor = new Actor();
+    else{
+        if(def.m_type == ACTOR_ITEM){
+            actor = new Item();
+        }
+        else{
+            actor = new Actor();
+        }
+    }
     actor->m_name = name.c_str();
     for(int i=0;i<def.m_propertyNames.size();i++){
         bool handled=false;
         std::string  &name = def.m_propertyNames[i];
         TCOD_value_t &val  = def.m_propertyData[i];
         if(name == "glyph"){handled=true;
-            actor->m_glyph = val.c;
+            actor->m_glyph = val.i;
         }
         if(name == "col"){handled=true;
             actor->m_color = getColor(val.s);
@@ -263,6 +288,17 @@ ActorFactory::getActor(std::string name, Level *level)
 Actor *
 ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
 {
+    double hdOffsets[] = {
+        0.3,
+        0.5,
+        2.0,
+        0.3,
+        0.1
+    };
+    boost::random::discrete_distribution<> hdDist(hdOffsets);
+    hd += hdDist(RAND) -2;
+    hd = std::max(0,hd);
+
     std::vector<std::string> matchingDefinitions;
     std::vector<float> definitionWeights;
     std::map<std::string, ActorDefinition>::iterator iter;
@@ -311,16 +347,88 @@ ActorFactory::getCreature(int hd, Level *level, std::vector<std::string> tags)
     }
 }
 
+Actor *
+ActorFactory::getItem(int dungeonLevel, Level *level, std::vector<std::string> tags)
+{
+    double enchantmentOffsets[] = {
+        0.3,
+        0.5,
+        2.0,
+        0.3,
+        0.1
+    };
+    boost::random::discrete_distribution<> enchantmentDist(enchantmentOffsets);
+    int enchantment = dungeonLevel/2 + enchantmentDist(RAND) -2;
+    enchantment = std::max(0,enchantment);
+
+    std::vector<std::string> matchingDefinitions;
+    std::vector<float> definitionWeights;
+    std::map<std::string, ActorDefinition>::iterator iter;
+    for(iter=m_actorDefinitions.begin();iter!=m_actorDefinitions.end();++iter){
+        std::string defName = iter->first;
+        ActorDefinition &def = iter->second;
+        bool priv = false;
+        if(def.m_type == ACTOR_ITEM){
+            for(int i=0;i<def.m_propertyNames.size();i++){
+                std::string  &name = def.m_propertyNames[i];
+                TCOD_value_t &val  = def.m_propertyData[i];
+            }
+            std::vector<bool> tagMatches;
+            for(int i=0;i<tags.size();i++){
+                tagMatches.push_back(false);
+            }
+            for(int i=0;i<def.m_flags.size();i++){
+                std::string &flag = def.m_flags[i];
+                if(flag == "priv"){
+                    priv = true;
+                }
+                for(int ii=0;ii<tags.size();ii++){
+                    if(tags[ii] == flag){
+                        tagMatches[ii] = true;
+                    }
+                }
+            }
+            bool allTagsMatch = true;
+            for(int i=0;i<tags.size();i++){
+                allTagsMatch = allTagsMatch && tagMatches[i];
+            }
+            if(allTagsMatch && !priv){
+                definitionWeights.push_back(def.m_genWeight);
+                matchingDefinitions.push_back(defName);
+            }
+        }
+    }
+    if(matchingDefinitions.size() > 0){
+        boost::random::discrete_distribution<> itemDist(definitionWeights);
+        int a = itemDist(RAND);
+        std::string name = matchingDefinitions[a];
+
+        Actor *actor = getActor(name,level);
+        //actor->m_enchantment = enchantment;
+        return actor;
+    }
+    else{
+        return 0;
+    }
+}
+
+
 TCODColor
 ActorFactory::getColor(std::string name){
 	if(name == "blue")
         return TCODColor::blue;
 	if(name == "green")
-        return TCODColor::green;
-	if(name == "dark green")
         return TCODColor::darkGreen;
+	if(name == "dark green")
+        return TCODColor::darkestGreen;
+	if(name == "green")
+        return TCODColor::green;
+	if(name == "light blue")
+        return TCODColor::lightBlue;
 	if(name == "white")
         return TCODColor::white;
+	if(name == "flesh")
+        return TCODColor::lightYellow * TCODColor::lightPink;
 }
 
 ActorConfigListener::ActorConfigListener(ActorFactory *factory):

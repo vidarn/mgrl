@@ -12,6 +12,9 @@ enum{
 	AB_SACRED_NECTAR,
 	AB_LIGHTNING_BOLT,
 	AB_BLINK,
+	AB_INSTANT_TUNNEL,
+	AB_BLAST_TRAP,
+	AB_DEFENSIVE_STANCE,
 	AB_SMALL_MANA_STREAM,
 };
 
@@ -88,12 +91,29 @@ class AbBlink: public Ability
         virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
 };
 
-/*class AbInstantTunnel: public Ability
+class AbInstantTunnel: public Ability
 {
 	public:
 		AbInstantTunnel(int id);
         virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
-};*/
+};
+
+class AbBlastTrap: public Ability
+{
+	public:
+		AbBlastTrap(int id, int type);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
+        virtual void deactivate(Actor *invoker, Level *level);
+        Actor *m_trap;
+};
+
+class AbDefensiveStance: public Ability
+{
+	public:
+		AbDefensiveStance(int id);
+        virtual bool invoke(Actor *invoker, Level *level, bool &cancelled);
+        virtual void deactivate(Actor *invoker, Level *level);
+};
 
 class AbSmallManaStream: public Ability
 {

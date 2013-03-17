@@ -24,9 +24,52 @@ Item::~Item()
 }
 
 void
-Item::act()
+Item::act(float time)
 {
-    m_time += m_speed;
+    m_time += m_speed*time;
+    if(hasTag(TRAP)){
+        if(hasTag(TRAP_BLAST)){
+            bool exploded = false;
+            std::vector<int> tags;
+            tags.push_back(TAG_CREATURE);
+            std::vector<Actor *> actors = m_level->getActors(m_x,m_y,tags);
+            for(int i=0;i<actors.size();i++){
+                Actor *actor = actors[i];
+                if(!actor->hasTag(TAG_PLAYER)){
+                    exploded = true;
+                }
+            }
+            if(exploded){
+                std::string msg = "The ";
+                msg += m_name;
+                msg += " explodes";
+                m_level->m_messages->showMessage(msg, MESSAGE_NOTIFICATION);
+                m_level->removeActor(this);
+                for(int i=0;i<actors.size();i++){
+                    Actor *actor = actors[i];
+                    if(!actor->hasTag(TAG_PLAYER)){
+                        int damage = 0;
+                        for(int i=0; i<2+m_level->m_player->m_hd;i++){
+                            damage += d6(RAND);
+                        }
+                        if(!actor->takeDamage(damage, DAMAGE_PHYSICAL, this)){
+                            m_level->killActor(actor,this);
+                        }
+                    }
+                }
+                Player *player= m_level->m_player;
+                for(int i=0;i<player->m_abilities.size();i++){
+                    Ability *ab = player->m_abilities[i];
+                    if(ab->m_id == AB_BLAST_TRAP && ab->m_active){
+                        AbBlastTrap *bt = static_cast<AbBlastTrap *>(ab);
+                        if(bt->m_trap == this){
+                            player->invokeAbility(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void
@@ -69,7 +112,10 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
         addTag(ITEM_SCROLL);addTag(ITEM_READ);addTag(ITEM_PICK_UP);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);
     }
     if(name == "potion" && val.b){
-        addTag(ITEM_POTION);addTag(ITEM_QUAFF);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);addTag(ITEM_PICK_UP);
+        addTag(ITEM_POTION);addTag(ITEM_QUAFF);addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);addTag(ITEM_PICK_UP);addTag(ITEM_STACK);
+    }
+    if(name == "sacred_nectar" && val.b){
+        addTag(POTION_SACRED_NECTAR);
     }
     if(name == "heal_potion" && val.b){
         addTag(POTION_HEAL);
@@ -88,10 +134,10 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
     }
     if(name == "container"){
         addTag(ITEM_OPEN);addTag(ITEM_CONTAINER);
-        for ( char ** iterator = (char **)TCOD_list_begin(val.list); iterator != (char **)TCOD_list_end(val.list); iterator ++ ) {
+        /*for ( char ** iterator = (char **)TCOD_list_begin(val.list); iterator != (char **)TCOD_list_end(val.list); iterator ++ ) {
             char *currentValue=*iterator;
             m_inventoryStrings.push_back(currentValue);
-        }
+        }*/
     }
     if(name == "not_potion_name" && val.b){
         addTag(POTION_NOT_NAME);}
@@ -126,6 +172,9 @@ Item::handleProperty(std::string &name, TCOD_value_t &val)
     if(name == "stack" && val.b){
         addTag(ITEM_STACK);
     }
+    if(name == "blast_trap" && val.b){
+        addTag(TAG_TRANSPARENT);addTag(TAG_WALKABLE);addTag(TRAP);addTag(TRAP_BLAST);m_speed=0.01f;
+    }
 }
 
 void
@@ -142,6 +191,26 @@ Item::finish(Level *level)
         if(actor != 0){
             m_inventory.push_back(actor);
         }
+    }
+    if(hasTag(ITEM_CONTAINER)){
+        double numItemProbabilities[] = {
+            1.0,
+            2.0,
+            0.5,
+            0.3,
+            0.1
+        };
+        boost::random::discrete_distribution<> numItemDist(numItemProbabilities);
+        int numItems = numItemDist(RAND);
+        std::vector<std::string> tags;
+        tags.push_back("pickUp");
+        for(int i=0;i<numItems;i++){
+            Actor *item = level->m_actorFactory.getItem(level->m_dungeonLevel, level, tags);
+            if(item != 0){
+                m_inventory.push_back(item);
+            }
+        }
+
     }
     if(hasTag(ITEM_POTION) && !hasTag(POTION_NOT_NAME)){
         std::string tmp = m_name;
@@ -211,13 +280,13 @@ Item::quaff(Actor *drinker)
     if(hasTag(ITEM_QUAFF)){
         if(hasTag(POTION_HEAL)){
             if(hasTag(TAG_MINOR)){
-                drinker->healDamage(8,this);
+                drinker->healDamage(drinker->m_maxHp/4,this);
             }
             if(hasTag(TAG_MEDIUM)){
-                drinker->healDamage(70,this);
+                drinker->healDamage(drinker->m_maxHp/2,this);
             }
             if(hasTag(TAG_MAJOR)){
-                drinker->healDamage(150,this);
+                drinker->healDamage(drinker->m_maxHp,this);
             }
             msg += " replenishes your health";
             showMessage = true;

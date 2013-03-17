@@ -21,6 +21,10 @@ tile "Shard of Knowledge"{
 	glyph=28
 	walkable
 }
+tile "Orb of Knowledge"{
+	glyph=31
+	walkable
+}
 tile "Rock Wall"{
 	glyph=9
 }

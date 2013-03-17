@@ -1,7 +1,7 @@
 // Creatures
 creature "Goblin"{
 	glyph=8
-    col="dark green"
+    col="green"
     name="Small Goblin"
     int bab=0
     int str=7
@@ -11,8 +11,23 @@ creature "Goblin"{
     int wis=8
     int cha=4
     dice hp="1d6"
-    string weapon="Short Sword"
+    string weapon="Dagger"
     int expValue=200
+}
+creature "Goblin Warrior"{
+	glyph=8
+    col="dark green"
+    name="Goblin Warrior"
+    int bab=1
+    int str=7
+    int dex=12
+    int con=13
+    int in=6
+    int wis=8
+    int cha=4
+    dice hp="2d6"
+    string weapon="Short Sword"
+    int expValue=400
 }
 creature "Bat"{
 	glyph=17
@@ -44,49 +59,160 @@ creature "Spider"{
     spider
 }
 creature "Orc"{
-	glyph='O'
-    col="dark green"
+	glyph=30
+    col="green"
     name="Orc"
     int bab=2
-    int str=16
+    int str=12
     int dex=12
-    int con=16
+    int con=12
     int in=6
     int wis=10
     int cha=4
-    dice hp="2d10"
+    int expValue=600
+    string weapon="Short Sword"
+    dice hp="2d8"
+}
+creature "Orc Warrior"{
+	glyph=30
+    col="dark green"
+    name="Orc Warrior"
+    int bab=3
+    int str=14
+    int dex=12
+    int con=14
+    int in=6
+    int wis=10
+    int cha=4
+    int expValue=900
+    string weapon="Scimitar"
+    dice hp="3d8"
+}
+creature "Golem"{
+	glyph=132
+    col="flesh"
+    name="Golem"
+    int bab=4
+    int str=23
+    int dex=12
+    int con=17
+    int in=6
+    int wis=10
+    int cha=4
+    int expValue=2000
+    dice hp="4d10"
+    float speed = 1.4
+    int unarmed = 12
+}
+creature "Wraith"{
+	glyph=133
+    name="Wraith"
+    int bab=5
+    int str=23
+    int dex=16
+    int con=17
+    int in=6
+    int wis=10
+    int cha=4
+    int expValue=3000
+    dice hp="5d10"
+    float speed = 0.8
+    int unarmed = 20
+}
+creature "Giant Spider"{
+	glyph=18
+    name="Giant Spider"
+    col="flesh"
+    int bab=3
+    int str=10
+    int dex=15
+    int con=7
+    int in=6
+    int wis=8
+    int cha=4
+    dice hp="3d6"
+    int expValue=1500
+    float speed = 0.6
+    int unarmed = 10
+    spider
 }
 
 // Items
 
+item "Dagger"{
+	glyph=128
+    name="Dagger"
+    bool melee=true
+    dice damage="1d8"
+    pickUp
+}
 item "Short Sword"{
-	glyph=')'
+	glyph=128
     name="Short Sword"
     bool melee=true
-    dice damage="1d6"
+    dice damage="1d8"
+    pickUp
+}
+item "Scimitar"{
+	glyph=128
+    name="Scimitar"
+    bool melee=true
+    dice damage="1d10"
+    pickUp
+}
+item "Long Sword"{
+	glyph=128
+    name="Long Sword"
+    bool melee=true
+    dice damage="1d12"
+    pickUp
+}
+item "Estoc"{
+	glyph=128
+    name="Estoc"
+    bool melee=true
+    dice damage="2d6"
+    pickUp
+}
+item "Broad Sword"{
+	glyph=128
+    name="Broad Sword"
+    bool melee=true
+    dice damage="2d8"
+    pickUp
 }
 item "Short Bow"{
-	glyph=')'
+	glyph=129
     name="Short Bow"
     bool ranged=true
     dice damage="1d6"
+    pickUp
+}
+item "Long Bow"{
+	glyph=129
+    name="Long Bow"
+    bool ranged=true
+    dice damage="1d10"
+    pickUp
 }
 item "Arrow"{
-	glyph=')'
+	glyph=130
     name="Arrow"
     bool ammo_bow=true
     dice damage="1d6"
-}
-item "Leather Cap"{
-	glyph=')'
-    name="Leather Cap"
-    bool helmet=true
-    int ac=2
+    pickUp
 }
 item "Sarcophagus"{
 	glyph=15
     name="Sarcophagus"
-    string[] container=["Minor Mana Potion"]
+    bool container=true
+    bool transparent=true
+    bool walkable=true
+}
+item "Chest"{
+	glyph=131
+    name="Chest"
+    bool container=true
     bool transparent=true
     bool walkable=true
 }
@@ -94,6 +220,7 @@ item "Door"{
 	glyph=24
     name="Door"
     bool door=true
+    priv
 }
 item "Open Door"{
 	glyph=25
@@ -101,6 +228,7 @@ item "Open Door"{
     bool transparent=true
     bool walkable=true
     bool blend_in=true
+    priv
 }
 item "Stairs Down"{
 	glyph=27
@@ -109,6 +237,7 @@ item "Stairs Down"{
     bool transparent=true
     bool blend_in=true
     bool stairs_down=true
+    priv
 }
 item "Stairs Up"{
 	glyph=26
@@ -117,12 +246,7 @@ item "Stairs Up"{
     bool transparent=true
     bool blend_in=true
     bool stairs_up=true
-}
-item "Shard of Knowledge"{
-	glyph=28
-    name="Shard of Knowledge"
-    bool walkable=true
-    bool shard=true
+    priv
 }
 item "Minor Mana Potion"{
     glyph=23
@@ -130,6 +254,39 @@ item "Minor Mana Potion"{
     bool potion=true
     bool minor=true
     bool mana_potion=true
+    pickUp
+}
+item "Medium Mana Potion"{
+    glyph=23
+    name="Medium Mana"
+    bool potion=true
+    bool medium=true
+    bool mana_potion=true
+    pickUp
+}
+item "Minor Healing Potion"{
+    glyph=23
+    name="Minor Healing"
+    bool potion=true
+    bool minor=true
+    bool healing_potion=true
+    pickUp
+}
+item "Medium Healing Potion"{
+    glyph=23
+    name="Medium Healing"
+    bool potion=true
+    bool medium=true
+    bool healing_potion=true
+    pickUp
+}
+item "Major Healing Potion"{
+    glyph=23
+    name="Major Healing"
+    bool potion=true
+    bool major=true
+    bool healing_potion=true
+    pickUp
 }
 item "Sacred Nectar"{
     glyph=23
@@ -137,8 +294,14 @@ item "Sacred Nectar"{
     bool potion=true
     bool not_potion_name=true
     bool heal_potion=true
-    bool minor=true
+    bool medium=true
+    bool sacred_nectar=true
+    priv
 }
-item "Lightning Bolt"{
-    name="Lightning Bolt"
+item "Blast Trap"{
+    name="Blast Trap"
+    glyph=22
+    col="light blue"
+    bool blast_trap=true
+    priv
 }

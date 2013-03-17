@@ -44,8 +44,14 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
             dec = getDoorDecoration(doorId, place, creatureTags,-1);
         if(place.m_type == DEC_DOOR_CLOSED)
             dec = getDoorDecoration(doorId, place, creatureTags, 1);
-        if(place.m_type == DEC_STAIRS_DOWN)
-            dec = getStairsDecoration(doorId, place, creatureTags, true);
+        if(place.m_type == DEC_STAIRS_DOWN){
+            if(level->m_dungeonLevel < 15){
+                dec = getStairsDecoration(doorId, place, creatureTags, true);
+            }
+            else{
+                dec = getRandomDecoration(randomId, place, creatureTags);
+            }
+        }
         if(place.m_type == DEC_STAIRS_UP)
             dec = getStairsDecoration(doorId, place, creatureTags, false);
         if(place.m_type == DEC_SHARD)
@@ -74,7 +80,8 @@ Room::decorate(char *charTiles, Tile *tiles, TileFactory *tileFactory, Level *le
             int y = yDist(RAND);
             Tile *tile = getTile(x,y,tiles);
             if(tile != 0 && tile->m_walkable){
-                Actor *actor = level->m_actorFactory.getCreature(1,level,creatureTags);
+                int hd = 1+level->m_dungeonLevel/4;
+                Actor *actor = level->m_actorFactory.getCreature(hd,level,creatureTags);
                 if(actor != 0){
                     actor->m_x = m_x+x;
                     actor->m_y = m_y+y;

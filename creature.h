@@ -6,7 +6,7 @@ class Creature: public Actor
 {
 	public:
 		Creature();
-		virtual void act();
+		virtual void act(float time=1.0f);
 		virtual void playerSpotted();
 		void attack(Actor *target, int type);
         void die(Actor *source);
@@ -20,7 +20,6 @@ class Creature: public Actor
         virtual void finish(Level *level);
         virtual void regainMana(int amount, int color);
 		int m_expValue;
-		int m_hd;
 		int m_str;int m_dex;int m_con;
 		int m_int;int m_wis;int m_cha;
 		int m_strBonus;int m_dexBonus;int m_conBonus;
@@ -38,6 +37,7 @@ class Creature: public Actor
         int m_boots;
         int m_unarmedDamage;
         int m_mana[3]; int m_maxMana[3]; int m_lockedMana[3];
+        int m_regainLifeCooldown;
 };
 
 #endif /* end of include guard: CREATURE_EV3PTLWG */
