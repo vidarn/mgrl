@@ -982,7 +982,10 @@ Player::levelUp(){
         m_bab++;
         m_expForNextLevel += m_hd*1000;
         calculateBonuses();
-        calculateHp();
+        boost::random::uniform_int_distribution<> hpDist(0,m_hitDie);
+        m_maxHp += hpDist(RAND);
+        m_maxHp += m_conBonus;
+        m_hp = m_maxHp;
         calculateAc();
         ss << "You are now level " << m_hd;
         m_level->m_messages->showMessage(ss.str(),MESSAGE_NOTIFICATION);
@@ -1019,8 +1022,10 @@ Player::goUp(){
 void
 Player::gainExp(int amount){
     m_exp += amount;
-    while(m_exp >= m_expForNextLevel){
-        levelUp();
+    if(m_hd<20){
+        while(m_exp >= m_expForNextLevel){
+            levelUp();
+        }
     }
 }
 

@@ -8,7 +8,7 @@ OBJ += level.o
 OBJ += actor.o creature.o player.o item.o
 OBJ += messages.o
 OBJ += ability.o
-FLG = 
+FLG =
 LIB = -ltcod -ltcodxx
 
 $(OUT):$(OBJ)

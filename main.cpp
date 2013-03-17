@@ -103,7 +103,7 @@ main(int argc, char **argv)
                         case 'i':
                             level.m_player->showInventory();
                             break;
-                        /*case '-' :
+                        case '-' :
                             level.m_player->m_hp--; break;
                         case '+' :
                             level.m_player->m_hp++; break;
@@ -111,7 +111,7 @@ main(int argc, char **argv)
                             level.m_player->gainExp(300); break;
                         case 'r':
                             level.generate();
-                            break;*/
+                            break;
                         case '.':
                             level.m_player->act();
                             break;
