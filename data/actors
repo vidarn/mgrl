@@ -269,7 +269,7 @@ item "Minor Healing Potion"{
     name="Minor Healing"
     bool potion=true
     bool minor=true
-    bool healing_potion=true
+    bool heal_potion=true
     pickUp
 }
 item "Medium Healing Potion"{
@@ -277,7 +277,7 @@ item "Medium Healing Potion"{
     name="Medium Healing"
     bool potion=true
     bool medium=true
-    bool healing_potion=true
+    bool heal_potion=true
     pickUp
 }
 item "Major Healing Potion"{
@@ -285,7 +285,7 @@ item "Major Healing Potion"{
     name="Major Healing"
     bool potion=true
     bool major=true
-    bool healing_potion=true
+    bool heal_potion=true
     pickUp
 }
 item "Sacred Nectar"{
