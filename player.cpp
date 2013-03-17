@@ -54,7 +54,6 @@ static bool
 handleNameInput(char key, void *data)
 {
     std::string *str = static_cast<std::string *>(data);
-    std::cout << int(key) << std::endl;
     if(key >= 'A' && key <= 'z'){
         str->push_back(key);
     }
@@ -280,7 +279,6 @@ Player::walk(int dx, int dy)
             tags.push_back(ITEM_DOOR);
             std::vector<Actor *> actors = m_level->getActors(tmpX, tmpY,tags);
             if(actors.size()>0){
-                std::cout << "Opening...";
                 actors[0]->open(this);
                 act(0.6);
                 return true;
@@ -827,10 +825,6 @@ Player::pickUp(Actor *item)
         msg += " - ";
         msg += itemName;
         m_level->m_messages->showMessage(msg,MESSAGE_NOTIFICATION);
-        for(int i=0;i<m_inventory.size();i++){
-            Actor *a = m_inventory[i];
-            std::cout << a->m_name << std::endl;
-        }
     }
 }
 

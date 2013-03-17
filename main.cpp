@@ -100,15 +100,15 @@ main(int argc, char **argv)
                             level.m_player->startRun(-1,1); break;
                         case 'N' :
                             level.m_player->startRun(1,1); break;
+                        case 'i':
+                            level.m_player->showInventory();
+                            break;
                         /*case '-' :
                             level.m_player->m_hp--; break;
                         case '+' :
                             level.m_player->m_hp++; break;
                         case 'z' :
                             level.m_player->gainExp(300); break;
-                        case 'i':
-                            level.m_player->showInventory();
-                            break;
                         case 'r':
                             level.generate();
                             break;*/

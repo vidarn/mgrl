@@ -82,7 +82,6 @@ Level::generate()
             float dy = actor.m_y - m_player->m_y;
             float dist = dx*dx + dy*dy;
             if(dist < 10.0f){
-                std::cout << "Killing " << actor.m_name << std::endl;
                 m_actors.erase(m_actors.begin()+i);
                 i--;
             }
