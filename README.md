@@ -8,19 +8,21 @@ I'll write an explanation of the game here (https://github.com/vidarn/mgrl) as s
 
 You are more than wellcome to try the game out, but proper instructions will probably enhance the experience.
 
+
 I'll tell you the controlls at least:
 
-hjklyubn - move/attack
-i - inventory
-q - drink
-g - pick up
-Q - quiver
-f - fire (ranged weapon)
-o - open (container, doors open by just bumping in to them)
-w - wield
-d - drop
-> - descend stairs
-< - ascend stairs
+* hjklyubn - move/attack
+* i - inventory
+* q - drink
+* g - pick up
+* Q - quiver
+* f - fire (ranged weapon)
+* o - open (container, doors open by just bumping in to them)
+* w - wield
+* d - drop
+* \> - descend stairs
+* \< - ascend stairs
+
 
 Game instructions (will update when I've slept)
 Your goal is to get to dungeon level 15 and retrieve the Orb of Knowledge
