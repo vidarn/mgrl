@@ -133,9 +133,6 @@ main(int argc, char **argv)
                         case '3':
                             level.m_player->invokeAbility(2);
                             break;
-                        case '4':
-                            level.m_player->invokeAbility(3);
-                            break;
                         case '>':
                             level.m_player->goDown();
                             break;
