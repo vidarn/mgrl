@@ -1,5 +1,5 @@
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/discrete_distribution.hpp>
+#include "boost/random/uniform_int_distribution.hpp"
+#include "boost/random/discrete_distribution.hpp"
 #include <cfloat>
 #include "dungeon.h"
 #include "level.h"

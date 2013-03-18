@@ -1,7 +1,7 @@
 #include <iostream>
 #include "libtcod.hpp"
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
+#include "boost/random/mersenne_twister.hpp"
+#include "boost/random/uniform_int_distribution.hpp"
 #include <vector>
 #include <ctime>
 #include "level.h"
@@ -103,15 +103,6 @@ main(int argc, char **argv)
                         case 'i':
                             level.m_player->showInventory();
                             break;
-                        case '-' :
-                            level.m_player->m_hp--; break;
-                        case '+' :
-                            level.m_player->m_hp++; break;
-                        case 'z' :
-                            level.m_player->gainExp(300); break;
-                        case 'r':
-                            level.generate();
-                            break;
                         case '.':
                             level.m_player->act();
                             break;
@@ -157,7 +148,17 @@ main(int argc, char **argv)
                                 level.m_messages->showMessage("DEBUG MODE ON",MESSAGE_WARNING);
                             else
                                 level.m_messages->showMessage("DEBUG MODE OFF",MESSAGE_WARNING);
-                            break;*/
+                            break;
+                        case '-' :
+                            level.m_player->m_hp--; break;
+                        case '+' :
+                            level.m_player->m_hp++; break;
+                        case 'z' :
+                            level.m_player->gainExp(300); break;
+                        case 'r':
+                            level.generate();
+                            break;
+                            */
                         default:
                             break;
                     }

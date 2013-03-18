@@ -38,7 +38,10 @@ void
 Overlay::main(Level *level)
 {
     bool run=true;
-    while(run){
+    while (run){
+        if(TCODConsole::isWindowClosed()){
+            exit(0);
+        }
         level->render();
         render();
         TCODConsole::flush();

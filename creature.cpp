@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <boost/random/uniform_int_distribution.hpp>
+#include "boost/random/uniform_int_distribution.hpp"
 #include "creature.h"
 #include "level.h"
 
