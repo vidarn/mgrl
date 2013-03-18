@@ -4,7 +4,7 @@ MGRL
 >"Welcome to the deep and deadly dungeons of Svogthos.
 You are an aspiring planeswalker in search of the Orb of Knowledge, known to lie deep under ground."
 
-MGRL is a roguelike game written for the 7day Roguelike Challenge 2013. The objective of the game is to get to dungeon level 15 and obtaining the Orb of knowledge.
+MGRL is a roguelike game written for the 7day Roguelike Challenge 2013. The objective of the game is to get to dungeon level 15 and obtaining the Orb of Knowledge.
 
 *The most up-to-date versions of the game and this document can be found at https://github.com/vidarn/mgrl*
 
@@ -43,6 +43,12 @@ There are three types of spells.
     * While active, the *Continous* spell will decrease your maximum Mana by the cost of the spell. You will regain the Mana when the spell is deactivated.
     * To deactivate a *Continous* spell, simply press the number key again. This will place a random new spell in the slot.
     * A *Continous* spell will conjure an item when activated (such as Sacred Nectar placing a potent healing potion in your inventory). This item will disappear when the spell is deactivated.
+
+###Shards of Knowledge
+
+Shards of Knowledge are small fragments from the orb of Knowledge and absorbing one grants great powers.
+Each level contains one Shard of Knowledge (it looks like a crystal). Picking it up (by pressing 'g') will absorb the power and allow you to raise your maximum Mana pool.  
+Absorbing a Shard of Mana fully replenishes your Mana, which can be a great tactical advantage.
 
 ###Controls
 
