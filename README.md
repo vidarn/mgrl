@@ -13,9 +13,6 @@ MGRL is a roguelike game written for the 7day Roguelike Challenge 2013. The obje
 Binaries for Windows and 64-bit Linux are available from [here](http://dl.dropbox.com/u/1618340/MGRL/MGRL.zip) (same zip file for both platforms).
 This is the 7drl-version of the game with some post-compo bug fixes. No new features have been implemented however.
 
-There is a post-compo version of the game called MGRL-mini. It's faster and more action packed. It is also the recommended version for people with smaller screen sizes.  
-MGRL-mini can be downloaded from [here](http://dl.dropbox.com/u/1618340/MGRL/MGRL-mini.zip) (Windows and 64-bit Linux).
-
 ##Instructions
 
 In-game instructions are rather sparse, so please read these to learn the basics of the game.
