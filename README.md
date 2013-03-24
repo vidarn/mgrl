@@ -6,6 +6,9 @@ You are an aspiring planeswalker in search of the Orb of Knowledge, known to lie
 
 MGRL is a roguelike game written for the 7day Roguelike Challenge 2013. The objective of the game is to get to dungeon level 15 and obtaining the Orb of Knowledge.
 
+There is a [wonderful review](http://www.youtube.com/watch?v=htkWaTT9Gq4) of the game on youtube.
+
+
 *The most up-to-date versions of the game and this document can be found at https://github.com/vidarn/mgrl*
 
 ##Downloads
@@ -31,7 +34,7 @@ There are three types of spells.
 * *Mana stream*.
     * Invoking this spell will activate it (it becomes a darker shade of color to indicate that it's active).
     * While active, the *Mana Stream* will replenish your Mana at regular intervals.
-    * Apart from picking up a *Shard of Knowledge*, *Mana Stream* is your **only way of regaining Mana**.
+    * Apart from picking up a *Shard of Knowledge* or drinking a potion, *Mana Stream* is your **only way of regaining Mana**.
     * To deactivate the *Mana stream*, simply press the number key again. This will place a random new spell in the slot.
 * *Instant* Spells.
     * Invoking an *instant* spell will have an effect (such as Lightning Bolt dealing damage to an enemy) and then immediately place a random new spell in the slot.
@@ -52,6 +55,7 @@ Absorbing a Shard of Mana fully replenishes your Mana, which can be a great tact
 * 1,2,3 - invoke spells
 * h,j,k,l - move/attack straight
 * y,u,b,n - move/attack diagonally
+* . - wait
 * i - inventory
 * q - drink
 * g - pick up
